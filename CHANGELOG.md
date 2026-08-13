@@ -6,10 +6,11 @@ Saat rilis, pindahkan ke heading versi + tanggal.
 ## Unreleased
 
 ### Bersih & stabilizer
-- **Bersih** (bukan Tajam): meredam noise di **video + foto**, tanpa unsharp
-- Unsharp dimatikan karena numpuk aneh dengan filter TikTok
-- Stabilizer sekarang geser + **putar ringan** (bukan gimbal)
-- Hint di editor: kalau mau filter TikTok, matikan Bersih & Stabil
+- **Bersih** meredam noise di **video + foto**, lalu unsharp ringan supaya tidak empuk
+- Urutan dibetulkan: **stabil dulu, baru bersih** (zoom-lah yang bikin buram)
+- Kalau Stabil nyala, tajam dipulihkan sedikit lebih kuat
+- Stabilizer: geser + **putar ringan**
+- Hint: mau filter TikTok, matikan Bersih & Stabil
 
 ### Export
 - Tombol EXPORT berbingkai kotak
