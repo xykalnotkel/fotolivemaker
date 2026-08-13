@@ -289,6 +289,30 @@ object Converter {
             values.put(MediaStore.Images.Media.IS_PENDING, 0)
             resolver.update(uri, values, null, null)
         }
+
+        // Paksa MediaStore memindai berkasnya sekarang juga.
+        // Tanpa ini, di sebagian perangkat berkas baru muncul di galeri
+        // setelah beberapa saat atau setelah HP di-restart.
+        runCatching {
+            val path = resolvePath(context, uri)
+            if (path != null) {
+                android.media.MediaScannerConnection.scanFile(
+                    context, arrayOf(path), arrayOf("image/jpeg"), null
+                )
+            }
+        }
         return uri
     }
+
+    /** Cari path fisik berkas supaya bisa dipindai MediaScanner. */
+    private fun resolvePath(context: Context, uri: Uri): String? = runCatching {
+        context.contentResolver.query(
+            uri, arrayOf(MediaStore.Images.Media.DATA), null, null, null
+        )?.use { c ->
+            if (c.moveToFirst()) {
+                val i = c.getColumnIndex(MediaStore.Images.Media.DATA)
+                if (i >= 0) c.getString(i) else null
+            } else null
+        }
+    }.getOrNull()
 }

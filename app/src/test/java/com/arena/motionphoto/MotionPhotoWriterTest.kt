@@ -45,7 +45,7 @@ class MotionPhotoWriterTest {
     }
 
     @Test
-    fun `Length di XMP sama persis dengan ukuran mp4`() {
+    fun `Length di XMP mencakup mp4 plus trailer SEF`() {
         val mp4 = fakeMp4(7777)
         val result = MotionPhotoWriter.build(fakeJpeg(), mp4, 0L)
 
@@ -55,7 +55,8 @@ class MotionPhotoWriterTest {
         assertTrue("penanda Length tidak ditemukan", i >= 0)
         val declared = text.substring(i + marker.length).substringBefore('"').toInt()
 
-        assertEquals("Length harus sama persis dgn ukuran mp4", mp4.size, declared)
+        // trailer SEF (32 byte) berada SETELAH video, jadi ikut dihitung
+        assertEquals("Length = mp4 + blok SEF", mp4.size + 32, declared)
     }
 
     @Test
@@ -63,8 +64,10 @@ class MotionPhotoWriterTest {
         val mp4 = fakeMp4(5000)
         val result = MotionPhotoWriter.build(fakeJpeg(), mp4, 0L)
 
-        // ini persis cara galeri Android mencari videonya: hitung mundur dari akhir
-        val extracted = result.copyOfRange(result.size - mp4.size, result.size)
+        // hitung mundur dari akhir, lalu buang 32 byte blok SEF di ujung
+        val extracted = result.copyOfRange(
+            result.size - mp4.size - 32, result.size - 32
+        )
         assertTrue("byte mp4 hasil ekstrak harus identik", mp4.contentEquals(extracted))
         assertEquals('f'.code.toByte(), extracted[4])  // awal atom ftyp
     }
@@ -97,7 +100,7 @@ class MotionPhotoWriterTest {
     fun `verify mendeteksi file rusak`() {
         val good = MotionPhotoWriter.build(fakeJpeg(), fakeMp4(), 0L)
         // buang 10 byte terakhir -> Length jadi tidak cocok
-        val broken = good.copyOfRange(0, good.size - 10)
+        val broken = good.copyOfRange(0, good.size - 40)
         assertTrue("harus terdeteksi rusak", !MotionPhotoWriter.verify(broken).ok)
     }
 }
