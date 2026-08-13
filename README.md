@@ -1,4 +1,4 @@
-# Live Photo Maker (Android)
+# Foto Live (Android)
 
 [![Build APK](https://github.com/xykalnotkel/fotolivemaker/actions/workflows/build.yml/badge.svg)](https://github.com/xykalnotkel/fotolivemaker/actions/workflows/build.yml)
 [![License: Apache--2.0](https://img.shields.io/badge/License-Apache--2.0-blue.svg)](LICENSE)
@@ -33,7 +33,7 @@ Download berkas `.apk` di bagian **Assets**, buka, lalu izinkan
 5. Tap **EXPORT**
 6. File tersimpan ke **DCIM/Camera** dan langsung muncul di galeri
 
-Kamu juga bisa share video dari galeri → pilih **Live Photo Maker**.
+Kamu juga bisa share video dari galeri → pilih **Foto Live**.
 
 ### Tes hasilnya
 1. Buka **Galeri bawaan** — kalau ada ikon Motion/Live dan bergerak saat ditahan → format sudah benar
@@ -101,7 +101,7 @@ File itu biner dan susah di-upload dari HP. Workflow memakai
 ## Isi project
 
 ```
-app/src/main/java/com/arena/motionphoto/
+app/src/main/java/livefoto/xystudio/app/
   MotionPhotoWriter.kt   # XMP GCamera + trailer Samsung SEF
   Converter.kt           # trim, encode Media3, simpan DCIM/Camera
   Stabilizer.kt          # analisis guncangan + shader

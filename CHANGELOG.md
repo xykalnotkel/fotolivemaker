@@ -3,20 +3,32 @@
 Setiap update wajib menambah entri di sini. Yang belum dirilis masuk **Unreleased**.
 Saat rilis, pindahkan ke heading versi + tanggal.
 
-## Unreleased
+## [v1.2.0](https://github.com/xykalnotkel/fotolivemaker/releases/tag/v1.2.0) — 2026-08-14
+
+### Identitas & Penamaan
+- Rebranding nama aplikasi menjadi **Foto Live**.
+- Migrasi namespace & application ID ke `livefoto.xystudio.app`.
+- Konfigurasi kunci penandatangan resmi XYStudio (RSA 2048-bit) untuk rilis publik dan mitigasi Google Play Protect.
 
 ### Core Engine & Kualitas Gambar
-- Filter bilateral edge-preserving dengan coring threshold: redam noise mikro tanpa memunculkan bintik pasir pada area halus (kulit, langit, gradasi).
-- Rotasi frame otomatis (0/90/180/270 derajat) saat ekstraksi cover JPEG dari video sumber.
-- Stabilizer ditingkatkan menjadi Multi-Block Grid (3x3) dengan Median Outlier Rejection dan Gaussian Trajectory Smoothing: mengabaikan subjek bergerak di latar depan dan mengunci getaran tangan secara akurat.
-- Selector Aspect Ratio lengkap: Asli, 9:16 (Layar Penuh TikTok/Reels), 3:4 (Portrait), 1:1 (Persegi), 4:3 (Klasik), dan 16:9 (Landscape).
-- Optimasi unsharp mask di shader OpenGL GLSL dengan smoothstep coring gate.
+- **Bilateral Filter Edge-Preserving**: Meredam noise mikro tanpa mengaburkan tepi objek.
+- **Coring Threshold Sharpening**: Mencegah timbulnya bintik pasir / grain pada permukaan halus (wajah, langit, gradasi).
+- **Multi-Block Grid Stabilizer (3x3)**: Menggunakan median outlier rejection untuk mengabaikan pergerakan objek di latar depan dan mengunci getaran tangan secara akurat.
+- **Gaussian Trajectory Smoothing**: Memisahkan pergerakan kamera disengaja dari getaran tangan.
+- **Selector Aspect Ratio Lengkap**: Mendukung rasio Asli, 9:16 (Layar Penuh TikTok/Reels/Story), 3:4 (Portrait), 1:1 (Persegi Feed), 4:3 (Klasik), dan 16:9 (Landscape).
+- Penanganan rotasi frame otomatis saat ekstraksi cover JPEG.
 
-### Tampilan & Pengalaman Pengguna (UI/UX)
-- Palet tema modern dengan aksen Live Gold / Golden Amber, permukaan rounded squircle (14dp-16dp), dan kontras tegas.
-- Seluruh icon vector didesain ulang dengan gaya modern: Live Photo concentric rings, aspect ratio framing, AI clarity sparkle, stabilizer gimbal horizon, dan high-tech resolution badge.
-- Layar hasil dengan badge LIVE beraksen amber dan mode preview interaktif (Statis, Live, Putar).
-- Estimasi waktu export (ETA) disederhanakan menjadi tahapan waktu yang tenang dan informatif.
+### UI/UX & Interaksi
+- **Tema Royal Indigo & Electric Violet**: Desain modern dengan palet warna berkelas dan kontras optimal.
+- **Seamless Hero Gradient**: Kartu Project Baru di beranda luruh menyatu 100% mulus ke latar belakang.
+- **Custom Modals Squircle**: Dialog pemilihan rasio, resolusi, kualitas JPEG, dan tema dengan tampilan modern dan umpan balik haptic.
+- **Floating Update Banner 3D**: Banner update mengambang dengan visual 3D morphing organic fluid beresolusi tinggi.
+- **Estimasi Waktu Tenang**: Tahapan status ekspor yang informatif dan stabil.
+
+### Aksesibilitas & Pengaturan
+- **Mode Kontras Tinggi**: Meningkatkan ketegasan garis batas dan keterbacaan teks.
+- **Umpan Balik Getar (Haptics)**: Getaran mikro taktil pada slider dan tombol aksi.
+- **Kurangi Animasi (Reduce Motion)**: Opsi mematikan animasi transisi untuk performa instan.
 
 ## [v1.1.0](https://github.com/xykalnotkel/fotolivemaker/releases/tag/v1.1.0) — 2026-08-13
 

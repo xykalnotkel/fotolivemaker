@@ -4,7 +4,7 @@ plugins {
 }
 
 android {
-    namespace = "com.arena.motionphoto"
+    namespace = "livefoto.xystudio.app"
     compileSdk = 34
 
     // Keystore rilis diambil dari GitHub Secrets saat build di CI.
@@ -29,7 +29,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.arena.motionphoto"
+        applicationId = "livefoto.xystudio.app"
         minSdk = 26
         targetSdk = 34
         // Versi diambil dari nomor run GitHub Actions supaya SELALU sinkron

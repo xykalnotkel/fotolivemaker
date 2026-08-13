@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Live Photo Maker</string>
+    <string name="app_name">Foto Live</string>
 
     <!-- Kategori Pengaturan -->
     <string name="cat_storage">Penyimpanan</string>
