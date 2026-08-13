@@ -14,6 +14,7 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.PopupMenu
 import android.widget.TextView
+import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
@@ -27,10 +28,8 @@ import kotlinx.coroutines.withContext
 import java.util.concurrent.ConcurrentHashMap
 
 /**
- * Pemilih video buatan sendiri.
- *
- * Hanya menampilkan VIDEO (foto tidak berguna di sini), dan punya dropdown
- * album di bagian atas.
+ * Pemilih video buatan sendiri + fallback Photo Picker sistem
+ * (tidak butuh izin luas, jalan di Android 14+ saat akses sebagian).
  */
 class PickerActivity : AppCompatActivity() {
 
@@ -42,7 +41,16 @@ class PickerActivity : AppCompatActivity() {
     private val askPerm = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { granted ->
-        if (granted) loadAlbums() else showEmpty("Izin akses video ditolak")
+        if (granted) loadAlbums() else {
+            showEmpty("Izin akses video ditolak")
+            openSystemPicker()
+        }
+    }
+
+    private val pickVisual = registerForActivityResult(
+        ActivityResultContracts.PickVisualMedia()
+    ) { uri ->
+        if (uri != null) pick(uri)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -52,6 +60,8 @@ class PickerActivity : AppCompatActivity() {
 
         b.btnBack.setOnClickListener { finish() }
         b.albumBar.setOnClickListener { showAlbumMenu() }
+        b.btnSystemPick.setOnClickListener { openSystemPicker() }
+        b.btnEmptyPick.setOnClickListener { openSystemPicker() }
 
         b.grid.layoutManager = GridLayoutManager(this, 3)
         b.grid.adapter = adapter
@@ -65,9 +75,17 @@ class PickerActivity : AppCompatActivity() {
         ) loadAlbums() else askPerm.launch(perm)
     }
 
+    private fun openSystemPicker() {
+        pickVisual.launch(
+            PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.VideoOnly)
+        )
+    }
+
     private fun loadAlbums() {
         lifecycleScope.launch {
-            albums = withContext(Dispatchers.IO) { ProjectStore.videoAlbums(this@PickerActivity) }
+            albums = withContext(Dispatchers.IO) {
+                ProjectStore.videoAlbums(this@PickerActivity)
+            }
             b.albumName.text = "Semua Video"
             currentBucket = null
             loadVideos()
@@ -97,7 +115,7 @@ class PickerActivity : AppCompatActivity() {
     }
 
     private fun loadVideos() {
-        b.empty.visibility = View.GONE
+        b.emptyBox.visibility = View.GONE
         lifecycleScope.launch {
             val list = withContext(Dispatchers.IO) {
                 ProjectStore.videos(this@PickerActivity, currentBucket)
@@ -110,19 +128,15 @@ class PickerActivity : AppCompatActivity() {
 
     private fun showEmpty(msg: String) {
         b.empty.text = msg
-        b.empty.visibility = View.VISIBLE
+        b.emptyBox.visibility = View.VISIBLE
     }
 
     private fun pick(uri: Uri) {
         startActivity(
-            Intent(this, MainActivity::class.java)
-                .setData(uri)
-                .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            Intent(this, MainActivity::class.java).withReadGrant(uri)
         )
         finish()
     }
-
-    // ---------------- adapter ----------------
 
     private inner class VideoAdapter(
         val onPick: (Uri) -> Unit
@@ -147,7 +161,6 @@ class PickerActivity : AppCompatActivity() {
         override fun getItemCount() = items.size
 
         override fun onBindViewHolder(h: VH, pos: Int) {
-            // jangan pakai nama "it": lambda runCatching punya "it" sendiri
             val video = items[pos]
             h.dur.text = fmt(video.durationMs)
             h.img.setImageDrawable(null)
@@ -178,7 +191,7 @@ class PickerActivity : AppCompatActivity() {
                 }
                 if (bmp != null) {
                     thumbs[id] = bmp
-                    if (h.adapterPosition == pos) h.img.setImageBitmap(bmp)
+                    if (h.bindingAdapterPosition == pos) h.img.setImageBitmap(bmp)
                 }
             }
         }

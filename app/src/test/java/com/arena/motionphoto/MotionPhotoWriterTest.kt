@@ -97,6 +97,15 @@ class MotionPhotoWriterTest {
     }
 
     @Test
+    fun `extractMp4 membuang trailer SEF`() {
+        val mp4 = fakeMp4(5000)
+        val result = MotionPhotoWriter.build(fakeJpeg(), mp4, 0L)
+        val extracted = MotionPhotoWriter.extractMp4(result)
+        assertTrue(extracted != null)
+        assertTrue("MP4 harus utuh tanpa SEF", mp4.contentEquals(extracted))
+    }
+
+    @Test
     fun `verify mendeteksi file rusak`() {
         val good = MotionPhotoWriter.build(fakeJpeg(), fakeMp4(), 0L)
         // buang 10 byte terakhir -> Length jadi tidak cocok

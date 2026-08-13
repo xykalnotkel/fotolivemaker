@@ -115,13 +115,96 @@
                     style="@style/Label"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Potongan otomatis" />
+                    android:text="Potongan" />
+
+                <LinearLayout
+                    android:id="@+id/rowStart"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_marginTop="12dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_weight="1"
+                            android:layout_height="wrap_content"
+                            android:text="Mulai jendela"
+                            android:textColor="@color/text_hi"
+                            android:textSize="13sp" />
+
+                        <TextView
+                            android:id="@+id/tvStartValue"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textColor="@color/ink"
+                            android:textSize="12sp"
+                            android:textStyle="bold"
+                            android:fontFamily="monospace" />
+                    </LinearLayout>
+
+                    <com.google.android.material.slider.Slider
+                        android:id="@+id/sliderStart"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:valueFrom="0"
+                        android:valueTo="1"
+                        android:stepSize="0.1"
+                        android:value="0"
+                        android:contentDescription="Posisi jendela 3 detik" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginTop="4dp">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        android:layout_height="wrap_content"
+                        android:text="Frame kunci"
+                        android:textColor="@color/text_hi"
+                        android:textSize="13sp" />
+
+                    <TextView
+                        android:id="@+id/tvKeyValue"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/ink"
+                        android:textSize="12sp"
+                        android:textStyle="bold"
+                        android:fontFamily="monospace" />
+                </LinearLayout>
+
+                <com.google.android.material.slider.Slider
+                    android:id="@+id/sliderKey"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:valueFrom="0"
+                    android:valueTo="3"
+                    android:stepSize="0.1"
+                    android:value="1.5"
+                    android:contentDescription="Posisi frame kunci" />
+
+                <TextView
+                    android:id="@+id/tvClipHint"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Durasi dikunci 3,0 dtk · sama seperti Live Photo iPhone"
+                    android:textColor="@color/text_dim"
+                    android:textSize="11sp" />
 
                 <TextView
                     android:id="@+id/tvPlan"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
+                    android:layout_marginTop="12dp"
                     android:fontFamily="monospace"
                     android:textSize="12sp"
                     android:textColor="@color/text_mid"
@@ -129,7 +212,6 @@
                     android:text="Membaca video…" />
             </LinearLayout>
 
-            <!-- tools -->
             <TextView
                 style="@style/Label"
                 android:layout_width="wrap_content"
@@ -186,8 +268,10 @@
                         android:fontFamily="monospace" />
                 </LinearLayout>
 
-                <View android:layout_width="match_parent"
-                    android:layout_height="1dp" android:background="@color/line" />
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="@color/line" />
 
                 <com.google.android.material.materialswitch.MaterialSwitch
                     android:id="@+id/swSquare"
@@ -198,8 +282,10 @@
                     android:textColor="@color/text_hi"
                     android:textSize="14sp" />
 
-                <View android:layout_width="match_parent"
-                    android:layout_height="1dp" android:background="@color/line" />
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="@color/line" />
 
                 <com.google.android.material.materialswitch.MaterialSwitch
                     android:id="@+id/swEnhance"
@@ -210,8 +296,10 @@
                     android:textColor="@color/text_hi"
                     android:textSize="14sp" />
 
-                <View android:layout_width="match_parent"
-                    android:layout_height="1dp" android:background="@color/line" />
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="@color/line" />
 
                 <com.google.android.material.materialswitch.MaterialSwitch
                     android:id="@+id/swStab"

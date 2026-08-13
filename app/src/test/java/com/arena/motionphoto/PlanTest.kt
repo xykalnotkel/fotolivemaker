@@ -66,6 +66,15 @@ class PlanTest {
     }
 
     @Test
+    fun `sanitize menahan usulan di dalam video`() {
+        val p = Converter.sanitize(8_000, 6_500, 3_000, 1_500)
+        assertEquals(5_000L, p.startMs)
+        assertEquals(3_000L, p.durationMs)
+        assertEquals(1_500L, p.keyframeOffsetMs)
+        assertTrue(p.startMs + p.durationMs <= 8_000L)
+    }
+
+    @Test
     fun `klip selalu berada di dalam video`() {
         var ms = 100L
         while (ms <= 20_000) {

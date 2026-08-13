@@ -62,7 +62,6 @@ object MotionPhotoVerifier {
         val struct = MotionPhotoWriter.verify(bytes)
         val text = String(bytes, 0, minOf(bytes.size, 65536), Charsets.ISO_8859_1)
         val xmpOk = text.contains("GCamera:MotionPhoto=\"1\"")
-        val ftyp = indexOfFtyp(bytes)
         val lengthOk = struct.ok
 
         sb.append("STRUKTUR FILE\n")
@@ -84,10 +83,11 @@ object MotionPhotoVerifier {
         var playable = false
         var durMs = 0L
         var dim = "-"
-        if (ftyp >= 4) {
+        val mp4 = MotionPhotoWriter.extractMp4(bytes)
+        if (mp4 != null) {
             val tmp = File(context.cacheDir, "verify_${System.currentTimeMillis()}.mp4")
             runCatching {
-                tmp.writeBytes(bytes.copyOfRange(ftyp - 4, bytes.size))
+                tmp.writeBytes(mp4)
                 val r = MediaMetadataRetriever()
                 r.setDataSource(tmp.absolutePath)
                 durMs = r.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)
@@ -111,11 +111,7 @@ object MotionPhotoVerifier {
             sb.append("✗ Video tidak bisa didecode\n")
         }
 
-        val level = when {
-            !lengthOk || !xmpOk || !playable -> Level.FAILED
-            sysFlag == true -> Level.CONFIRMED
-            else -> Level.LIKELY
-        }
+        val level = decideLevel(lengthOk, xmpOk, playable, sysFlag)
 
         return Report(
             level = level,
@@ -149,20 +145,15 @@ object MotionPhotoVerifier {
         }.getOrNull()
     }
 
-    /** Minta MediaStore memindai ulang, lalu cek lagi penanda sistemnya. */
-    fun recheckSystemFlag(context: Context, uri: Uri): Boolean? =
-        querySystemFlag(context, uri)
-
-    private fun indexOfFtyp(data: ByteArray): Int {
-        val pat = byteArrayOf(
-            'f'.code.toByte(), 't'.code.toByte(),
-            'y'.code.toByte(), 'p'.code.toByte()
-        )
-        outer@ for (i in 0..data.size - 4) {
-            for (j in 0..3) if (data[i + j] != pat[j]) continue@outer
-            return i
-        }
-        return -1
+    fun decideLevel(
+        lengthOk: Boolean,
+        xmpOk: Boolean,
+        playable: Boolean,
+        systemFlag: Boolean?
+    ): Level = when {
+        !lengthOk || !xmpOk || !playable -> Level.FAILED
+        systemFlag == true -> Level.CONFIRMED
+        else -> Level.LIKELY
     }
 
     private fun failed(msg: String) = Report(

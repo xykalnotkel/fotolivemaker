@@ -1,10 +1,11 @@
 name: Build APK
 
-# Otomatis saat push, atau jalankan manual dari tab Actions.
-# Setiap build sukses di branch utama otomatis jadi Release baru.
+# Push/PR: tes + build artifact.
+# Release publik hanya dari tag v* atau tombol Run workflow.
 on:
   push:
     branches: [ main, master ]
+    tags: [ 'v*' ]
   pull_request:
   workflow_dispatch:
 
@@ -25,8 +26,6 @@ jobs:
           distribution: temurin
           java-version: '17'
 
-      # Gradle di-install oleh action ini, jadi kita TIDAK butuh
-      # gradle-wrapper.jar di repo (file biner susah di-upload dari HP).
       - name: Siapkan Gradle
         uses: gradle/actions/setup-gradle@v3
         with:
@@ -43,16 +42,27 @@ jobs:
             echo "::warning::KEYSTORE_BASE64 kosong - APK akan pakai debug key"
           fi
 
+      - name: Tentukan nomor versi
+        id: ver
+        run: |
+          if [[ "${GITHUB_REF}" == refs/tags/v* ]]; then
+            NAME="${GITHUB_REF#refs/tags/v}"
+          else
+            NAME="1.0.${{ github.run_number }}-ci"
+          fi
+          echo "name=${NAME}" >> "$GITHUB_OUTPUT"
+          echo "Versi: ${NAME}"
+
       - name: Tes unit (verifikasi format Motion Photo)
         env:
           BUILD_NUMBER: ${{ github.run_number }}
+          VERSION_NAME: ${{ steps.ver.outputs.name }}
         run: gradle :app:testDebugUnitTest --no-daemon --stacktrace
 
       - name: Build APK release
         env:
-          # versionCode & versionName di dalam APK ikut nomor ini,
-          # jadi selalu sinkron dengan tag Release & nama file.
           BUILD_NUMBER: ${{ github.run_number }}
+          VERSION_NAME: ${{ steps.ver.outputs.name }}
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
@@ -77,7 +87,7 @@ jobs:
         id: prep
         run: |
           mkdir -p out
-          VER="v1.0.${{ github.run_number }}"
+          VER="v${{ steps.ver.outputs.name }}"
           cp app/build/outputs/apk/release/app-release.apk \
              "out/LivePhotoMaker-${VER}.apk"
           echo "version=${VER}" >> "$GITHUB_OUTPUT"
@@ -91,10 +101,10 @@ jobs:
           if-no-files-found: error
           retention-days: 90
 
-      # ---- Release hanya dibuat untuk push ke branch utama ----
       - name: Terbitkan Release
-        # Jangan pernah menerbitkan APK yang masih memakai debug key.
-        if: github.event_name != 'pull_request' && steps.sign.outputs.release_signed == 'true'
+        if: >
+          steps.sign.outputs.release_signed == 'true' &&
+          (startsWith(github.ref, 'refs/tags/v') || github.event_name == 'workflow_dispatch')
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ steps.prep.outputs.version }}
@@ -110,7 +120,7 @@ jobs:
             ### Cara pasang
             1. Download berkas `.apk` di bagian **Assets** di bawah
             2. Buka berkasnya, izinkan **Install unknown apps** kalau diminta
-            3. Buka app → Pilih Video → atur slider → **Buat Live Photo**
+            3. Buka app → Pilih Video → geser jendela 3 dtk → **Buat Live Photo**
             4. Hasil tersimpan di `DCIM/Camera`
 
             ### Catatan penting
@@ -127,7 +137,7 @@ jobs:
             App berjalan **sepenuhnya offline**. Tidak ada izin `INTERNET`
             sama sekali, jadi tidak mungkin mengirim data ke mana pun.
 
-            Lisensi MIT · Tanpa jaminan — lihat [TERMS.md](TERMS.md)
+            Lisensi Apache 2.0 · Tanpa jaminan — lihat [TERMS.md](TERMS.md)
 
       - name: Hapus keystore dari runner
         if: always()

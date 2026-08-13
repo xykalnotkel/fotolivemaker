@@ -14,23 +14,34 @@ class SplashActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // Animasi morph hanya sekali. Launch berikutnya langsung ke Home.
+        if (Settings.seenSplash(this)) {
+            goNext(animate = false)
+            return
+        }
+
         b = ActivitySplashBinding.inflate(layoutInflater)
         setContentView(b.root)
 
-        b.morph.animateMorph(1150L) { goNext() }
+        b.morph.animateMorph(1150L) { goNext(animate = true) }
 
         b.title.alpha = 0f
         b.title.animate().alpha(1f).setStartDelay(560).setDuration(420).start()
 
-        // jaring pengaman kalau animasi tidak memanggil balik
-        Handler(Looper.getMainLooper()).postDelayed({ goNext() }, 2000)
+        Handler(Looper.getMainLooper()).postDelayed({ goNext(animate = true) }, 2000)
     }
 
-    private fun goNext() {
+    private fun goNext(animate: Boolean) {
         if (moved) return
         moved = true
+        Settings.markSplashSeen(this)
         startActivity(Intent(this, HomeActivity::class.java))
-        overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
+        if (animate) {
+            overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
+        } else {
+            overridePendingTransition(0, 0)
+        }
         finish()
     }
 }

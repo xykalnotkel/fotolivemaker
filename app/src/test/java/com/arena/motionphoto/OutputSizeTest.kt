@@ -21,20 +21,13 @@ class OutputSizeTest {
         val opts = Converter.Options(square = square, res = res)
         val baseH = opts.heightFor(if (srcH > 0) srcH else 1080)
         return if (square) {
-            val s = evenUp(baseH.toFloat())
+            val s = Converter.evenUp(baseH)
             s to s
         } else {
             val ratio = if (srcW > 0 && srcH > 0) srcW.toFloat() / srcH else 9f / 16f
-            val h = evenUp(baseH.toFloat())
-            evenUp(h * ratio) to h
+            val h = Converter.evenUp(baseH)
+            Converter.evenUp(h * ratio) to h
         }
-    }
-
-    private fun evenUp(v: Float): Int {
-        var x = Math.round(v)
-        if (x < 2) x = 2
-        if (x % 2 != 0) x++
-        return x
     }
 
     @Test

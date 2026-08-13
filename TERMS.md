@@ -76,9 +76,9 @@ APK resmi hanya didistribusikan melalui halaman **Releases** di repositori GitHu
 ini. Pengembang tidak bertanggung jawab atas APK yang diperoleh dari sumber lain,
 karena bisa saja sudah dimodifikasi atau disisipi program berbahaya.
 
-APK ditandatangani dengan **debug key**, bukan kunci rilis produksi. Ini berarti
-APK bisa langsung di-install, tetapi **tidak boleh diunggah ke Google Play Store**
-dalam kondisi seperti itu.
+APK resmi dari halaman Releases ditandatangani **kunci rilis** pengembang.
+Itu bukan identitas Google Play. **Jangan unggah APK ini ke Play Store**
+tanpa paket, kebijakan, dan keystore milikmu sendiri.
 
 ## 7. Perubahan syarat
 

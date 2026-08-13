@@ -75,11 +75,7 @@ class HomeActivity : AppCompatActivity() {
         }
         if (uri != null) {
             intent.putExtra("handled", true)
-            startActivity(
-                Intent(this, MainActivity::class.java)
-                    .setData(uri)
-                    .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-            )
+            startActivity(Intent(this, MainActivity::class.java).withReadGrant(uri))
         }
     }
 
@@ -158,7 +154,7 @@ class HomeActivity : AppCompatActivity() {
                 }
                 if (bmp != null) {
                     cache[key] = bmp
-                    if (h.adapterPosition == pos) h.thumb.setImageBitmap(bmp)
+                    if (h.bindingAdapterPosition == pos) h.thumb.setImageBitmap(bmp)
                 }
             }
         }

@@ -1,11 +1,18 @@
 package com.arena.motionphoto
 
 import android.content.Intent
+import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
+import android.os.SystemClock
+import android.view.Gravity
 import android.view.View
 import android.view.WindowManager
+import android.widget.FrameLayout
 import android.widget.Toast
+import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.arena.motionphoto.databinding.ActivityProcessBinding
@@ -15,9 +22,10 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-/** Layar export khusus: preview sengaja dibuka gelap lalu terang mengikuti
- * kemajuan. Progress encoder tidak selalu linear, maka teks tahap tetap jadi
- * sumber informasi utama untuk pengguna. */
+/**
+ * Layar export: preview di tengah tanpa background,
+ * progress mengikuti kotak preview, estimasi sisa waktu realtime.
+ */
 class ProcessActivity : AppCompatActivity() {
     companion object {
         const val EXTRA_SQUARE = "square"
@@ -25,11 +33,25 @@ class ProcessActivity : AppCompatActivity() {
         const val EXTRA_ENHANCE = "enhance"
         const val EXTRA_STABILIZE = "stabilize"
         const val EXTRA_JPEG_QUALITY = "jpeg_quality"
+        const val EXTRA_START_MS = "start_ms"
+        const val EXTRA_DURATION_MS = "duration_ms"
+        const val EXTRA_KEY_MS = "key_ms"
     }
 
     private lateinit var b: ActivityProcessBinding
     private var job: Job? = null
     private var progress = 0
+    private var startedAt = 0L
+    private var etaEma = -1.0
+    private var finished = false
+    private val handler = Handler(Looper.getMainLooper())
+    private val ticker = object : Runnable {
+        override fun run() {
+            if (finished) return
+            updateEta()
+            handler.postDelayed(this, 400)
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -39,9 +61,13 @@ class ProcessActivity : AppCompatActivity() {
             window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         }
         b.btnCancel.setOnClickListener { cancelExport() }
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() = cancelExport()
+        })
 
         val uri = intent.data ?: run { finish(); return }
-        val res = intent.getStringExtra(EXTRA_RES)?.let { runCatching { Converter.Res.valueOf(it) }.getOrNull() }
+        val res = intent.getStringExtra(EXTRA_RES)
+            ?.let { runCatching { Converter.Res.valueOf(it) }.getOrNull() }
             ?: Converter.Res.P1080
         val opts = Converter.Options(
             square = intent.getBooleanExtra(EXTRA_SQUARE, false),
@@ -50,64 +76,129 @@ class ProcessActivity : AppCompatActivity() {
             stabilize = intent.getBooleanExtra(EXTRA_STABILIZE, false),
             jpegQuality = intent.getIntExtra(EXTRA_JPEG_QUALITY, 95)
         )
-        loadPreview(uri, opts)
-        export(uri, opts)
+        val hint = if (intent.hasExtra(EXTRA_START_MS)) {
+            Converter.Plan(
+                totalMs = 0L,
+                startMs = intent.getLongExtra(EXTRA_START_MS, 0L),
+                durationMs = intent.getLongExtra(EXTRA_DURATION_MS, Converter.TARGET_CLIP_MS),
+                keyframeOffsetMs = intent.getLongExtra(EXTRA_KEY_MS, Converter.TARGET_CLIP_MS / 2)
+            )
+        } else null
+
+        loadPreview(uri, opts, hint)
+        export(uri, opts, hint)
     }
 
-    private fun loadPreview(uri: Uri, opts: Converter.Options) = lifecycleScope.launch {
-        val bmp = withContext(Dispatchers.IO) { Converter.extractFrame(this@ProcessActivity, uri, 0, opts, 720) }
-        if (bmp != null) b.preview.setImageBitmap(bmp)
+    private fun loadPreview(uri: Uri, opts: Converter.Options, hint: Converter.Plan?) =
+        lifecycleScope.launch {
+            val at = (hint?.startMs ?: 0L) + (hint?.keyframeOffsetMs ?: 0L)
+            val bmp = withContext(Dispatchers.IO) {
+                Converter.extractFrame(this@ProcessActivity, uri, at, opts, 720)
+            }
+            if (bmp != null) fitPreview(bmp)
+        }
+
+    private fun fitPreview(bmp: Bitmap) {
+        b.preview.setImageBitmap(bmp)
+        val parent = b.previewHost
+        parent.post {
+            val maxW = parent.width
+            val maxH = parent.height
+            if (maxW <= 0 || maxH <= 0) return@post
+            val aspect = bmp.width.toFloat() / bmp.height.coerceAtLeast(1)
+            var w = maxW
+            var h = (w / aspect).toInt()
+            if (h > maxH) {
+                h = maxH
+                w = (h * aspect).toInt()
+            }
+            w = w.coerceAtLeast(120)
+            h = h.coerceAtLeast(120)
+            b.previewBox.layoutParams = FrameLayout.LayoutParams(w, h, Gravity.CENTER)
+            b.previewBox.requestLayout()
+        }
     }
 
-    private fun export(uri: Uri, opts: Converter.Options) {
+    private fun export(uri: Uri, opts: Converter.Options, hint: Converter.Plan?) {
+        startedAt = SystemClock.elapsedRealtime()
+        handler.post(ticker)
         job = lifecycleScope.launch {
             try {
-                Converter.convert(this@ProcessActivity, uri, opts,
-                    log = { stage ->
-                        b.tvStage.text = stage
-                        when {
-                            stage.startsWith("Membaca") -> showProgress(3)
-                            stage.startsWith("Stabilizer") -> showProgress(8)
-                            stage.startsWith("Mengambil") -> showProgress(16)
-                            stage.startsWith("Menyisipkan") -> showProgress(96)
-                            stage.startsWith("Menyimpan") -> showProgress(98)
-                        }
-                    },
-                    progress = { showProgress(it.coerceIn(16, 95)) }
+                Converter.convert(
+                    this@ProcessActivity, uri, opts,
+                    log = { stage -> runOnMain { b.tvStage.text = stage } },
+                    progress = { value -> runOnMain { showProgress(value) } },
+                    planHint = hint
                 ).also { result ->
                     showProgress(100)
+                    finished = true
+                    handler.removeCallbacks(ticker)
                     b.tvStage.text = "Live Photo selesai dibuat"
+                    b.tvEta.text = "Selesai"
                     b.btnCancel.visibility = View.GONE
-                    startActivity(Intent(this@ProcessActivity, ResultActivity::class.java)
-                        .putExtra(ResultActivity.EXTRA_URI, result.uri.toString()))
+                    startActivity(
+                        Intent(this@ProcessActivity, ResultActivity::class.java)
+                            .putExtra(ResultActivity.EXTRA_URI, result.uri.toString())
+                    )
                     finish()
                 }
             } catch (_: CancellationException) {
-                // Tombol batal sudah menutup layar.
+                finished = true
             } catch (e: Exception) {
+                finished = true
+                handler.removeCallbacks(ticker)
                 b.tvStage.text = "Export gagal"
+                b.tvEta.text = "Berhenti"
                 b.tvHint.text = e.message ?: "Coba gunakan 720p atau matikan efek."
                 b.btnCancel.text = "KEMBALI"
                 b.btnCancel.setOnClickListener { finish() }
-                Toast.makeText(this@ProcessActivity, e.message ?: "Export gagal", Toast.LENGTH_LONG).show()
+                Toast.makeText(
+                    this@ProcessActivity,
+                    e.message ?: "Export gagal",
+                    Toast.LENGTH_LONG
+                ).show()
             }
         }
     }
 
     private fun showProgress(value: Int) {
-        progress = maxOf(progress, value)
-        b.progressRing.setProgressCompat(progress, true)
+        progress = maxOf(progress, value.coerceIn(0, 100))
+        b.boxProgress.progress = progress
         b.tvPercent.text = "$progress%"
-        // Overlay hitam berkurang sampai 8% pada akhir agar preview masih punya kontras.
-        b.previewShade.alpha = (1f - progress / 100f).coerceIn(0.08f, 1f)
+        updateEta()
+    }
+
+    private fun updateEta() {
+        if (finished) return
+        val elapsed = SystemClock.elapsedRealtime() - startedAt
+        if (progress < 4 || elapsed < 400L) {
+            b.tvEta.text = "Berjalan ${fmt(elapsed)}  ·  menghitung sisa…"
+            return
+        }
+        if (progress >= 100) {
+            b.tvEta.text = "Selesai"
+            return
+        }
+        val raw = elapsed * (100.0 - progress) / progress.toDouble()
+        etaEma = if (etaEma < 0) raw else etaEma * 0.72 + raw * 0.28
+        b.tvEta.text = "Berjalan ${fmt(elapsed)}  ·  sisa ± ${fmt(etaEma.toLong())}"
+    }
+
+    private fun fmt(ms: Long): String {
+        val s = (ms / 1000L).coerceAtLeast(0L)
+        return if (s < 60) "${s} dtk" else "${s / 60}:${"%02d".format(s % 60)}"
     }
 
     private fun cancelExport() {
+        finished = true
+        handler.removeCallbacks(ticker)
         job?.cancel()
         finish()
     }
 
-    override fun onBackPressed() {
-        cancelExport()
+    override fun onDestroy() {
+        finished = true
+        handler.removeCallbacks(ticker)
+        super.onDestroy()
     }
 }

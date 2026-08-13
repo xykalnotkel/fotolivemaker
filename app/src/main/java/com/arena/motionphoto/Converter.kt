@@ -58,7 +58,7 @@ object Converter {
             if (res == Res.SOURCE) sourceHeight.coerceAtLeast(2) else res.height
     }
 
-    /** Rencana potong yang dihitung otomatis dari durasi video. */
+    /** Rencana potong: jendela klip + posisi frame kunci di dalam jendela. */
     data class Plan(
         val totalMs: Long,
         val startMs: Long,
@@ -67,15 +67,72 @@ object Converter {
     )
 
     /**
-     * Tentukan potongan secara otomatis:
+     * Potongan otomatis (kalau user tidak menggeser slider):
      * - video >= 3 dtk  -> ambil 3 dtk di bagian tengah
      * - video <  3 dtk  -> pakai seluruh video apa adanya
      * Frame kunci selalu di tengah klip.
      */
     fun plan(totalMs: Long): Plan {
-        val dur = if (totalMs >= TARGET_CLIP_MS) TARGET_CLIP_MS else totalMs
-        val start = if (totalMs > dur) (totalMs - dur) / 2 else 0L
-        return Plan(totalMs, start, dur, dur / 2)
+        val safe = totalMs.coerceAtLeast(1L)
+        val dur = if (safe >= TARGET_CLIP_MS) TARGET_CLIP_MS else safe
+        val start = if (safe > dur) (safe - dur) / 2 else 0L
+        return Plan(safe, start, dur, dur / 2)
+    }
+
+    /** Rapikan usulan potongan supaya selalu di dalam video dan <= 3 dtk. */
+    fun sanitize(totalMs: Long, startMs: Long, durationMs: Long, keyframeOffsetMs: Long): Plan {
+        val safe = totalMs.coerceAtLeast(1L)
+        val dur = durationMs.coerceIn(1L, minOf(TARGET_CLIP_MS, safe))
+        val start = startMs.coerceIn(0L, (safe - dur).coerceAtLeast(0L))
+        val key = keyframeOffsetMs.coerceIn(0L, dur)
+        return Plan(safe, start, dur, key)
+    }
+
+    fun sliderRound(v: Float): Float = Math.round(v * 10f) / 10f
+
+    /** Range Material Slider yang selalu sah: from < to, value di dalamnya. */
+    fun sliderRange(from: Float, to: Float, value: Float): Triple<Float, Float, Float> {
+        val f = sliderRound(from)
+        val t = sliderRound(maxOf(to, f + 0.1f))
+        val v = sliderRound(value).coerceIn(f, t)
+        return Triple(f, t, v)
+    }
+
+    data class ClipSliders(
+        val start: Triple<Float, Float, Float>,
+        val key: Triple<Float, Float, Float>,
+        val clipSec: Float,
+        val showStart: Boolean
+    )
+
+    /**
+     * Dua slider: posisi jendela 3 dtk, dan frame kunci di dalam jendela.
+     * Durasi dikunci 3,0 dtk (atau seluruh video kalau lebih pendek).
+     */
+    fun clipSliders(
+        totalMs: Long,
+        startSec: Float? = null,
+        keySec: Float? = null
+    ): ClipSliders {
+        val totalSec = sliderRound((totalMs.coerceAtLeast(1L)) / 1000f)
+        val clip = sliderRound(minOf(TARGET_CLIP_MS / 1000f, totalSec.coerceAtLeast(0.1f)))
+        val maxStart = maxOf(0f, sliderRound(totalSec - clip))
+        val showStart = maxStart >= 0.1f
+        val start = if (showStart) {
+            sliderRange(0f, maxStart, startSec ?: (maxStart / 2f))
+        } else {
+            Triple(0f, 0.1f, 0f)
+        }
+        val key = sliderRange(0f, clip, keySec ?: (clip / 2f))
+        return ClipSliders(start, key, clip, showStart)
+    }
+
+    /** Bulatkan ke atas ke bilangan genap; encoder menolak dimensi ganjil. */
+    fun evenUp(v: Number): Int {
+        var x = Math.round(v.toFloat())
+        if (x < 2) x = 2
+        if (x % 2 != 0) x++
+        return x
     }
 
     fun videoDurationMs(context: Context, uri: Uri): Long {
@@ -132,7 +189,9 @@ object Converter {
             val s = minOf(bmp.width, bmp.height)
             val x = (bmp.width - s) / 2
             val y = (bmp.height - s) / 2
-            bmp = Bitmap.createBitmap(bmp, x, y, s, s)
+            val cropped = Bitmap.createBitmap(bmp, x, y, s, s)
+            if (bmp !== src) bmp.recycle()
+            bmp = cropped
         }
         if (bmp.height != targetH) {
             val ratio = targetH.toFloat() / bmp.height
@@ -140,8 +199,86 @@ object Converter {
             var h = targetH
             w -= w % 2
             h -= h % 2
-            if (w > 0 && h > 0) bmp = Bitmap.createScaledBitmap(bmp, w, h, true)
+            if (w > 0 && h > 0) {
+                val scaled = Bitmap.createScaledBitmap(bmp, w, h, true)
+                if (scaled !== bmp) {
+                    if (bmp !== src) bmp.recycle()
+                    bmp = scaled
+                }
+            }
         }
+        if (opts.enhance) {
+            val enhanced = enhanceBitmap(bmp)
+            if (enhanced !== bmp) {
+                if (bmp !== src) bmp.recycle()
+                bmp = enhanced
+            }
+        }
+        if (bmp !== src) src.recycle()
+        return bmp
+    }
+
+    /**
+     * Versi CPU dari shader enhance: redam noise lalu unsharp.
+     * Supaya cover JPEG tidak "loncat" dibanding video saat Live diputar.
+     */
+    private fun enhanceBitmap(src: Bitmap): Bitmap {
+        val w = src.width
+        val h = src.height
+        if (w < 3 || h < 3) return src
+        val work = if (src.config == Bitmap.Config.ARGB_8888) src
+        else src.copy(Bitmap.Config.ARGB_8888, false)
+        val inn = IntArray(w * h)
+        val out = IntArray(w * h)
+        work.getPixels(inn, 0, w, 0, 0, w, h)
+        val denoise = 0.75f
+        val sharpen = 0.55f * 1.6f
+        for (y in 0 until h) {
+            val y0 = if (y > 0) y - 1 else 0
+            val y1 = if (y + 1 < h) y + 1 else h - 1
+            for (x in 0 until w) {
+                val x0 = if (x > 0) x - 1 else 0
+                val x1 = if (x + 1 < w) x + 1 else w - 1
+                var r = 0
+                var g = 0
+                var b = 0
+                var n = 0
+                var yy = y0
+                while (yy <= y1) {
+                    val row = yy * w
+                    var xx = x0
+                    while (xx <= x1) {
+                        val p = inn[row + xx]
+                        r += (p ushr 16) and 0xFF
+                        g += (p ushr 8) and 0xFF
+                        b += p and 0xFF
+                        n++
+                        xx++
+                    }
+                    yy++
+                }
+                val br = r / n
+                val bg = g / n
+                val bb = b / n
+                val p = inn[y * w + x]
+                val cr = (p ushr 16) and 0xFF
+                val cg = (p ushr 8) and 0xFF
+                val cb = p and 0xFF
+                val a = p ushr 24
+                val baseR = cr + ((br - cr) * denoise).toInt()
+                val baseG = cg + ((bg - cg) * denoise).toInt()
+                val baseB = cb + ((bb - cb) * denoise).toInt()
+                fun ch(base: Int, blur: Int): Int {
+                    val v = base + ((base - blur) * sharpen).toInt()
+                    return v.coerceIn(0, 255)
+                }
+                out[y * w + x] = (a shl 24) or (ch(baseR, br) shl 16) or
+                    (ch(baseG, bg) shl 8) or ch(baseB, bb)
+            }
+        }
+        val bmp = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888)
+        bmp.setPixels(out, 0, w, 0, 0, w, h)
+        if (work !== src) work.recycle()
         return bmp
     }
 
@@ -308,17 +445,20 @@ object Converter {
         uri: Uri,
         opts: Options,
         log: (String) -> Unit,
-        progress: (Int) -> Unit
+        progress: (Int) -> Unit,
+        planHint: Plan? = null
     ): Result {
         log("Membaca info video…")
+        progress(3)
         val total = withContext(Dispatchers.IO) { videoDurationMs(context, uri) }
         if (total <= 0) throw IllegalStateException("Durasi video tidak terbaca")
 
         val (srcW, srcH) = withContext(Dispatchers.IO) { videoSize(context, uri) }
         log("Sumber: ${srcW}x${srcH}, ${total} ms")
 
-        val p = plan(total)
-        log("Potong otomatis: ${p.startMs} → ${p.startMs + p.durationMs} ms")
+        val raw = planHint ?: plan(total)
+        val p = sanitize(total, raw.startMs, raw.durationMs, raw.keyframeOffsetMs)
+        log("Potong: ${p.startMs} → ${p.startMs + p.durationMs} ms")
 
         // Tentukan ukuran keluaran
         val baseH = opts.heightFor(if (srcH > 0) srcH else 1080)
@@ -338,11 +478,15 @@ object Converter {
         var stab: Stabilizer.Plan? = null
         if (opts.stabilize) {
             stab = withContext(Dispatchers.Default) {
-                Stabilizer.analyze(context, uri, p.startMs, p.durationMs, log)
+                Stabilizer.analyze(
+                    context, uri, p.startMs, p.durationMs, log,
+                    progress = { sample -> progress(5 + sample * 11 / 100) }
+                )
             }
         }
 
         log("Mengambil frame kunci…")
+        progress(16)
         val rawBmp = withContext(Dispatchers.IO) {
             extractFrame(context, uri, p.startMs + p.keyframeOffsetMs, opts, outH)
         } ?: throw IllegalStateException("Gagal mengambil frame dari video")
@@ -356,9 +500,12 @@ object Converter {
         if (!bmp.isRecycled) bmp.recycle()
         log("JPEG: ${jpeg.size / 1024} KB")
 
-        val mp4 = transcodeClip(context, uri, p, opts, outW, outH, stab, log, progress)
+        val mp4 = transcodeClip(context, uri, p, opts, outW, outH, stab, log) { enc ->
+            progress(18 + enc.coerceIn(0, 100) * 76 / 100)
+        }
 
         log("Menyisipkan XMP GCamera + trailer Samsung…")
+        progress(96)
         val motionPhoto = withContext(Dispatchers.Default) {
             MotionPhotoWriter.build(jpeg, mp4, p.keyframeOffsetMs * 1000)
         }
@@ -368,18 +515,11 @@ object Converter {
         log(if (check.ok) "Struktur: VALID" else "Struktur: BERMASALAH")
 
         log("Menyimpan ke DCIM/Camera…")
+        progress(98)
         val savedUri = withContext(Dispatchers.IO) { saveToGallery(context, motionPhoto) }
         log("Tersimpan.")
 
         return Result(savedUri, p, check.log, motionPhoto.size)
-    }
-
-    /** Bulatkan ke atas ke bilangan genap; encoder menolak dimensi ganjil. */
-    private fun evenUp(v: Number): Int {
-        var x = Math.round(v.toFloat())
-        if (x < 2) x = 2
-        if (x % 2 != 0) x++
-        return x
     }
 
     private fun saveToGallery(context: Context, data: ByteArray): Uri {

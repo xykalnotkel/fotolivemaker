@@ -46,7 +46,8 @@ object Stats {
         val before = dirSize(context.cacheDir) + dirSize(context.externalCacheDir)
         runCatching { context.cacheDir.listFiles()?.forEach { it.deleteRecursively() } }
         runCatching { context.externalCacheDir?.listFiles()?.forEach { it.deleteRecursively() } }
-        return before
+        val after = dirSize(context.cacheDir) + dirSize(context.externalCacheDir)
+        return (before - after).coerceAtLeast(0L)
     }
 
     private fun dirSize(dir: File?): Long {

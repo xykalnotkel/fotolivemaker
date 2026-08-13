@@ -122,7 +122,7 @@ class SettingsActivity : AppCompatActivity() {
     }
 
     private fun pickRes() {
-        val items = Converter.Res.values()
+        val items = Converter.Res.entries.toTypedArray()
         val labels = items.map {
             when (it) {
                 Converter.Res.P720 -> "720p  —  paling cepat"

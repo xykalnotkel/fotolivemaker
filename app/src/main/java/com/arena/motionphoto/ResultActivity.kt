@@ -32,7 +32,6 @@ class ResultActivity : AppCompatActivity() {
 
     companion object {
         const val EXTRA_URI = "uri"
-        const val EXTRA_LOG = "log"
     }
 
     private lateinit var b: ActivityResultBinding
@@ -177,12 +176,11 @@ class ResultActivity : AppCompatActivity() {
             val f = withContext(Dispatchers.IO) {
                 runCatching {
                     val bytes = contentResolver.openInputStream(uri)!!.use { it.readBytes() }
-                    val idx = indexOfFtyp(bytes)
-                    if (idx < 4) return@runCatching null
+                    val mp4 = MotionPhotoWriter.extractMp4(bytes) ?: return@runCatching null
                     val dir = File(cacheDir, "share").apply { mkdirs() }
                     dir.listFiles()?.forEach { it.delete() }
                     val out = File(dir, "LivePhoto_${System.currentTimeMillis()}.mp4")
-                    out.writeBytes(bytes.copyOfRange(idx - 4, bytes.size))
+                    out.writeBytes(mp4)
                     out
                 }.getOrNull()
             }
@@ -213,17 +211,6 @@ class ResultActivity : AppCompatActivity() {
             })
             p.prepare()
         }
-    }
-
-    private fun indexOfFtyp(data: ByteArray): Int {
-        val pat = byteArrayOf(
-            'f'.code.toByte(), 't'.code.toByte(), 'y'.code.toByte(), 'p'.code.toByte()
-        )
-        outer@ for (i in 0..data.size - 4) {
-            for (j in 0..3) if (data[i + j] != pat[j]) continue@outer
-            return i
-        }
-        return -1
     }
 
     private fun setupHoldToPlay() {

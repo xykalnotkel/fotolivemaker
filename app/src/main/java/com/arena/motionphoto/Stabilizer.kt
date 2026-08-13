@@ -5,7 +5,6 @@ import android.graphics.Bitmap
 import android.media.MediaMetadataRetriever
 import android.net.Uri
 import kotlin.math.abs
-import kotlin.math.roundToInt
 
 /**
  * Stabilisasi video dengan analisis gerakan nyata.
@@ -78,7 +77,8 @@ object Stabilizer {
         uri: Uri,
         startMs: Long,
         durationMs: Long,
-        log: (String) -> Unit
+        log: (String) -> Unit,
+        progress: (Int) -> Unit = {}
     ): Plan? {
         val r = MediaMetadataRetriever()
         return try {
@@ -97,6 +97,7 @@ object Stabilizer {
             val dys = ArrayList<Float>(samples)
 
             for (i in 0 until samples) {
+                progress(((i + 1) * 100) / samples)
                 val rel = (i * step).toLong()
                 val bmp = r.getFrameAtTime(
                     (startMs + rel) * 1000, MediaMetadataRetriever.OPTION_CLOSEST
@@ -246,12 +247,5 @@ object Stabilizer {
             out[i] = sum / n
         }
         return out
-    }
-
-    /** Bulatkan ke genap — encoder rewel dengan dimensi ganjil. */
-    fun evenDim(v: Float): Int {
-        var x = v.roundToInt()
-        if (x % 2 != 0) x++
-        return x
     }
 }

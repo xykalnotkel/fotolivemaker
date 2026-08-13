@@ -5,9 +5,8 @@
 
 ## Ringkasan singkat
 
-**Aplikasi ini tidak mengumpulkan data apa pun darimu. Titik.**
-
-Semua pemrosesan terjadi 100% di dalam perangkatmu, secara offline.
+**Aplikasi ini tidak mengumpulkan data apa pun darimu, dan tidak mengirim
+apa pun ke internet.** Semua pemrosesan terjadi di dalam perangkat, secara offline.
 
 ---
 
@@ -16,14 +15,15 @@ Semua pemrosesan terjadi 100% di dalam perangkatmu, secara offline.
 **Tidak ada.**
 
 Aplikasi ini:
-- ❌ Tidak mengumpulkan data pribadi
-- ❌ Tidak mengirim file atau data apa pun ke internet
-- ❌ Tidak memiliki server, akun, atau login
-- ❌ Tidak memakai analytics, pelacak, maupun iklan
-- ❌ Tidak membaca kontak, lokasi, mikrofon, atau kamera
-- ❌ Tidak menampilkan iklan pihak ketiga
 
-Aplikasi ini bahkan **tidak meminta izin akses internet** (`INTERNET` permission
+- Tidak mengumpulkan data pribadi
+- Tidak mengirim file atau data apa pun ke internet
+- Tidak memiliki server, akun, atau login
+- Tidak memakai analytics, pelacak, maupun iklan
+- Tidak membaca kontak, lokasi, mikrofon, atau kamera
+- Tidak menampilkan iklan pihak ketiga
+
+Aplikasi ini **tidak meminta izin akses internet** (`INTERNET` permission
 tidak ada di AndroidManifest), jadi secara teknis aplikasi ini **tidak mampu**
 mengirim datamu ke mana pun — ini bisa kamu verifikasi sendiri di kode sumbernya.
 
@@ -31,23 +31,34 @@ mengirim datamu ke mana pun — ini bisa kamu verifikasi sendiri di kode sumbern
 
 | Izin | Kegunaan |
 |---|---|
-| `READ_MEDIA_VIDEO` (Android 13+) | Membaca video yang **kamu pilih sendiri** untuk dikonversi |
+| `READ_MEDIA_VIDEO` (Android 13+) | Menampilkan kisi video di pemilih internal |
 | `READ_EXTERNAL_STORAGE` (Android ≤12) | Sama seperti di atas, untuk versi Android lama |
 | `WRITE_EXTERNAL_STORAGE` (Android ≤9) | Menyimpan hasil ke folder DCIM/Camera |
 
 Di Android 10 ke atas, penyimpanan hasil menggunakan **MediaStore**, sehingga
-tidak memerlukan izin penyimpanan sama sekali.
+tidak memerlukan izin penyimpanan.
 
-Aplikasi hanya mengakses file video yang **kamu pilih secara eksplisit** lewat
-pemilih file sistem. Aplikasi tidak memindai galerimu.
+Kalau izin ditolak, atau kamu mengetuk **SISTEM**, aplikasi memakai
+**Photo Picker** bawaan Android. Jalur itu hanya memberi akses ke **satu
+video yang kamu pilih**, tanpa memindai galeri.
+
+## Apa yang dibaca di perangkat
+
+- **Pemilih internal** (kalau izin diberikan) menanyakan MediaStore daftar
+  video agar bisa ditampilkan per album. Aplikasi tidak mengunggah daftar itu
+  ke mana pun.
+- **Riwayat "Pernah dibuat"** adalah query MediaStore untuk JPEG berawalan
+  `MP_` yang aplikasi ini sendiri tulis ke `DCIM/Camera`. Bukan database
+  tersembunyi. Kalau kamu hapus file dari galeri, ia hilang dari daftar.
+- Pengaturan (resolusi, tema, dsb.) disimpan di SharedPreferences lokal.
 
 ## Penyimpanan data
 
 - **File hasil konversi** disimpan di `DCIM/Camera` pada perangkatmu, dan
   sepenuhnya menjadi milikmu.
-- **File sementara** dibuat di cache internal aplikasi selama proses konversi,
-  lalu dihapus otomatis setelah selesai.
-- Tidak ada database, tidak ada riwayat, tidak ada cadangan ke cloud.
+- **File sementara** dibuat di cache internal selama proses konversi,
+  lalu bisa dibersihkan dari Pengaturan.
+- Tidak ada cadangan ke cloud.
 
 ## Layanan pihak ketiga
 

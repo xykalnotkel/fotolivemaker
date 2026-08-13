@@ -158,6 +158,27 @@ object MotionPhotoWriter {
         return out.toByteArray()
     }
 
+    /** Offset atom `ftyp` (bukan awal box). -1 kalau tidak ada. */
+    fun indexOfFtyp(data: ByteArray): Int =
+        indexOf(data, "ftyp".toByteArray(Charsets.US_ASCII))
+
+    /**
+     * Ambil payload MP4 dari ekor Motion Photo, tanpa trailer SEF.
+     * Dipakai preview / verifikasi decode — bukan spek Google (itu
+     * menghitung mundur Item:Length, yang memang mencakup SEF).
+     */
+    fun extractMp4(data: ByteArray): ByteArray? {
+        val ftyp = indexOfFtyp(data)
+        if (ftyp < 4) return null
+        val start = ftyp - 4
+        var end = data.size
+        val tailOk = end >= 4 &&
+            String(data, end - 4, 4, Charsets.ISO_8859_1) == SEF_TAIL
+        if (tailOk) end = (end - SEF_BLOCK_SIZE).coerceAtLeast(start)
+        if (end <= start) return null
+        return data.copyOfRange(start, end)
+    }
+
     data class VerifyResult(val ok: Boolean, val log: String)
 
     fun verify(data: ByteArray): VerifyResult {
@@ -182,7 +203,7 @@ object MotionPhotoWriter {
         }
 
         // --- jalur Google ---
-        val ftyp = indexOf(data, "ftyp".toByteArray(Charsets.US_ASCII))
+        val ftyp = indexOfFtyp(data)
         if (ftyp > 0) {
             val marker = "Item:Semantic=\"MotionPhoto\" Item:Length=\""
             val mi = text.indexOf(marker)
