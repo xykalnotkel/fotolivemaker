@@ -27,15 +27,16 @@ class MorphView @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyle: Int = 0
 ) : View(context, attrs, defStyle) {
 
+    private val ink = ContextCompat.getColor(context, R.color.ink)
     private val stroke = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         style = Paint.Style.STROKE
         strokeCap = Paint.Cap.ROUND
         strokeJoin = Paint.Join.ROUND
-        color = Color.BLACK
+        color = ink
     }
     private val fill = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         style = Paint.Style.FILL
-        color = Color.BLACK
+        color = ink
     }
 
     private var t = 0f

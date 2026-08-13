@@ -48,6 +48,12 @@ object Settings {
         sp(c).edit().putBoolean(K_SEEN_SPLASH, true).apply()
     }
 
+    fun showSplash(c: Context): Boolean = sp(c).getBoolean(K_SHOW_SPLASH, true)
+
+    fun setShowSplash(c: Context, enabled: Boolean) {
+        sp(c).edit().putBoolean(K_SHOW_SPLASH, enabled).apply()
+    }
+
     fun setKeepScreenOn(c: Context, enabled: Boolean) {
         sp(c).edit().putBoolean(K_KEEP_SCREEN_ON, enabled).apply()
     }

@@ -208,8 +208,8 @@ object Converter {
                 }
             }
         }
-        if (opts.enhance) {
-            val enhanced = enhanceBitmap(bmp)
+        if (applyLook && opts.enhance) {
+            val enhanced = enhanceBitmap(bmp, restoreSharpen(opts.stabilize))
             if (enhanced !== bmp) {
                 if (bmp !== src) bmp.recycle()
                 bmp = enhanced
