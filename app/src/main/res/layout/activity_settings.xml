@@ -507,7 +507,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:text="Tajam bukan AI/HD: redam noise + unsharp, tidak menambah detail. Stabilizer hanya geser X/Y, video sedikit ter-crop, tidak untuk goyang berputar."
+                android:text="Bersih: redam noise di video+foto, lalu pulihkan tepi yang empuk karena zoom stabilizer. Stabil: geser + putar ringan. Mau filter TikTok? Matikan keduanya."
                 android:textColor="@color/text_dim"
                 android:textSize="11sp"
                 android:lineSpacingExtra="2dp" />
