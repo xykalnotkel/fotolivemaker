@@ -116,6 +116,57 @@
                         android:letterSpacing="0.1" />
                 </LinearLayout>
 
+                <!-- tombol mode di kanan atas -->
+                <LinearLayout
+                    android:id="@+id/modeBar"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="top|end"
+                    android:layout_margin="10dp"
+                    android:orientation="horizontal"
+                    android:background="@drawable/bg_pill_outline"
+                    android:padding="3dp">
+
+                    <TextView
+                        android:id="@+id/modeStatic"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:paddingStart="11dp"
+                        android:paddingEnd="11dp"
+                        android:paddingTop="6dp"
+                        android:paddingBottom="6dp"
+                        android:text="Statis"
+                        android:textSize="11sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/ink" />
+
+                    <TextView
+                        android:id="@+id/modeLive"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:paddingStart="11dp"
+                        android:paddingEnd="11dp"
+                        android:paddingTop="6dp"
+                        android:paddingBottom="6dp"
+                        android:text="Live"
+                        android:textSize="11sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/ink" />
+
+                    <TextView
+                        android:id="@+id/modeLoop"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:paddingStart="11dp"
+                        android:paddingEnd="11dp"
+                        android:paddingTop="6dp"
+                        android:paddingBottom="6dp"
+                        android:text="Ulangi"
+                        android:textSize="11sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/ink" />
+                </LinearLayout>
+
                 <TextView
                     android:id="@+id/hintHold"
                     android:layout_width="wrap_content"

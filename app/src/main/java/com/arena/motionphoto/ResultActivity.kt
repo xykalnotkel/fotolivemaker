@@ -42,6 +42,10 @@ class ResultActivity : AppCompatActivity() {
     private var prepared = false
     private var playedOk = false
 
+    /** Mode preview: STATIC = foto diam, LIVE = tahan untuk putar, LOOP = putar terus. */
+    private enum class Mode { STATIC, LIVE, LOOP }
+    private var mode = Mode.LIVE
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         b = ActivityResultBinding.inflate(layoutInflater)
@@ -55,6 +59,10 @@ class ResultActivity : AppCompatActivity() {
         b.btnGallery.setOnClickListener { openInGallery() }
         b.btnRecheck.setOnClickListener { runVerification() }
 
+        b.modeStatic.setOnClickListener { setMode(Mode.STATIC) }
+        b.modeLive.setOnClickListener { setMode(Mode.LIVE) }
+        b.modeLoop.setOnClickListener { setMode(Mode.LOOP) }
+
         b.btnDetail.setOnClickListener {
             val show = b.detail.visibility != View.VISIBLE
             b.detail.visibility = if (show) View.VISIBLE else View.GONE
@@ -64,6 +72,7 @@ class ResultActivity : AppCompatActivity() {
         loadStill()
         prepareClip()
         setupHoldToPlay()
+        setMode(Mode.LIVE)
         runVerification()
     }
 
@@ -119,6 +128,33 @@ class ResultActivity : AppCompatActivity() {
 
     private fun mark(ok: Boolean) = if (ok) "✓" else "✕"
 
+    private fun setMode(m: Mode) {
+        mode = m
+        // tandai yang aktif dengan tebal + hitam, sisanya redup
+        val on = androidx.core.content.ContextCompat.getColor(this, R.color.ink)
+        val off = androidx.core.content.ContextCompat.getColor(this, R.color.text_dim)
+        b.modeStatic.setTextColor(if (m == Mode.STATIC) on else off)
+        b.modeLive.setTextColor(if (m == Mode.LIVE) on else off)
+        b.modeLoop.setTextColor(if (m == Mode.LOOP) on else off)
+
+        when (m) {
+            Mode.STATIC -> {
+                stopPlay()
+                b.hintHold.visibility = View.GONE
+            }
+            Mode.LIVE -> {
+                stopPlay()
+                b.hintHold.visibility = View.VISIBLE
+                b.hintHold.text = "Tahan untuk memutar"
+            }
+            Mode.LOOP -> {
+                b.hintHold.visibility = View.GONE
+                if (prepared) startPlay() else
+                    Toast.makeText(this, "Video belum siap…", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
     private fun loadStill() {
         val uri = savedUri ?: return
         lifecycleScope.launch {
@@ -162,7 +198,10 @@ class ResultActivity : AppCompatActivity() {
             p.volume = 0f
             p.addListener(object : Player.Listener {
                 override fun onPlaybackStateChanged(state: Int) {
-                    if (state == Player.STATE_READY) prepared = true
+                    if (state == Player.STATE_READY) {
+                        prepared = true
+                        if (mode == Mode.LOOP) startPlay()
+                    }
                 }
 
                 override fun onPlayerError(error: androidx.media3.common.PlaybackException) {
@@ -188,11 +227,13 @@ class ResultActivity : AppCompatActivity() {
         b.holdArea.setOnTouchListener { v, ev ->
             when (ev.action) {
                 MotionEvent.ACTION_DOWN -> {
+                    if (mode != Mode.LIVE) return@setOnTouchListener false
                     if (prepared) startPlay() else
                         Toast.makeText(this, "Video belum siap…", Toast.LENGTH_SHORT).show()
                     true
                 }
                 MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
+                    if (mode != Mode.LIVE) return@setOnTouchListener false
                     stopPlay()
                     v.performClick()
                     true
@@ -216,8 +257,10 @@ class ResultActivity : AppCompatActivity() {
         player?.playWhenReady = false
         b.playerView.visibility = View.INVISIBLE
         b.still.visibility = View.VISIBLE
-        b.hintHold.visibility = View.VISIBLE
-        if (playedOk) b.hintHold.text = "Berhasil diputar · tahan lagi"
+        if (mode == Mode.LIVE) {
+            b.hintHold.visibility = View.VISIBLE
+            if (playedOk) b.hintHold.text = "Berhasil diputar · tahan lagi"
+        }
     }
 
     // ---------------- buka & bagikan ----------------

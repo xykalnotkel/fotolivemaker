@@ -1,41 +1,59 @@
 package com.arena.motionphoto
 
 import android.content.Intent
+import android.graphics.Bitmap
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
-import androidx.activity.result.contract.ActivityResultContracts
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.widget.ImageView
+import android.widget.PopupMenu
+import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.arena.motionphoto.databinding.ActivityHomeBinding
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 class HomeActivity : AppCompatActivity() {
 
     private lateinit var b: ActivityHomeBinding
-
-    private val pickVideo = registerForActivityResult(
-        ActivityResultContracts.OpenDocument()
-    ) { uri -> uri?.let { openEditor(it, persist = true) } }
+    private val adapter = ProjectAdapter()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         b = ActivityHomeBinding.inflate(layoutInflater)
         setContentView(b.root)
 
-        b.f1.txt.text = "Pilih bagian video yang kamu mau"
-        b.f2.txt.text = "Tes langsung dengan menahan layar"
-        b.f3.txt.text = "Berjalan offline, tanpa iklan"
+        b.tvVersion.text = "v${BuildConfig.VERSION_NAME}"
 
-        // Tampilkan versi supaya bisa dipastikan APK mana yang terpasang
-        b.tvVersion.text = "v${BuildConfig.VERSION_NAME}  ·  build ${BuildConfig.VERSION_CODE}"
-
-        b.btnStart.setOnClickListener {
-            pickVideo.launch(arrayOf("video/*"))
+        b.cardAdd.setOnClickListener {
+            startActivity(Intent(this, PickerActivity::class.java))
+        }
+        b.btnSettings.setOnClickListener {
+            startActivity(Intent(this, SettingsActivity::class.java))
         }
 
-        b.btnLegal.setOnClickListener { showLegal() }
+        b.list.layoutManager = LinearLayoutManager(this)
+        b.list.adapter = adapter
+        b.list.isNestedScrollingEnabled = false
 
-        // kalau dibuka lewat "Bagikan ke" dari galeri
         handleIncoming(intent)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        refresh()
     }
 
     override fun onNewIntent(intent: Intent) {
@@ -43,6 +61,7 @@ class HomeActivity : AppCompatActivity() {
         handleIncoming(intent)
     }
 
+    /** Terima video lewat "Bagikan ke" dari galeri. */
     private fun handleIncoming(intent: Intent?) {
         intent ?: return
         if (intent.getBooleanExtra("handled", false)) return
@@ -56,30 +75,142 @@ class HomeActivity : AppCompatActivity() {
         }
         if (uri != null) {
             intent.putExtra("handled", true)
-            openEditor(uri, persist = false)
+            startActivity(
+                Intent(this, MainActivity::class.java)
+                    .setData(uri)
+                    .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            )
         }
     }
 
-    private fun openEditor(uri: Uri, persist: Boolean) {
-        if (persist) {
+    private fun refresh() {
+        lifecycleScope.launch {
+            val items = withContext(Dispatchers.IO) { ProjectStore.list(this@HomeActivity) }
+            adapter.submit(items)
+            b.tvCount.text = if (items.isEmpty()) "" else "${items.size}"
+            b.emptyBox.visibility = if (items.isEmpty()) View.VISIBLE else View.GONE
+            b.list.visibility = if (items.isEmpty()) View.GONE else View.VISIBLE
+        }
+    }
+
+    // ---------------- adapter riwayat ----------------
+
+    private inner class ProjectAdapter : RecyclerView.Adapter<ProjectAdapter.VH>() {
+
+        private var items: List<ProjectStore.Item> = emptyList()
+        private val fmt = SimpleDateFormat("d MMM yyyy · HH:mm", Locale("id", "ID"))
+        private val cache = HashMap<String, Bitmap>()
+
+        fun submit(list: List<ProjectStore.Item>) {
+            items = list
+            notifyDataSetChanged()
+        }
+
+        inner class VH(v: View) : RecyclerView.ViewHolder(v) {
+            val thumb: ImageView = v.findViewById(R.id.thumb)
+            val name: TextView = v.findViewById(R.id.name)
+            val meta: TextView = v.findViewById(R.id.meta)
+            val more: ImageView = v.findViewById(R.id.more)
+        }
+
+        override fun onCreateViewHolder(p: ViewGroup, t: Int) =
+            VH(LayoutInflater.from(p.context).inflate(R.layout.item_project, p, false))
+
+        override fun getItemCount() = items.size
+
+        override fun onBindViewHolder(h: VH, pos: Int) {
+            val it = items[pos]
+            h.name.text = it.name
+            h.meta.text = "${fmt.format(Date(it.dateMs))}   ·   " +
+                "${it.width}x${it.height}   ·   ${it.sizeBytes / 1024} KB"
+            h.thumb.setImageDrawable(null)
+
+            h.itemView.setOnClickListener { open(it) }
+            h.more.setOnClickListener { v -> menuFor(v, it) }
+
+            val key = it.uri.toString()
+            cache[key]?.let { c -> h.thumb.setImageBitmap(c); return }
+
+            lifecycleScope.launch {
+                val bmp = withContext(Dispatchers.IO) {
+                    runCatching {
+                        if (Build.VERSION.SDK_INT >= 29) {
+                            contentResolver.loadThumbnail(
+                                it.uri, android.util.Size(200, 200), null
+                            )
+                        } else {
+                            contentResolver.openInputStream(it.uri)?.use { s ->
+                                val o = android.graphics.BitmapFactory.Options()
+                                    .apply { inSampleSize = 8 }
+                                android.graphics.BitmapFactory.decodeStream(s, null, o)
+                            }
+                        }
+                    }.getOrNull()
+                }
+                if (bmp != null) {
+                    cache[key] = bmp
+                    if (h.adapterPosition == pos) h.thumb.setImageBitmap(bmp)
+                }
+            }
+        }
+
+        private fun open(it: ProjectStore.Item) {
+            startActivity(
+                Intent(this@HomeActivity, ResultActivity::class.java)
+                    .putExtra(ResultActivity.EXTRA_URI, it.uri.toString())
+            )
+        }
+
+        private fun menuFor(anchor: View, it: ProjectStore.Item) {
+            PopupMenu(this@HomeActivity, anchor).apply {
+                menu.add(0, 1, 0, "Buka")
+                menu.add(0, 2, 1, "Bagikan")
+                menu.add(0, 3, 2, "Hapus")
+                setOnMenuItemClickListener { mi ->
+                    when (mi.itemId) {
+                        1 -> open(it)
+                        2 -> share(it.uri)
+                        3 -> confirmDelete(it)
+                    }
+                    true
+                }
+                show()
+            }
+        }
+
+        private fun share(uri: Uri) {
             runCatching {
-                contentResolver.takePersistableUriPermission(
-                    uri, Intent.FLAG_GRANT_READ_URI_PERMISSION
+                startActivity(
+                    Intent.createChooser(
+                        Intent(Intent.ACTION_SEND).apply {
+                            type = "image/jpeg"
+                            putExtra(Intent.EXTRA_STREAM, uri)
+                            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                        }, "Bagikan"
+                    )
                 )
             }
         }
-        startActivity(
-            Intent(this, MainActivity::class.java)
-                .setData(uri)
-                .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-        )
-    }
 
-    private fun showLegal() {
-        AlertDialog.Builder(this)
-            .setTitle("Lisensi & Privasi")
-            .setMessage(getString(R.string.legal_notice))
-            .setPositiveButton("Tutup", null)
-            .show()
+        private fun confirmDelete(it: ProjectStore.Item) {
+            AlertDialog.Builder(this@HomeActivity)
+                .setTitle("Hapus berkas ini?")
+                .setMessage(it.name)
+                .setNegativeButton("Batal", null)
+                .setPositiveButton("Hapus") { _, _ ->
+                    lifecycleScope.launch {
+                        val ok = withContext(Dispatchers.IO) {
+                            ProjectStore.delete(this@HomeActivity, it.uri)
+                        }
+                        Toast.makeText(
+                            this@HomeActivity,
+                            if (ok) "Dihapus" else "Gagal menghapus",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                        refresh()
+                    }
+                }
+                .show()
+        }
     }
 }

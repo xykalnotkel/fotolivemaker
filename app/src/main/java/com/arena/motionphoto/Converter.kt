@@ -15,13 +15,17 @@ import androidx.media3.common.Effect
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MimeTypes
 import androidx.media3.effect.Presentation
+import androidx.media3.effect.GlEffect
+import androidx.media3.effect.ScaleAndRotateTransformation
 import androidx.media3.transformer.Composition
+import androidx.media3.transformer.DefaultEncoderFactory
 import androidx.media3.transformer.EditedMediaItem
 import androidx.media3.transformer.Effects
 import androidx.media3.transformer.ExportException
 import androidx.media3.transformer.ExportResult
 import androidx.media3.transformer.ProgressHolder
 import androidx.media3.transformer.Transformer
+import androidx.media3.transformer.VideoEncoderSettings
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
@@ -36,11 +40,24 @@ object Converter {
     /** Durasi klip mengikuti Live Photo Apple: 3 detik. */
     const val TARGET_CLIP_MS = 3000L
 
+    /** Pilihan resolusi keluaran. SOURCE = ikut resolusi asli video. */
+    enum class Res(val label: String, val height: Int) {
+        P720("720p", 720),
+        P1080("1080p", 1080),
+        SOURCE("Asli", 0)
+    }
+
     data class Options(
-        val square: Boolean,
-        val targetHeight: Int = 1080,
-        val jpegQuality: Int = 92
-    )
+        val square: Boolean = false,
+        val res: Res = Res.P1080,
+        val enhance: Boolean = false,
+        val stabilize: Boolean = false,
+        val jpegQuality: Int = 95
+    ) {
+        /** Tinggi efektif; untuk SOURCE dipakai tinggi video aslinya. */
+        fun heightFor(sourceHeight: Int): Int =
+            if (res == Res.SOURCE) sourceHeight.coerceAtLeast(2) else res.height
+    }
 
     /** Rencana potong yang dihitung otomatis dari durasi video. */
     data class Plan(
@@ -74,7 +91,25 @@ object Converter {
         }
     }
 
-    fun extractFrame(context: Context, uri: Uri, atMs: Long, opts: Options): Bitmap? {
+    /** Ukuran video sumber (lebar, tinggi) setelah memperhitungkan rotasi. */
+    fun videoSize(context: Context, uri: Uri): Pair<Int, Int> {
+        val r = MediaMetadataRetriever()
+        return try {
+            r.setDataSource(context, uri)
+            val w = r.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH)?.toIntOrNull() ?: 0
+            val h = r.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT)?.toIntOrNull() ?: 0
+            val rot = r.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_ROTATION)?.toIntOrNull() ?: 0
+            if (rot == 90 || rot == 270) h to w else w to h
+        } catch (e: Exception) {
+            0 to 0
+        } finally {
+            runCatching { r.release() }
+        }
+    }
+
+    fun extractFrame(
+        context: Context, uri: Uri, atMs: Long, opts: Options, outHeight: Int
+    ): Bitmap? {
         val r = MediaMetadataRetriever()
         return try {
             r.setDataSource(context, uri)
@@ -82,7 +117,7 @@ object Converter {
                 ?: r.getFrameAtTime(atMs * 1000, MediaMetadataRetriever.OPTION_CLOSEST_SYNC)
                 ?: r.getFrameAtTime()
                 ?: return null
-            processBitmap(bmp, opts)
+            processBitmap(bmp, opts, outHeight)
         } catch (e: Exception) {
             null
         } catch (e: OutOfMemoryError) {
@@ -92,7 +127,7 @@ object Converter {
         }
     }
 
-    private fun processBitmap(src: Bitmap, opts: Options): Bitmap {
+    private fun processBitmap(src: Bitmap, opts: Options, targetH: Int): Bitmap {
         var bmp = src
         if (opts.square) {
             val s = minOf(bmp.width, bmp.height)
@@ -100,7 +135,6 @@ object Converter {
             val y = (bmp.height - s) / 2
             bmp = Bitmap.createBitmap(bmp, x, y, s, s)
         }
-        val targetH = opts.targetHeight
         if (bmp.height != targetH) {
             val ratio = targetH.toFloat() / bmp.height
             var w = (bmp.width * ratio).toInt()
@@ -130,6 +164,9 @@ object Converter {
         uri: Uri,
         plan: Plan,
         opts: Options,
+        outW: Int,
+        outH: Int,
+        zoom: Float,
         log: (String) -> Unit,
         progress: (Int) -> Unit
     ): ByteArray = withContext(Dispatchers.Main) {
@@ -146,28 +183,56 @@ object Converter {
             .build()
 
         val effects = mutableListOf<Effect>()
-        if (opts.square) {
-            effects += Presentation.createForAspectRatio(
-                1f, Presentation.LAYOUT_SCALE_TO_FIT_WITH_CROP
-            )
-            log("Efek: crop 1:1 diterapkan ke video")
+
+        // 1. Penghalus/penajam lebih dulu, saat resolusi masih penuh.
+        if (opts.enhance) {
+            effects += GlEffect { ctx, useHdr ->
+                EnhanceShader(ctx, useHdr, denoise = 0.75f, sharpen = 0.55f)
+            }
+            log("Efek: bersihkan noise + pertajam")
         }
-        effects += Presentation.createForHeight(opts.targetHeight)
-        log("Efek: skala ke ${opts.targetHeight}p")
+
+        // 2. Stabilisasi = zoom sedikit supaya guncangan punya ruang koreksi.
+        if (zoom > 1.001f) {
+            effects += ScaleAndRotateTransformation.Builder()
+                .setScale(zoom, zoom)
+                .build()
+            log("Efek: stabilisasi, zoom %.0f%%".format((zoom - 1f) * 100))
+        }
+
+        // 3. Presentation HARUS satu saja dan paling akhir.
+        //    Sebelumnya dipasang dua kali (aspect ratio lalu height), dan
+        //    yang kedua menimpa yang pertama -> crop 1:1 tidak pernah jalan.
+        effects += Presentation.createForWidthAndHeight(
+            outW, outH, Presentation.LAYOUT_SCALE_TO_FIT_WITH_CROP
+        )
+        log("Keluaran: ${outW}x${outH}")
 
         val edited = EditedMediaItem.Builder(mediaItem)
             .setEffects(Effects(emptyList(), effects))
             .build()
 
+        // Bitrate proporsional dengan jumlah piksel supaya tidak pecah.
+        val bitrate = (outW.toLong() * outH * 12).toInt().coerceIn(3_000_000, 40_000_000)
+        log("Bitrate: ${bitrate / 1_000_000} Mbps")
+
         suspendCancellableCoroutine<ByteArray> { cont ->
-            // dideklarasikan lebih dulu supaya listener bisa menghentikan polling
             val handler = Handler(Looper.getMainLooper())
             var poll: Runnable? = null
             fun stopPolling() { poll?.let { handler.removeCallbacks(it) } }
 
+            val encoderFactory = DefaultEncoderFactory.Builder(context)
+                .setRequestedVideoEncoderSettings(
+                    VideoEncoderSettings.Builder()
+                        .setBitrate(bitrate)
+                        .build()
+                )
+                .build()
+
             val transformer = Transformer.Builder(context)
                 .setVideoMimeType(MimeTypes.VIDEO_H264)
                 .setAudioMimeType(MimeTypes.AUDIO_AAC)
+                .setEncoderFactory(encoderFactory)
                 .addListener(object : Transformer.Listener {
                     override fun onCompleted(composition: Composition, result: ExportResult) {
                         stopPolling()
@@ -191,7 +256,7 @@ object Converter {
                         cont.resumeWithException(
                             IllegalStateException(
                                 "Encoder gagal: ${exception.errorCodeName}. " +
-                                    "Coba aktifkan 720p atau pilih video lain.",
+                                    "Coba turunkan resolusi atau matikan efek.",
                                 exception
                             )
                         )
@@ -199,7 +264,6 @@ object Converter {
                 })
                 .build()
 
-            // Laporan kemajuan sungguhan dari Transformer
             val holder = ProgressHolder()
             poll = object : Runnable {
                 override fun run() {
@@ -236,23 +300,48 @@ object Converter {
         log("Membaca info video…")
         val total = withContext(Dispatchers.IO) { videoDurationMs(context, uri) }
         if (total <= 0) throw IllegalStateException("Durasi video tidak terbaca")
+
+        val (srcW, srcH) = withContext(Dispatchers.IO) { videoSize(context, uri) }
+        log("Sumber: ${srcW}x${srcH}, ${total} ms")
+
         val p = plan(total)
-        log("Durasi video: ${total} ms")
         log("Potong otomatis: ${p.startMs} → ${p.startMs + p.durationMs} ms")
-        log("Frame kunci: +${p.keyframeOffsetMs} ms")
+
+        // Tentukan ukuran keluaran
+        val baseH = opts.heightFor(if (srcH > 0) srcH else 1080)
+        val outH: Int
+        val outW: Int
+        if (opts.square) {
+            val side = evenUp(baseH)
+            outW = side; outH = side
+        } else {
+            val ratio = if (srcW > 0 && srcH > 0) srcW.toFloat() / srcH else 9f / 16f
+            outH = evenUp(baseH)
+            outW = evenUp(outH * ratio)
+        }
+        log("Target: ${outW}x${outH}${if (opts.square) " (kotak 1:1)" else ""}")
+
+        // Stabilisasi: analisis dulu untuk tahu berapa zoom yang perlu
+        var zoom = 1f
+        if (opts.stabilize) {
+            val st = withContext(Dispatchers.Default) {
+                Stabilizer.analyze(context, uri, p.startMs, p.durationMs, log)
+            }
+            if (st != null) zoom = st.zoom
+        }
 
         log("Mengambil frame kunci…")
         val bmp = withContext(Dispatchers.IO) {
-            extractFrame(context, uri, p.startMs + p.keyframeOffsetMs, opts)
+            extractFrame(context, uri, p.startMs + p.keyframeOffsetMs, opts, outH)
         } ?: throw IllegalStateException("Gagal mengambil frame dari video")
         log("Foto: ${bmp.width}x${bmp.height}")
 
         val jpeg = withContext(Dispatchers.Default) { bmp.toJpeg(opts.jpegQuality) }
         log("JPEG: ${jpeg.size / 1024} KB")
 
-        val mp4 = transcodeClip(context, uri, p, opts, log, progress)
+        val mp4 = transcodeClip(context, uri, p, opts, outW, outH, zoom, log, progress)
 
-        log("Menyisipkan XMP GCamera…")
+        log("Menyisipkan XMP GCamera + trailer Samsung…")
         val motionPhoto = withContext(Dispatchers.Default) {
             MotionPhotoWriter.build(jpeg, mp4, p.keyframeOffsetMs * 1000)
         }
@@ -266,6 +355,14 @@ object Converter {
         log("Tersimpan.")
 
         return Result(savedUri, p, check.log, motionPhoto.size)
+    }
+
+    /** Bulatkan ke atas ke bilangan genap; encoder menolak dimensi ganjil. */
+    private fun evenUp(v: Number): Int {
+        var x = Math.round(v.toFloat())
+        if (x < 2) x = 2
+        if (x % 2 != 0) x++
+        return x
     }
 
     private fun saveToGallery(context: Context, data: ByteArray): Uri {

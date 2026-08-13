@@ -27,11 +27,10 @@
             android:contentDescription="Kembali" />
 
         <TextView
-            android:layout_width="0dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
             android:layout_marginStart="4dp"
-            android:text="Buat Live Photo"
+            android:text="Pengaturan"
             android:textColor="@color/text_hi"
             android:textSize="18sp"
             android:textStyle="bold" />
@@ -46,81 +45,19 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:fillViewport="true"
         android:scrollbars="none">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:paddingStart="20dp"
-            android:paddingEnd="20dp"
-            android:paddingTop="20dp"
-            android:paddingBottom="20dp">
+            android:padding="20dp">
 
-            <FrameLayout
-                android:layout_width="match_parent"
-                android:layout_height="290dp"
-                android:background="@drawable/bg_preview">
-
-                <ImageView
-                    android:id="@+id/preview"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_margin="1dp"
-                    android:scaleType="fitCenter"
-                    android:contentDescription="Preview frame kunci" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="top|start"
-                    android:layout_margin="10dp"
-                    android:background="@drawable/bg_pill"
-                    android:paddingStart="9dp"
-                    android:paddingEnd="9dp"
-                    android:paddingTop="4dp"
-                    android:paddingBottom="4dp"
-                    android:text="FRAME KUNCI"
-                    android:textColor="@color/on_ink"
-                    android:textSize="10sp"
-                    android:textStyle="bold"
-                    android:letterSpacing="0.08" />
-            </FrameLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:layout_marginTop="16dp"
-                android:background="@drawable/bg_card"
-                android:padding="18dp">
-
-                <TextView
-                    style="@style/Label"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Potongan otomatis" />
-
-                <TextView
-                    android:id="@+id/tvPlan"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
-                    android:fontFamily="monospace"
-                    android:textSize="12sp"
-                    android:textColor="@color/text_mid"
-                    android:lineSpacingExtra="3dp"
-                    android:text="Membaca video…" />
-            </LinearLayout>
-
-            <!-- tools -->
             <TextView
                 style="@style/Label"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="22dp"
-                android:text="Tools" />
+                android:text="Bawaan project baru" />
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -156,7 +93,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Bitrate ikut naik, tidak pecah"
+                            android:text="Makin tinggi, makin lama diproses"
                             android:textColor="@color/text_dim"
                             android:textSize="11sp" />
                     </LinearLayout>
@@ -212,29 +149,72 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
-                android:text="Bersihkan &amp; pertajam meredam bintik lalu menajamkan tepi. Ini tidak menambah detail yang tidak ada di video asli."
+                android:text="Pengaturan ini jadi nilai awal setiap kali membuat project baru, dan tetap bisa diubah di layar edit."
                 android:textColor="@color/text_dim"
                 android:textSize="11sp"
                 android:lineSpacingExtra="2dp" />
+
+            <TextView
+                style="@style/Label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="28dp"
+                android:text="Tentang" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginTop="12dp"
+                android:background="@drawable/bg_card"
+                android:paddingStart="18dp"
+                android:paddingEnd="18dp">
+
+                <LinearLayout
+                    android:id="@+id/rowLicense"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:minHeight="56dp"
+                    android:gravity="center_vertical"
+                    android:background="?attr/selectableItemBackground">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Lisensi &amp; Privasi"
+                        android:textColor="@color/text_hi"
+                        android:textSize="14sp" />
+                </LinearLayout>
+
+                <View android:layout_width="match_parent"
+                    android:layout_height="1dp" android:background="@color/line" />
+
+                <LinearLayout
+                    android:id="@+id/rowSource"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:minHeight="56dp"
+                    android:gravity="center_vertical"
+                    android:background="?attr/selectableItemBackground">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Kode sumber di GitHub"
+                        android:textColor="@color/text_hi"
+                        android:textSize="14sp" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/tvVersion"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:gravity="center"
+                android:textColor="@color/text_dim"
+                android:textSize="11sp"
+                android:fontFamily="monospace" />
         </LinearLayout>
     </ScrollView>
-
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1.5dp"
-        android:background="@color/line" />
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:background="@color/paper"
-        android:padding="20dp">
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnConvert"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Buat Live Photo" />
-    </LinearLayout>
 </LinearLayout>
