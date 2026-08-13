@@ -79,7 +79,7 @@ class ResultActivity : AppCompatActivity() {
                 if (rep.videoPlayable) "  ·  ${rep.videoDurationMs} ms  ·  ${rep.videoSize}" else ""
             b.chkSystem.text = when (rep.systemFlag) {
                 true -> mark(true) + "  Ditandai sistem Android"
-                false -> "○  Belum ditandai sistem — coba Cek ulang"
+                false -> "○  Galeri HP ini tidak menandainya — wajar, TikTok tetap bisa"
                 null -> "–  Penanda sistem tak tersedia di Android ini"
             }
 
@@ -95,7 +95,9 @@ class ResultActivity : AppCompatActivity() {
                 }
                 MotionPhotoVerifier.Level.LIKELY -> {
                     b.statusDot.setBackgroundResource(R.drawable.dot_accent)
-                    b.statusSub.text = "Struktur sudah benar. Tahan gambar untuk menguji."
+                    b.statusSub.text =
+                        "Struktur benar. Banyak galeri Android tidak bisa " +
+                        "memutarnya, tapi TikTok tetap membacanya — coba upload."
                     b.badgeText.text = "LIVE"
                     b.badgeIcon.alpha = 1f
                     b.badgeLive.alpha = 1f
