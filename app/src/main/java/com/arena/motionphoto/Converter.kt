@@ -10,6 +10,7 @@ import android.os.Environment
 import android.os.Handler
 import android.os.Looper
 import android.provider.MediaStore
+import androidx.media3.common.util.UnstableApi
 import androidx.media3.common.Effect
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MimeTypes
@@ -29,6 +30,7 @@ import java.io.File
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 
+@androidx.annotation.OptIn(UnstableApi::class)
 object Converter {
 
     /** Durasi klip mengikuti Live Photo Apple: 3 detik. */
@@ -158,11 +160,17 @@ object Converter {
             .build()
 
         suspendCancellableCoroutine<ByteArray> { cont ->
+            // dideklarasikan lebih dulu supaya listener bisa menghentikan polling
+            val handler = Handler(Looper.getMainLooper())
+            var poll: Runnable? = null
+            fun stopPolling() { poll?.let { handler.removeCallbacks(it) } }
+
             val transformer = Transformer.Builder(context)
                 .setVideoMimeType(MimeTypes.VIDEO_H264)
                 .setAudioMimeType(MimeTypes.AUDIO_AAC)
                 .addListener(object : Transformer.Listener {
                     override fun onCompleted(composition: Composition, result: ExportResult) {
+                        stopPolling()
                         try {
                             val bytes = outFile.readBytes()
                             log("Encode selesai: ${bytes.size / 1024} KB")
@@ -178,6 +186,7 @@ object Converter {
                         result: ExportResult,
                         exception: ExportException
                     ) {
+                        stopPolling()
                         outFile.delete()
                         cont.resumeWithException(
                             IllegalStateException(
@@ -191,9 +200,8 @@ object Converter {
                 .build()
 
             // Laporan kemajuan sungguhan dari Transformer
-            val handler = Handler(Looper.getMainLooper())
             val holder = ProgressHolder()
-            val poll = object : Runnable {
+            poll = object : Runnable {
                 override fun run() {
                     if (!cont.isActive) return
                     val state = transformer.getProgress(holder)
@@ -206,15 +214,13 @@ object Converter {
 
             log("Mulai encode H.264 + AAC…")
             transformer.start(edited, outFile.absolutePath)
-            handler.post(poll)
+            handler.post(poll!!)
 
             cont.invokeOnCancellation {
-                handler.removeCallbacks(poll)
+                stopPolling()
                 runCatching { transformer.cancel() }
                 outFile.delete()
             }
-            // hentikan polling begitu selesai, apa pun hasilnya
-            cont.invokeOnCompletion { handler.removeCallbacks(poll) }
         }
     }
 

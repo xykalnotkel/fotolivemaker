@@ -10,6 +10,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
+import androidx.media3.common.util.UnstableApi
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
@@ -26,6 +27,7 @@ import java.io.File
  * menyiapkan berkas ketika view-nya masih invisible, sehingga tahan-layar
  * tidak memutar apa pun.
  */
+@androidx.annotation.OptIn(UnstableApi::class)
 class ResultActivity : AppCompatActivity() {
 
     companion object {
