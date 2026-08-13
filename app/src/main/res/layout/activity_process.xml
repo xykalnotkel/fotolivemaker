@@ -72,7 +72,7 @@
             app:trackThickness="5dp"
             app:indicatorSize="116dp"
             app:indicatorDirectionCircular="clockwise"
-            app:indeterminate="false"
+            android:indeterminate="false"
             android:max="100"
             android:progress="0" />
 
