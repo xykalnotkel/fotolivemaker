@@ -59,14 +59,17 @@ jobs:
         run: gradle :app:assembleRelease --no-daemon --stacktrace
 
       - name: Periksa tanda tangan APK
+        id: sign
         run: |
           APK=app/build/outputs/apk/release/app-release.apk
           BT=$(ls "$ANDROID_HOME"/build-tools | sort -V | tail -1)
           "$ANDROID_HOME/build-tools/$BT/apksigner" verify --print-certs "$APK" \
             | tee /tmp/sig.txt
           if grep -qi "CN=Android Debug" /tmp/sig.txt; then
+            echo "release_signed=false" >> "$GITHUB_OUTPUT"
             echo "::warning::APK memakai debug key: artifact tetap diunggah, tetapi Release publik dilewati."
           else
+            echo "release_signed=true" >> "$GITHUB_OUTPUT"
             echo "APK ditandatangani kunci rilis."
           fi
 
@@ -91,7 +94,7 @@ jobs:
       # ---- Release hanya dibuat untuk push ke branch utama ----
       - name: Terbitkan Release
         # Jangan pernah menerbitkan APK yang masih memakai debug key.
-        if: github.event_name != 'pull_request' && secrets.KEYSTORE_BASE64 != '' && secrets.KEYSTORE_PASSWORD != '' && secrets.KEY_ALIAS != '' && secrets.KEY_PASSWORD != ''
+        if: github.event_name != 'pull_request' && steps.sign.outputs.release_signed == 'true'
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ steps.prep.outputs.version }}
