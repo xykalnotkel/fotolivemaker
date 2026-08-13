@@ -1,19 +1,14 @@
 package com.arena.motionphoto
 
-import android.content.ContentValues
 import android.content.Intent
 import android.graphics.BitmapFactory
 import android.net.Uri
-import android.os.Build
 import android.os.Bundle
-import android.os.Environment
-import android.provider.MediaStore
 import android.view.MotionEvent
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.FileProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
@@ -55,7 +50,7 @@ class ResultActivity : AppCompatActivity() {
         b.btnClose.setOnClickListener { finish() }
         b.btnAgain.setOnClickListener { finish() }
         b.btnShare.setOnClickListener { share() }
-        b.btnSaveVideo.setOnClickListener { saveVideoToGallery() }
+        b.btnGallery.setOnClickListener { openInGallery() }
         b.btnRecheck.setOnClickListener { runVerification() }
 
         b.btnDetail.setOnClickListener {
@@ -221,90 +216,52 @@ class ResultActivity : AppCompatActivity() {
         if (playedOk) b.hintHold.text = "Berhasil diputar · tahan lagi"
     }
 
-    // ---------------- simpan & bagikan ----------------
+    // ---------------- buka & bagikan ----------------
 
-    /** Simpan klip MP4 sebagai berkas video di galeri (Movies/LivePhotoMaker). */
-    private fun saveVideoToGallery() {
-        val src = clipFile
-        if (src == null || !src.exists()) {
-            Toast.makeText(this, "Klip belum siap", Toast.LENGTH_SHORT).show()
-            return
-        }
-        lifecycleScope.launch {
-            val ok = withContext(Dispatchers.IO) {
-                runCatching {
-                    val name = "LivePhoto_${System.currentTimeMillis()}.mp4"
-                    val v = ContentValues().apply {
-                        put(MediaStore.Video.Media.DISPLAY_NAME, name)
-                        put(MediaStore.Video.Media.MIME_TYPE, "video/mp4")
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                            put(
-                                MediaStore.Video.Media.RELATIVE_PATH,
-                                Environment.DIRECTORY_MOVIES + "/LivePhotoMaker"
-                            )
-                            put(MediaStore.Video.Media.IS_PENDING, 1)
-                        }
-                    }
-                    val u = contentResolver.insert(
-                        MediaStore.Video.Media.EXTERNAL_CONTENT_URI, v
-                    )!!
-                    contentResolver.openOutputStream(u)!!.use { o -> src.inputStream().use { it.copyTo(o) } }
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                        v.clear(); v.put(MediaStore.Video.Media.IS_PENDING, 0)
-                        contentResolver.update(u, v, null, null)
-                    }
-                    true
-                }.getOrDefault(false)
-            }
-            Toast.makeText(
-                this@ResultActivity,
-                if (ok) "Video tersimpan di Movies/LivePhotoMaker" else "Gagal menyimpan video",
-                Toast.LENGTH_LONG
-            ).show()
+    /**
+     * Buka berkas di aplikasi galeri.
+     *
+     * Ini cara menguji yang benar: Motion Photo hanya utuh kalau dibaca
+     * langsung dari galeri. Begitu dikirim lewat Intent share, aplikasi
+     * penerima umumnya memproses ulang gambarnya dan ekor MP4-nya hilang.
+     */
+    private fun openInGallery() {
+        val uri = savedUri ?: return
+        runCatching {
+            startActivity(
+                Intent(Intent.ACTION_VIEW).apply {
+                    setDataAndType(uri, "image/jpeg")
+                    addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                }
+            )
+        }.onFailure {
+            Toast.makeText(this, "Tidak ada aplikasi galeri", Toast.LENGTH_SHORT).show()
         }
     }
 
+    /**
+     * Bagikan berkas Motion Photo apa adanya.
+     *
+     * Diberi peringatan lebih dulu, karena banyak aplikasi (termasuk TikTok)
+     * memproses ulang gambar yang diterima lewat share sehingga bagian
+     * videonya terbuang dan hasilnya jadi foto diam.
+     */
     private fun share() {
         AlertDialog.Builder(this)
-            .setTitle("Bagikan sebagai apa?")
-            .setItems(
-                arrayOf(
-                    "Video MP4  —  pasti bergerak",
-                    "Motion Photo  —  hanya utuh lewat galeri"
-                )
-            ) { _, which -> if (which == 0) shareAsVideo() else shareAsMotionPhoto() }
+            .setTitle("Bagikan Live Photo")
+            .setMessage(
+                "Banyak aplikasi memproses ulang gambar yang dikirim lewat " +
+                    "tombol bagikan, sehingga bagian videonya hilang dan yang " +
+                    "sampai cuma foto diam.\n\n" +
+                    "Supaya tetap jadi Live Photo, pilih berkasnya langsung " +
+                    "dari galeri di dalam aplikasi tujuan."
+            )
+            .setPositiveButton("Tetap bagikan") { _, _ -> doShare() }
+            .setNegativeButton("Batal", null)
             .show()
     }
 
-    private fun shareAsVideo() {
-        val src = clipFile
-        if (src == null || !src.exists()) {
-            Toast.makeText(this, "Klip belum siap, tunggu sebentar", Toast.LENGTH_SHORT).show()
-            return
-        }
-        val shared = runCatching {
-            FileProvider.getUriForFile(this, "$packageName.fileprovider", src)
-        }.getOrNull()
-        if (shared == null) {
-            Toast.makeText(this, "Gagal menyiapkan video", Toast.LENGTH_SHORT).show()
-            return
-        }
-        runCatching {
-            startActivity(
-                Intent.createChooser(
-                    Intent(Intent.ACTION_SEND).apply {
-                        type = "video/mp4"
-                        putExtra(Intent.EXTRA_STREAM, shared)
-                        addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                    }, "Bagikan video"
-                )
-            )
-        }.onFailure {
-            Toast.makeText(this, "Tidak bisa membagikan", Toast.LENGTH_SHORT).show()
-        }
-    }
-
-    private fun shareAsMotionPhoto() {
+    private fun doShare() {
         val uri = savedUri ?: return
         runCatching {
             startActivity(

@@ -302,7 +302,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="6dp"
-                    android:text="Tombol Bagikan mengirim gambar biasa, jadi bagian videonya ikut hilang. Motion Photo hanya utuh kalau dipilih langsung dari galeri di dalam TikTok.\n\nKalau HP-mu memang tidak mendukung label Live, pakai Bagikan → Video MP4. Itu pasti bergerak, cuma jadi video biasa, bukan Live Photo."
+                    android:text="Jangan pakai tombol Bagikan. Aplikasi penerima memproses ulang gambarnya, jadi bagian video di dalam berkas ikut terbuang dan yang sampai cuma foto diam.\n\nBerkasnya harus dipilih langsung dari galeri di dalam TikTok, lewat tombol + lalu tab Upload."
                     android:textColor="@color/text_dim"
                     android:textSize="12sp"
                     android:lineSpacingExtra="4dp" />
@@ -323,11 +323,11 @@
         android:padding="20dp">
 
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnSaveVideo"
+            android:id="@+id/btnGallery"
             style="@style/Btn.Ghost"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Simpan sebagai Video MP4" />
+            android:text="Buka di Galeri" />
 
         <LinearLayout
             android:layout_width="match_parent"
