@@ -3,6 +3,7 @@ package com.arena.motionphoto
 import android.content.ContentValues
 import android.content.Context
 import android.graphics.Bitmap
+import android.graphics.Matrix
 import android.media.MediaMetadataRetriever
 import android.net.Uri
 import android.os.Build
@@ -39,6 +40,18 @@ object Converter {
     /** Durasi klip mengikuti Live Photo Apple: 3 detik. */
     const val TARGET_CLIP_MS = 3000L
 
+    /** Rasio aspek keluaran video & foto */
+    enum class AspectRatio(val label: String, val ratioW: Int, val ratioH: Int) {
+        ORIGINAL("Asli", 0, 0),
+        RATIO_9_16("9:16", 9, 16),
+        RATIO_3_4("3:4", 3, 4),
+        RATIO_1_1("1:1", 1, 1),
+        RATIO_4_3("4:3", 4, 3),
+        RATIO_16_9("16:9", 16, 9);
+
+        fun isOriginal(): Boolean = this == ORIGINAL
+    }
+
     /** Pilihan resolusi keluaran. SOURCE = ikut resolusi asli video. */
     enum class Res(val label: String, val height: Int) {
         P720("720p", 720),
@@ -47,12 +60,28 @@ object Converter {
     }
 
     data class Options(
-        val square: Boolean = false,
+        val aspectRatio: AspectRatio = AspectRatio.ORIGINAL,
         val res: Res = Res.P1080,
         val enhance: Boolean = false,
         val stabilize: Boolean = false,
-        val jpegQuality: Int = 95
+        val jpegQuality: Int = 96
     ) {
+        val square: Boolean get() = aspectRatio == AspectRatio.RATIO_1_1
+
+        constructor(
+            square: Boolean,
+            res: Res = Res.P1080,
+            enhance: Boolean = false,
+            stabilize: Boolean = false,
+            jpegQuality: Int = 96
+        ) : this(
+            aspectRatio = if (square) AspectRatio.RATIO_1_1 else AspectRatio.ORIGINAL,
+            res = res,
+            enhance = enhance,
+            stabilize = stabilize,
+            jpegQuality = jpegQuality
+        )
+
         /** Tinggi efektif; untuk SOURCE dipakai tinggi video aslinya. */
         fun heightFor(sourceHeight: Int): Int =
             if (res == Res.SOURCE) sourceHeight.coerceAtLeast(2) else res.height
@@ -135,6 +164,20 @@ object Converter {
         return x
     }
 
+    /** Hitung dimensi keluaran berdasarkan rasio aspek dan resolusi pilihan */
+    fun calculateDimensions(srcW: Int, srcH: Int, opts: Options): Pair<Int, Int> {
+        val baseH = opts.heightFor(if (srcH > 0) srcH else 1080)
+        val outH = evenUp(baseH)
+        val outW = if (opts.aspectRatio.isOriginal()) {
+            val ratio = if (srcW > 0 && srcH > 0) srcW.toFloat() / srcH else 9f / 16f
+            evenUp(outH * ratio)
+        } else {
+            val targetRatio = opts.aspectRatio.ratioW.toFloat() / opts.aspectRatio.ratioH
+            evenUp(outH * targetRatio)
+        }
+        return outW to outH
+    }
+
     fun videoDurationMs(context: Context, uri: Uri): Long {
         val r = MediaMetadataRetriever()
         return try {
@@ -164,17 +207,28 @@ object Converter {
     }
 
     fun extractFrame(
-        context: Context, uri: Uri, atMs: Long, opts: Options, outHeight: Int,
-        applyLook: Boolean = true
+        context: Context, uri: Uri, atMs: Long, opts: Options,
+        targetW: Int, targetH: Int, applyLook: Boolean = true
     ): Bitmap? {
         val r = MediaMetadataRetriever()
         return try {
             r.setDataSource(context, uri)
-            val bmp = r.getFrameAtTime(atMs * 1000, MediaMetadataRetriever.OPTION_CLOSEST)
+            var bmp = r.getFrameAtTime(atMs * 1000, MediaMetadataRetriever.OPTION_CLOSEST)
                 ?: r.getFrameAtTime(atMs * 1000, MediaMetadataRetriever.OPTION_CLOSEST_SYNC)
                 ?: r.getFrameAtTime()
                 ?: return null
-            processBitmap(bmp, opts, outHeight, applyLook)
+
+            val rot = r.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_ROTATION)?.toIntOrNull() ?: 0
+            if (rot != 0) {
+                val matrix = Matrix().apply { postRotate(rot.toFloat()) }
+                val rotated = Bitmap.createBitmap(bmp, 0, 0, bmp.width, bmp.height, matrix, true)
+                if (rotated !== bmp) {
+                    bmp.recycle()
+                    bmp = rotated
+                }
+            }
+
+            processBitmap(bmp, opts, targetW, targetH, applyLook)
         } catch (e: Exception) {
             null
         } catch (e: OutOfMemoryError) {
@@ -184,30 +238,41 @@ object Converter {
         }
     }
 
-    private fun processBitmap(src: Bitmap, opts: Options, targetH: Int, applyLook: Boolean): Bitmap {
+    private fun processBitmap(
+        src: Bitmap, opts: Options, targetW: Int, targetH: Int, applyLook: Boolean
+    ): Bitmap {
         var bmp = src
-        if (opts.square) {
-            val s = minOf(bmp.width, bmp.height)
-            val x = (bmp.width - s) / 2
-            val y = (bmp.height - s) / 2
-            val cropped = Bitmap.createBitmap(bmp, x, y, s, s)
-            if (bmp !== src) bmp.recycle()
-            bmp = cropped
+        if (!opts.aspectRatio.isOriginal()) {
+            val targetRatio = opts.aspectRatio.ratioW.toFloat() / opts.aspectRatio.ratioH
+            val srcRatio = bmp.width.toFloat() / bmp.height.coerceAtLeast(1)
+            val cropW: Int
+            val cropH: Int
+            if (srcRatio > targetRatio) {
+                cropH = bmp.height
+                cropW = (cropH * targetRatio).toInt().coerceAtMost(bmp.width)
+            } else {
+                cropW = bmp.width
+                cropH = (cropW / targetRatio).toInt().coerceAtMost(bmp.height)
+            }
+            val x = ((bmp.width - cropW) / 2).coerceAtLeast(0)
+            val y = ((bmp.height - cropH) / 2).coerceAtLeast(0)
+            if (cropW > 0 && cropH > 0 && (cropW != bmp.width || cropH != bmp.height)) {
+                val cropped = Bitmap.createBitmap(bmp, x, y, cropW, cropH)
+                if (bmp !== src) bmp.recycle()
+                bmp = cropped
+            }
         }
-        if (bmp.height != targetH) {
-            val ratio = targetH.toFloat() / bmp.height
-            var w = (bmp.width * ratio).toInt()
-            var h = targetH
-            w -= w % 2
-            h -= h % 2
-            if (w > 0 && h > 0) {
-                val scaled = Bitmap.createScaledBitmap(bmp, w, h, true)
+
+        if (bmp.width != targetW || bmp.height != targetH) {
+            if (targetW > 0 && targetH > 0) {
+                val scaled = Bitmap.createScaledBitmap(bmp, targetW, targetH, true)
                 if (scaled !== bmp) {
                     if (bmp !== src) bmp.recycle()
                     bmp = scaled
                 }
             }
         }
+
         if (applyLook && opts.enhance) {
             val enhanced = enhanceBitmap(bmp, restoreSharpen(opts.stabilize))
             if (enhanced !== bmp) {
@@ -219,9 +284,13 @@ object Converter {
         return bmp
     }
 
-    /** Denoise lebih kuat; tajam cuma buat mengembalikan tepi setelah zoom/encode. */
-    fun restoreSharpen(stabilize: Boolean): Float = if (stabilize) 0.40f else 0.30f
+    fun restoreSharpen(stabilize: Boolean): Float = if (stabilize) 0.38f else 0.28f
 
+    /**
+     * Filter Bilateral Edge-Preserving dengan Coring Threshold:
+     * Menghilangkan noise bintik pasir pada area halus (kulit, langit, gradasi)
+     * dan hanya mempertajam tepi kontras nyata tanpa artefak.
+     */
     private fun enhanceBitmap(src: Bitmap, sharpen: Float): Bitmap {
         val w = src.width
         val h = src.height
@@ -231,88 +300,135 @@ object Converter {
         val inn = IntArray(w * h)
         val out = IntArray(w * h)
         work.getPixels(inn, 0, w, 0, 0, w, h)
-        val denoise = 0.68f
+
+        val sigmaCSq = 26f * 26f
+        val denoiseAmount = 0.65f
+
         for (y in 0 until h) {
             val y0 = (y - 2).coerceAtLeast(0)
             val y1 = (y + 2).coerceAtMost(h - 1)
+            val row = y * w
             for (x in 0 until w) {
                 val x0 = (x - 2).coerceAtLeast(0)
                 val x1 = (x + 2).coerceAtMost(w - 1)
-                var r = 0
-                var g = 0
-                var b = 0
-                var n = 0
-                var yy = y0
-                while (yy <= y1) {
-                    val row = yy * w
-                    var xx = x0
-                    while (xx <= x1) {
-                        val p = inn[row + xx]
-                        r += (p ushr 16) and 0xFF
-                        g += (p ushr 8) and 0xFF
-                        b += p and 0xFF
-                        n++
-                        xx++
+                val centerP = inn[row + x]
+                val cr = (centerP ushr 16) and 0xFF
+                val cg = (centerP ushr 8) and 0xFF
+                val cb = centerP and 0xFF
+                val a = centerP ushr 24
+
+                var sumR = 0f
+                var sumG = 0f
+                var sumB = 0f
+                var sumW = 0f
+
+                for (yy in y0..y1) {
+                    val sRow = yy * w
+                    val dy = yy - y
+                    for (xx in x0..x1) {
+                        val p = inn[sRow + xx]
+                        val pr = (p ushr 16) and 0xFF
+                        val pg = (p ushr 8) and 0xFF
+                        val pb = p and 0xFF
+                        val dx = xx - x
+
+                        val spatialDist = dx * dx + dy * dy
+                        val spatialW = when (spatialDist) {
+                            0 -> 4.0f
+                            1 -> 2.5f
+                            2 -> 1.8f
+                            else -> 1.0f
+                        }
+
+                        val colorDist = ((pr - cr) * (pr - cr) + (pg - cg) * (pg - cg) + (pb - cb) * (pb - cb)) / 3f
+                        val colorW = Math.exp((-colorDist / (2f * sigmaCSq)).toDouble()).toFloat()
+                        val wTotal = spatialW * colorW
+
+                        sumR += pr * wTotal
+                        sumG += pg * wTotal
+                        sumB += pb * wTotal
+                        sumW += wTotal
                     }
-                    yy++
                 }
-                val p = inn[y * w + x]
-                val cr = (p ushr 16) and 0xFF
-                val cg = (p ushr 8) and 0xFF
-                val cb = p and 0xFF
-                val a = p ushr 24
-                var outR = cr + ((r / n - cr) * denoise).toInt()
-                var outG = cg + ((g / n - cg) * denoise).toInt()
-                var outB = cb + ((b / n - cb) * denoise).toInt()
+
+                val invW = if (sumW > 0.0001f) 1f / sumW else 1f
+                val smoothR = sumR * invW
+                val smoothG = sumG * invW
+                val smoothB = sumB * invW
+
+                var baseR = cr + (smoothR - cr) * denoiseAmount
+                var baseG = cg + (smoothG - cg) * denoiseAmount
+                var baseB = cb + (smoothB - cb) * denoiseAmount
+
                 if (sharpen > 0.01f) {
-                    outR += ((outR - r / n) * sharpen).toInt()
-                    outG += ((outG - g / n) * sharpen).toInt()
-                    outB += ((outB - b / n) * sharpen).toInt()
+                    val top = inn[((y - 1).coerceAtLeast(0)) * w + x]
+                    val btm = inn[((y + 1).coerceAtMost(h - 1)) * w + x]
+                    val lft = inn[row + (x - 1).coerceAtLeast(0)]
+                    val rgt = inn[row + (x + 1).coerceAtMost(w - 1)]
+
+                    val blurR = ((top ushr 16 and 0xFF) + (btm ushr 16 and 0xFF) + (lft ushr 16 and 0xFF) + (rgt ushr 16 and 0xFF)) * 0.25f
+                    val blurG = ((top ushr 8 and 0xFF) + (btm ushr 8 and 0xFF) + (lft ushr 8 and 0xFF) + (rgt ushr 8 and 0xFF)) * 0.25f
+                    val blurB = ((top and 0xFF) + (btm and 0xFF) + (lft and 0xFF) + (rgt and 0xFF)) * 0.25f
+
+                    val diffR = baseR - blurR
+                    val diffG = baseG - blurG
+                    val diffB = baseB - blurB
+                    val lumaDiff = Math.abs(0.299f * diffR + 0.587f * diffG + 0.114f * diffB)
+
+                    // Coring gate: jika perbedaan halus < 6, biarkan mulus tanpa bintik noise
+                    if (lumaDiff > 6.0f) {
+                        val coringFactor = ((lumaDiff - 6.0f) / 12.0f).coerceIn(0f, 1f)
+                        baseR += diffR * (sharpen * 0.65f * coringFactor)
+                        baseG += diffG * (sharpen * 0.65f * coringFactor)
+                        baseB += diffB * (sharpen * 0.65f * coringFactor)
+                    }
                 }
-                out[y * w + x] = (a shl 24) or
-                    (outR.coerceIn(0, 255) shl 16) or
-                    (outG.coerceIn(0, 255) shl 8) or
-                    outB.coerceIn(0, 255)
+
+                val finalR = baseR.toInt().coerceIn(0, 255)
+                val finalG = baseG.toInt().coerceIn(0, 255)
+                val finalB = baseB.toInt().coerceIn(0, 255)
+                out[row + x] = (a shl 24) or (finalR shl 16) or (finalG shl 8) or finalB
             }
         }
-        val bmp = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888)
-        bmp.setPixels(out, 0, w, 0, 0, w, h)
+
+        val resBmp = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888)
+        resBmp.setPixels(out, 0, w, 0, 0, w, h)
         if (work !== src) work.recycle()
-        return bmp
+        return resBmp
     }
 
-    private fun Bitmap.toJpeg(quality: Int): ByteArray {
-        val out = ByteArrayOutputStream()
-        compress(Bitmap.CompressFormat.JPEG, quality, out)
-        return out.toByteArray()
+    private fun applyStabilizationToCover(
+        src: Bitmap,
+        stab: Stabilizer.Plan,
+        keyframeOffsetMs: Long
+    ): Bitmap {
+        val zoom = stab.zoom.coerceAtLeast(1.0f)
+        val (ox, oy) = stab.offsetAt(keyframeOffsetMs)
+        val rot = stab.rotAt(keyframeOffsetMs)
+        val w = src.width
+        val h = src.height
+        val matrix = Matrix()
+        val deg = Math.toDegrees(rot.toDouble()).toFloat()
+        matrix.postRotate(deg, w / 2f, h / 2f)
+        matrix.postScale(zoom, zoom, w / 2f, h / 2f)
+        matrix.postTranslate(-ox * w, -oy * h)
+        val out = Bitmap.createBitmap(src, 0, 0, w, h, matrix, true)
+        val cropX = ((out.width - w) / 2).coerceAtLeast(0)
+        val cropY = ((out.height - h) / 2).coerceAtLeast(0)
+        val cropped = Bitmap.createBitmap(
+            out, cropX, cropY, w.coerceAtMost(out.width - cropX),
+            h.coerceAtMost(out.height - cropY)
+        )
+        if (cropped !== out) out.recycle()
+        return cropped
     }
 
-    /** Cover ikut zoom/geser/putar stabilizer — setelah itu baru di-Bersih. */
-    private fun applyStabilizationToCover(src: Bitmap, plan: Stabilizer.Plan, timeMs: Long): Bitmap {
-        val (ox, oy) = plan.offsetAt(timeMs)
-        val rot = plan.rotAt(timeMs)
-        if (plan.zoom <= 1.001f && ox == 0f && oy == 0f && kotlin.math.abs(rot) < 0.001f) return src
-        val out = Bitmap.createBitmap(src.width, src.height, Bitmap.Config.ARGB_8888)
-        val c = android.graphics.Canvas(out)
-        val m = android.graphics.Matrix()
-        val cx = src.width / 2f
-        val cy = src.height / 2f
-        m.postTranslate(-cx, -cy)
-        m.postRotate(Math.toDegrees(rot.toDouble()).toFloat())
-        m.postScale(plan.zoom, plan.zoom)
-        m.postTranslate(cx - ox * src.width, cy - oy * src.height)
-        c.drawColor(android.graphics.Color.BLACK)
-        c.drawBitmap(src, m, android.graphics.Paint(android.graphics.Paint.FILTER_BITMAP_FLAG))
-        return out
+    fun Bitmap.toJpeg(quality: Int = 96): ByteArray {
+        val stream = ByteArrayOutputStream()
+        compress(Bitmap.CompressFormat.JPEG, quality.coerceIn(70, 100), stream)
+        return stream.toByteArray()
     }
 
-    /**
-     * Trim + transcode + CROP dengan Media3 Transformer.
-     *
-     * Crop 1:1 dikerjakan di sini lewat efek Presentation, bukan cuma di
-     * bitmap. Sebelumnya opsi kotak hanya mengubah fotonya sementara
-     * videonya tetap utuh, sehingga rasio foto dan video jadi tidak sama.
-     */
     private suspend fun transcodeClip(
         context: Context,
         uri: Uri,
@@ -323,8 +439,9 @@ object Converter {
         stab: Stabilizer.Plan?,
         log: (String) -> Unit,
         progress: (Int) -> Unit
-    ): ByteArray = withContext(Dispatchers.Main) {
-        val outFile = File(context.cacheDir, "clip_${System.currentTimeMillis()}.mp4")
+    ): ByteArray {
+        val outDir = File(context.cacheDir, "transcode").apply { mkdirs() }
+        val outFile = File(outDir, "clip_${System.currentTimeMillis()}.mp4")
 
         val mediaItem = MediaItem.Builder()
             .setUri(uri)
@@ -338,38 +455,30 @@ object Converter {
 
         val effects = mutableListOf<Effect>()
 
-        // 1. Penghalus/penajam lebih dulu, saat resolusi masih penuh.
         if (opts.enhance) {
-            // Bersih = denoise saja. Unsharp dimatikan: bentrok filter TikTok.
             effects += GlEffect { ctx, useHdr ->
-                EnhanceShader(ctx, useHdr, denoise = 0.55f, sharpen = 0f)
+                EnhanceShader(ctx, useHdr, denoise = 0.55f, sharpen = 0.28f)
             }
-            log("Efek: bersih noise (video + foto, tanpa tajam)")
+            log("Efek: bersih noise (bilateral + coring)")
         }
 
-        // 2. Stabilisasi: tiap frame digeser berlawanan arah guncangannya.
         if (stab != null && stab.zoom > 1.001f) {
             effects += GlEffect { ctx, useHdr -> StabilizeShader(ctx, useHdr, stab) }
             log("Efek: stabilisasi aktif (${stab.sampleCount} titik koreksi)")
         }
 
-        // 3. Presentation HARUS satu saja dan paling akhir.
-        //    Sebelumnya dipasang dua kali (aspect ratio lalu height), dan
-        //    yang kedua menimpa yang pertama -> crop 1:1 tidak pernah jalan.
         effects += Presentation.createForWidthAndHeight(
             outW, outH, Presentation.LAYOUT_SCALE_TO_FIT_WITH_CROP
         )
-        log("Keluaran: ${outW}x${outH}")
+        log("Keluaran: ${outW}x${outH} (${opts.aspectRatio.label})")
 
         val edited = EditedMediaItem.Builder(mediaItem)
             .setEffects(Effects(emptyList(), effects))
             .build()
 
-        // Bitrate proporsional dengan jumlah piksel supaya tidak pecah.
         val bitrate = (outW.toLong() * outH * 12).toInt().coerceIn(3_000_000, 40_000_000)
-        log("Bitrate: ${bitrate / 1_000_000} Mbps")
 
-        suspendCancellableCoroutine<ByteArray> { cont ->
+        return suspendCancellableCoroutine { cont ->
             val handler = Handler(Looper.getMainLooper())
             var poll: Runnable? = null
             fun stopPolling() { poll?.let { handler.removeCallbacks(it) } }
@@ -463,21 +572,9 @@ object Converter {
         val p = sanitize(total, raw.startMs, raw.durationMs, raw.keyframeOffsetMs)
         log("Potong: ${p.startMs} → ${p.startMs + p.durationMs} ms")
 
-        // Tentukan ukuran keluaran
-        val baseH = opts.heightFor(if (srcH > 0) srcH else 1080)
-        val outH: Int
-        val outW: Int
-        if (opts.square) {
-            val side = evenUp(baseH)
-            outW = side; outH = side
-        } else {
-            val ratio = if (srcW > 0 && srcH > 0) srcW.toFloat() / srcH else 9f / 16f
-            outH = evenUp(baseH)
-            outW = evenUp(outH * ratio)
-        }
-        log("Target: ${outW}x${outH}${if (opts.square) " (kotak 1:1)" else ""}")
+        val (outW, outH) = calculateDimensions(srcW, srcH, opts)
+        log("Target: ${outW}x${outH} (${opts.aspectRatio.label})")
 
-        // Stabilisasi: analisis gerakan untuk menyusun tabel koreksi per-frame
         var stab: Stabilizer.Plan? = null
         if (opts.stabilize) {
             stab = withContext(Dispatchers.Default) {
@@ -491,11 +588,15 @@ object Converter {
         log("Mengambil frame kunci…")
         progress(16)
         val rawBmp = withContext(Dispatchers.IO) {
-            extractFrame(context, uri, p.startMs + p.keyframeOffsetMs, opts, outH, applyLook = false)
+            extractFrame(
+                context, uri, p.startMs + p.keyframeOffsetMs, opts,
+                outW, outH, applyLook = false
+            )
         } ?: throw IllegalStateException("Gagal mengambil frame dari video")
+
         val framed = stab?.let { applyStabilizationToCover(rawBmp, it, p.keyframeOffsetMs) } ?: rawBmp
         if (framed !== rawBmp) rawBmp.recycle()
-        // Bersih sesudah zoom, sama seperti urutan di video.
+
         val bmp = if (opts.enhance) {
             val looked = withContext(Dispatchers.Default) {
                 enhanceBitmap(framed, restoreSharpen(opts.stabilize))
@@ -503,7 +604,6 @@ object Converter {
             if (looked !== framed) framed.recycle()
             looked
         } else framed
-        log("Foto: ${bmp.width}x${bmp.height}")
 
         val jpeg = withContext(Dispatchers.Default) { bmp.toJpeg(opts.jpegQuality) }
         if (!bmp.isRecycled) bmp.recycle()
@@ -561,7 +661,6 @@ object Converter {
                 }
             }
 
-            // Paksa MediaStore memindai berkasnya sekarang juga.
             runCatching {
                 val path = resolvePath(context, uri)
                 if (path != null) android.media.MediaScannerConnection.scanFile(
@@ -570,13 +669,11 @@ object Converter {
             }
             return uri
         } catch (e: Exception) {
-            // Jangan tinggalkan item pending / file setengah jadi di galeri.
             runCatching { resolver.delete(uri, null, null) }
             throw e
         }
     }
 
-    /** Cari path fisik berkas supaya bisa dipindai MediaScanner. */
     private fun resolvePath(context: Context, uri: Uri): String? = runCatching {
         context.contentResolver.query(
             uri, arrayOf(MediaStore.Images.Media.DATA), null, null, null

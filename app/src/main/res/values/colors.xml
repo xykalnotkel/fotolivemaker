@@ -1,26 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Monokrom murni: hitam & putih, tanpa gradient, tanpa warna aksen. -->
-    <color name="paper">#FFFFFFFF</color>
-    <color name="paper_dim">#FFF4F4F5</color>
-    <color name="ink">#FF000000</color>
+    <!-- Palet Modern Light: Elegan, Bersih, Berdimensi -->
+    <color name="paper">#FFF8FAFC</color>
+    <color name="paper_dim">#FFF1F5F9</color>
+    <color name="ink">#FF0F172A</color>
 
-    <color name="text_hi">#FF000000</color>
-    <color name="text_mid">#FF5A5A5F</color>
-    <color name="text_dim">#FF8E8E93</color>
+    <color name="text_hi">#FF0F172A</color>
+    <color name="text_mid">#FF475569</color>
+    <color name="text_dim">#FF94A3B8</color>
 
-    <color name="line">#FFE0E0E3</color>
-    <color name="line_strong">#FF000000</color>
+    <color name="line">#FFE2E8F0</color>
+    <color name="line_strong">#FFCBD5E1</color>
 
-    <!-- status tetap monokrom, dibedakan lewat ikon & teks, bukan warna -->
-    <color name="ok">#FF000000</color>
-    <color name="bad">#FF9A9A9F</color>
+    <!-- Aksen Live Photo Premium (Golden Amber) -->
+    <color name="gold_live">#FFF59E0B</color>
+    <color name="gold_live_dark">#FFD97706</color>
+    <color name="gold_live_glow">#26F59E0B</color>
+    <color name="gold_live_soft">#1AF59E0B</color>
+
+    <!-- Status & Feedback -->
+    <color name="ok">#FF10B981</color>
+    <color name="bad">#FFEF4444</color>
+    <color name="warn">#FFF59E0B</color>
 
     <color name="on_ink">#FFFFFFFF</color>
 
-    <!-- Hero card: pekat di atas (judul kebaca), luruh ke paper di bawah. -->
-    <color name="hero_start">#E6000000</color>
-    <color name="hero_end">#00000000</color>
-    <color name="hero_sub">#B3FFFFFF</color>
-    <color name="hero_line">#59FFFFFF</color>
+    <!-- Hero Card Modern Gradient -->
+    <color name="hero_start">#FF0F172A</color>
+    <color name="hero_end">#FF1E293B</color>
+    <color name="hero_sub">#B3F8FAFC</color>
+    <color name="hero_line">#33F8FAFC</color>
 </resources>

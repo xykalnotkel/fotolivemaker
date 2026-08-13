@@ -6,21 +6,22 @@
     android:orientation="vertical"
     android:background="@color/paper">
 
+    <!-- Header -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:gravity="center_vertical"
-        android:paddingStart="8dp"
-        android:paddingEnd="20dp"
-        android:paddingTop="10dp"
-        android:paddingBottom="10dp">
+        android:paddingStart="12dp"
+        android:paddingEnd="16dp"
+        android:paddingTop="12dp"
+        android:paddingBottom="12dp">
 
         <ImageView
             android:id="@+id/btnClose"
-            android:layout_width="44dp"
-            android:layout_height="44dp"
-            android:padding="11dp"
+            android:layout_width="42dp"
+            android:layout_height="42dp"
+            android:padding="10dp"
             android:src="@drawable/ic_back"
             android:background="?attr/selectableItemBackgroundBorderless"
             app:tint="@color/ink"
@@ -30,16 +31,17 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:layout_marginStart="4dp"
-            android:text="Hasil"
+            android:layout_marginStart="6dp"
+            android:text="Hasil Live Photo"
             android:textColor="@color/text_hi"
             android:textSize="18sp"
-            android:textStyle="bold" />
+            android:textStyle="bold"
+            android:letterSpacing="-0.02" />
     </LinearLayout>
 
     <View
         android:layout_width="match_parent"
-        android:layout_height="1.5dp"
+        android:layout_height="1dp"
         android:background="@color/line" />
 
     <ScrollView
@@ -55,8 +57,8 @@
             android:orientation="vertical"
             android:paddingStart="20dp"
             android:paddingEnd="20dp"
-            android:paddingTop="20dp"
-            android:paddingBottom="20dp">
+            android:paddingTop="18dp"
+            android:paddingBottom="24dp">
 
             <!-- AREA TES: tahan untuk memutar -->
             <FrameLayout
@@ -69,7 +71,7 @@
                     android:id="@+id/still"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:layout_margin="1dp"
+                    android:layout_margin="2dp"
                     android:scaleType="fitCenter"
                     android:contentDescription="Foto diam" />
 
@@ -82,26 +84,27 @@
                     app:use_controller="false"
                     app:resize_mode="fit" />
 
+                <!-- Badge LIVE Beraksen Amber / Gold -->
                 <LinearLayout
                     android:id="@+id/badgeLive"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="top|start"
-                    android:layout_margin="10dp"
+                    android:layout_margin="12dp"
                     android:orientation="horizontal"
                     android:gravity="center_vertical"
-                    android:background="@drawable/bg_pill"
-                    android:paddingStart="9dp"
-                    android:paddingEnd="11dp"
-                    android:paddingTop="5dp"
-                    android:paddingBottom="5dp">
+                    android:background="@drawable/bg_pill_live"
+                    android:paddingStart="10dp"
+                    android:paddingEnd="12dp"
+                    android:paddingTop="6dp"
+                    android:paddingBottom="6dp">
 
                     <ImageView
                         android:id="@+id/badgeIcon"
                         android:layout_width="14dp"
                         android:layout_height="14dp"
                         android:src="@drawable/ic_livephoto"
-                        app:tint="@color/on_ink"
+                        app:tint="#FFFFFFFF"
                         android:contentDescription="Live Photo" />
 
                     <TextView
@@ -110,19 +113,19 @@
                         android:layout_height="wrap_content"
                         android:layout_marginStart="6dp"
                         android:text="LIVE"
-                        android:textColor="@color/on_ink"
+                        android:textColor="#FFFFFFFF"
                         android:textSize="11sp"
                         android:textStyle="bold"
                         android:letterSpacing="0.1" />
                 </LinearLayout>
 
-                <!-- tombol mode di kanan atas -->
+                <!-- Tombol Mode di Kanan Atas -->
                 <LinearLayout
                     android:id="@+id/modeBar"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="top|end"
-                    android:layout_margin="10dp"
+                    android:layout_margin="12dp"
                     android:orientation="horizontal"
                     android:background="@drawable/bg_pill_outline"
                     android:padding="3dp">
@@ -131,8 +134,8 @@
                         android:id="@+id/modeStatic"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:paddingStart="11dp"
-                        android:paddingEnd="11dp"
+                        android:paddingStart="12dp"
+                        android:paddingEnd="12dp"
                         android:paddingTop="6dp"
                         android:paddingBottom="6dp"
                         android:text="Statis"
@@ -144,27 +147,27 @@
                         android:id="@+id/modeLive"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:paddingStart="11dp"
-                        android:paddingEnd="11dp"
+                        android:paddingStart="12dp"
+                        android:paddingEnd="12dp"
                         android:paddingTop="6dp"
                         android:paddingBottom="6dp"
                         android:text="Live"
                         android:textSize="11sp"
                         android:textStyle="bold"
-                        android:textColor="@color/ink" />
+                        android:textColor="@color/gold_live_dark" />
 
                     <TextView
                         android:id="@+id/modeLoop"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:paddingStart="11dp"
-                        android:paddingEnd="11dp"
+                        android:paddingStart="12dp"
+                        android:paddingEnd="12dp"
                         android:paddingTop="6dp"
                         android:paddingBottom="6dp"
-                        android:text="Ulangi"
+                        android:text="Putar"
                         android:textSize="11sp"
                         android:textStyle="bold"
-                        android:textColor="@color/ink" />
+                        android:textColor="@color/text_dim" />
                 </LinearLayout>
 
                 <TextView
@@ -172,10 +175,10 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="bottom|center_horizontal"
-                    android:layout_marginBottom="14dp"
+                    android:layout_marginBottom="16dp"
                     android:background="@drawable/bg_pill_outline"
-                    android:paddingStart="14dp"
-                    android:paddingEnd="14dp"
+                    android:paddingStart="16dp"
+                    android:paddingEnd="16dp"
                     android:paddingTop="8dp"
                     android:paddingBottom="8dp"
                     android:text="Tahan untuk memutar"
@@ -184,19 +187,19 @@
                     android:textStyle="bold" />
             </FrameLayout>
 
-            <!-- status utama -->
+            <!-- Status Utama -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:gravity="center_vertical"
-                android:layout_marginTop="18dp">
+                android:layout_marginTop="20dp">
 
                 <View
                     android:id="@+id/statusDot"
-                    android:layout_width="8dp"
-                    android:layout_height="8dp"
-                    android:background="@color/ink" />
+                    android:layout_width="10dp"
+                    android:layout_height="10dp"
+                    android:background="@drawable/dot_ok" />
 
                 <LinearLayout
                     android:layout_width="0dp"
@@ -209,7 +212,7 @@
                         android:id="@+id/statusTitle"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Memeriksa…"
+                        android:text="Memeriksa format…"
                         android:textColor="@color/text_hi"
                         android:textSize="17sp"
                         android:textStyle="bold" />
@@ -230,13 +233,13 @@
                     android:layout_height="wrap_content"
                     android:padding="8dp"
                     android:text="Cek ulang"
-                    android:textColor="@color/ink"
+                    android:textColor="@color/gold_live_dark"
                     android:textSize="12sp"
                     android:textStyle="bold"
                     android:visibility="gone" />
             </LinearLayout>
 
-            <!-- rincian pemeriksaan -->
+            <!-- Rincian Pemeriksaan -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -249,7 +252,7 @@
                     style="@style/Label"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Hasil pemeriksaan" />
+                    android:text="Verifikasi Struktur Berkas" />
 
                 <TextView
                     android:id="@+id/chkStruct"
@@ -299,7 +302,7 @@
                 android:textColor="@color/text_mid"
                 android:lineSpacingExtra="3dp" />
 
-            <!-- langkah tes, dengan ilustrasi -->
+            <!-- Petunjuk Penggunaan -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -322,55 +325,32 @@
                     style="@style/Label"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Langkah tes" />
+                    android:text="Cara Unggah ke TikTok" />
 
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="12dp"
-                    android:text="1.  Buka TikTok, tekan tombol +\n2.  Pilih tab Upload, cari fotonya\n3.  Kalau ada label Live, berhasil\n4.  Jangan lewat tombol Bagikan"
+                    android:text="1. Buka TikTok, tekan tombol +\n2. Pilih tab Upload, pilih foto dari galeri\n3. Pastikan muncul label LIVE pada thumbnail\n4. Jangan lewat tombol Bagikan / Share eksternal"
                     android:textColor="@color/text_mid"
                     android:textSize="13sp"
                     android:lineSpacingExtra="6dp" />
-
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="1dp"
-                    android:layout_marginTop="16dp"
-                    android:background="@color/line" />
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp"
-                    android:text="Hasilnya cuma foto diam?"
-                    android:textColor="@color/text_hi"
-                    android:textSize="13sp"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="6dp"
-                    android:text="Jangan pakai tombol Bagikan. Pilih berkasnya langsung dari galeri di TikTok (+ lalu Upload).\n\nKalau mau tambah filter/beauty TikTok, export ulang tanpa Bersih &amp; Stabil. Filter mereka menumpuk di atas efek kita jadi kelihatan aneh."
-                    android:textColor="@color/text_dim"
-                    android:textSize="12sp"
-                    android:lineSpacingExtra="4dp" />
             </LinearLayout>
         </LinearLayout>
     </ScrollView>
 
     <View
         android:layout_width="match_parent"
-        android:layout_height="1.5dp"
+        android:layout_height="1dp"
         android:background="@color/line" />
 
+    <!-- Action Buttons -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:background="@color/paper"
-        android:padding="20dp">
+        android:padding="18dp">
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnGallery"

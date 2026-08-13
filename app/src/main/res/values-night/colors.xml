@@ -1,24 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Mode gelap: warna dibalik, tetap monokrom murni. -->
-    <color name="paper">#FF0B0B0C</color>
-    <color name="paper_dim">#FF17171A</color>
-    <color name="ink">#FFFFFFFF</color>
+    <!-- Palet Modern Dark (Obsidian & Deep Slate) -->
+    <color name="paper">#FF090D16</color>
+    <color name="paper_dim">#FF111827</color>
+    <color name="ink">#FFF8FAFC</color>
 
-    <color name="text_hi">#FFFFFFFF</color>
-    <color name="text_mid">#FFA8A8AE</color>
-    <color name="text_dim">#FF6E6E76</color>
+    <color name="text_hi">#FFF8FAFC</color>
+    <color name="text_mid">#FF94A3B8</color>
+    <color name="text_dim">#FF64748B</color>
 
-    <color name="line">#FF2A2A2F</color>
-    <color name="line_strong">#FFFFFFFF</color>
+    <color name="line">#FF1E293B</color>
+    <color name="line_strong">#FF334155</color>
 
-    <color name="ok">#FFFFFFFF</color>
-    <color name="bad">#FF6E6E76</color>
+    <!-- Aksen Live Photo Premium (Golden Amber Glow) -->
+    <color name="gold_live">#FFFBBF24</color>
+    <color name="gold_live_dark">#FFF59E0B</color>
+    <color name="gold_live_glow">#33FBBF24</color>
+    <color name="gold_live_soft">#22FBBF24</color>
 
-    <color name="on_ink">#FF0B0B0C</color>
+    <!-- Status & Feedback -->
+    <color name="ok">#FF34D399</color>
+    <color name="bad">#FFF87171</color>
+    <color name="warn">#FFFBBF24</color>
 
-    <color name="hero_start">#E6FFFFFF</color>
-    <color name="hero_end">#00000000</color>
-    <color name="hero_sub">#B3000000</color>
-    <color name="hero_line">#59000000</color>
+    <color name="on_ink">#FF090D16</color>
+
+    <!-- Hero Card Modern Dark Gradient -->
+    <color name="hero_start">#FF1E293B</color>
+    <color name="hero_end">#FF0F172A</color>
+    <color name="hero_sub">#B394A3B8</color>
+    <color name="hero_line">#3364748B</color>
 </resources>

@@ -1,64 +1,42 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!--
-  Replika simbol Live Photo (mengikuti bentuk SF Symbol "livephoto"):
-  inti padat, cincin dalam, dan 12 segmen radial putus-putus.
-
-  Catatan: ini gambar ulang, bukan berkas aset milik Apple. Aset resmi
-  Apple berlisensi dan tidak boleh disertakan dalam aplikasi pihak ketiga.
--->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="24dp"
     android:height="24dp"
-    android:viewportWidth="48"
-    android:viewportHeight="48">
-
-    <!-- inti padat -->
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <!-- Inti Padat -->
     <path
         android:fillColor="#FFFFFFFF"
-        android:pathData="M24,24m-5.2,0a5.2,5.2 0 1,1 10.4,0a5.2,5.2 0 1,1 -10.4,0z" />
-
-    <!-- cincin dalam -->
+        android:pathData="M12,12m-2.8,0a2.8,2.8 0 1,1 5.6,0a2.8,2.8 0 1,1 -5.6,0z" />
+    <!-- Cincin Dalam Halus -->
     <path
         android:strokeColor="#FFFFFFFF"
-        android:strokeWidth="2.4"
+        android:strokeWidth="1.6"
         android:fillColor="@android:color/transparent"
-        android:pathData="M24,24m-10.4,0a10.4,10.4 0 1,1 20.8,0a10.4,10.4 0 1,1 -20.8,0z" />
-
-    <!-- 12 segmen radial, panjang seragam, ujung membulat -->
-    <path android:strokeColor="#FFFFFFFF" android:strokeWidth="2.6"
+        android:pathData="M12,12m-6,0a6,6 0 1,1 12,0a6,6 0 1,1 -12,0z" />
+    <!-- 8 Segmen Radial Modern -->
+    <path android:strokeColor="#FFFFFFFF" android:strokeWidth="1.8"
         android:strokeLineCap="round" android:fillColor="@android:color/transparent"
-        android:pathData="M24,5.6 L24,9.2" />
-    <path android:strokeColor="#FFFFFFFF" android:strokeWidth="2.6"
+        android:pathData="M12,2.2 L12,4.4" />
+    <path android:strokeColor="#FFFFFFFF" android:strokeWidth="1.8"
         android:strokeLineCap="round" android:fillColor="@android:color/transparent"
-        android:pathData="M33.2,8.07 L31.4,11.19" />
-    <path android:strokeColor="#FFFFFFFF" android:strokeWidth="2.6"
+        android:pathData="M18.93,5.07 L17.37,6.63" />
+    <path android:strokeColor="#FFFFFFFF" android:strokeWidth="1.8"
         android:strokeLineCap="round" android:fillColor="@android:color/transparent"
-        android:pathData="M39.93,14.8 L36.81,16.6" />
-    <path android:strokeColor="#FFFFFFFF" android:strokeWidth="2.6"
+        android:pathData="M21.8,12 L19.6,12" />
+    <path android:strokeColor="#FFFFFFFF" android:strokeWidth="1.8"
         android:strokeLineCap="round" android:fillColor="@android:color/transparent"
-        android:pathData="M42.4,24 L38.8,24" />
-    <path android:strokeColor="#FFFFFFFF" android:strokeWidth="2.6"
+        android:pathData="M18.93,18.93 L17.37,17.37" />
+    <path android:strokeColor="#FFFFFFFF" android:strokeWidth="1.8"
         android:strokeLineCap="round" android:fillColor="@android:color/transparent"
-        android:pathData="M39.93,33.2 L36.81,31.4" />
-    <path android:strokeColor="#FFFFFFFF" android:strokeWidth="2.6"
+        android:pathData="M12,21.8 L12,19.6" />
+    <path android:strokeColor="#FFFFFFFF" android:strokeWidth="1.8"
         android:strokeLineCap="round" android:fillColor="@android:color/transparent"
-        android:pathData="M33.2,39.93 L31.4,36.81" />
-    <path android:strokeColor="#FFFFFFFF" android:strokeWidth="2.6"
+        android:pathData="M5.07,18.93 L6.63,17.37" />
+    <path android:strokeColor="#FFFFFFFF" android:strokeWidth="1.8"
         android:strokeLineCap="round" android:fillColor="@android:color/transparent"
-        android:pathData="M24,42.4 L24,38.8" />
-    <path android:strokeColor="#FFFFFFFF" android:strokeWidth="2.6"
+        android:pathData="M2.2,12 L4.4,12" />
+    <path android:strokeColor="#FFFFFFFF" android:strokeWidth="1.8"
         android:strokeLineCap="round" android:fillColor="@android:color/transparent"
-        android:pathData="M14.8,39.93 L16.6,36.81" />
-    <path android:strokeColor="#FFFFFFFF" android:strokeWidth="2.6"
-        android:strokeLineCap="round" android:fillColor="@android:color/transparent"
-        android:pathData="M8.07,33.2 L11.19,31.4" />
-    <path android:strokeColor="#FFFFFFFF" android:strokeWidth="2.6"
-        android:strokeLineCap="round" android:fillColor="@android:color/transparent"
-        android:pathData="M5.6,24 L9.2,24" />
-    <path android:strokeColor="#FFFFFFFF" android:strokeWidth="2.6"
-        android:strokeLineCap="round" android:fillColor="@android:color/transparent"
-        android:pathData="M8.07,14.8 L11.19,16.6" />
-    <path android:strokeColor="#FFFFFFFF" android:strokeWidth="2.6"
-        android:strokeLineCap="round" android:fillColor="@android:color/transparent"
-        android:pathData="M14.8,8.07 L16.6,11.19" />
+        android:pathData="M5.07,5.07 L6.63,6.63" />
 </vector>

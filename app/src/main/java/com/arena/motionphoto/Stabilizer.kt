@@ -8,17 +8,15 @@ import kotlin.math.abs
 import kotlin.math.atan2
 
 /**
- * Stabilisasi 3 detik: translasi + rotasi kecil.
- *
- * Bukan gimbal / CapCut warp. Cukup untuk goyang tangan.
- * Tidak memperbaiki jalan kaki, rolling shutter, atau putaran besar.
+ * Stabilisasi 3 detik: Multi-Block Motion Estimation + Gaussian Trajectory Smoothing.
+ * Memisahkan getaran tangan (jitter) dari pergerakan kamera disengaja (pan).
  */
 object Stabilizer {
 
     private const val ANALYZE_W = 128
     private const val ANALYZE_H = 72
-    private const val SEARCH = 10
-    private const val MAX_SAMPLES = 50
+    private const val SEARCH = 12
+    private const val MAX_SAMPLES = 45
 
     data class Plan(
         val zoom: Float,
@@ -75,10 +73,10 @@ object Stabilizer {
         return try {
             r.setDataSource(context, uri)
             val samples = MAX_SAMPLES.coerceAtMost(
-                (durationMs / 33).toInt().coerceAtLeast(4)
+                (durationMs / 33).toInt().coerceAtLeast(6)
             )
             val step = durationMs.toFloat() / samples
-            log("Stabilizer: menganalisis $samples frame (geser + putar)…")
+            log("Stabilizer: menganalisis $samples frame (Multi-Block)…")
 
             var prev: IntArray? = null
             val times = ArrayList<Long>(samples)
@@ -96,7 +94,7 @@ object Stabilizer {
                 bmp.recycle()
                 val last = prev
                 if (last != null) {
-                    val motion = estimateMotion(last, gray)
+                    val motion = estimateMotionGrid(last, gray)
                     times += rel
                     dxs += motion.first
                     dys += motion.second
@@ -122,9 +120,9 @@ object Stabilizer {
                 trajX[i] = ax; trajY[i] = ay; trajR[i] = ar
             }
 
-            val smX = movingAverage(trajX, 9)
-            val smY = movingAverage(trajY, 9)
-            val smR = movingAverage(trajR, 9)
+            val smX = gaussianSmooth(trajX, 7)
+            val smY = gaussianSmooth(trajY, 7)
+            val smR = gaussianSmooth(trajR, 7)
 
             var maxDev = 0f
             var sumDev = 0f
@@ -135,15 +133,15 @@ object Stabilizer {
             for (i in 0 until n) {
                 corrX[i] = trajX[i] - smX[i]
                 corrY[i] = trajY[i] - smY[i]
-                corrR[i] = (trajR[i] - smR[i]).coerceIn(-0.07f, 0.07f)
+                corrR[i] = (trajR[i] - smR[i]).coerceIn(-0.06f, 0.06f)
                 val e = maxOf(abs(corrX[i]), abs(corrY[i]))
                 if (e > maxDev) maxDev = e
                 if (abs(corrR[i]) > maxRot) maxRot = abs(corrR[i])
                 sumDev += e
             }
 
-            val zoom = (1f + (maxDev / ANALYZE_W) * 2.2f + maxRot * 0.9f)
-                .coerceIn(1.02f, 1.28f)
+            val zoom = (1f + (maxDev / ANALYZE_W) * 2.2f + maxRot * 0.8f)
+                .coerceIn(1.03f, 1.25f)
             val limit = (1f - 1f / zoom) * 0.5f
             val offX = FloatArray(n)
             val offY = FloatArray(n)
@@ -168,40 +166,86 @@ object Stabilizer {
         }
     }
 
-    /** dx, dy (piksel analisis), dRot (radian). */
-    private fun estimateMotion(a: IntArray, b: IntArray): Triple<Float, Float, Float> {
-        val mid = ANALYZE_W / 2
-        val left = estimateShift(a, b, SEARCH, mid)
-        val right = estimateShift(a, b, mid, ANALYZE_W - SEARCH)
-        val dx = (left.first + right.first) / 2f
-        val dy = (left.second + right.second) / 2f
-        val span = (ANALYZE_W * 0.5f).coerceAtLeast(1f)
-        val rot = atan2((right.second - left.second).toFloat(), span)
-        return Triple(dx, dy, rot.coerceIn(-0.06f, 0.06f))
+    /**
+     * Multi-Block Grid Motion Estimation (3x3 grid) dengan Median Outlier Rejection.
+     * Mengabaikan objek bergerak di foreground dan mengunci gerakan latar belakang.
+     */
+    private fun estimateMotionGrid(a: IntArray, b: IntArray): Triple<Float, Float, Float> {
+        val blockW = ANALYZE_W / 3
+        val blockH = ANALYZE_H / 3
+        val listDx = ArrayList<Float>()
+        val listDy = ArrayList<Float>()
+        val leftDys = ArrayList<Float>()
+        val rightDys = ArrayList<Float>()
+
+        for (by in 0..2) {
+            for (bx in 0..2) {
+                val x0 = bx * blockW + 4
+                val x1 = (bx + 1) * blockW - 4
+                val y0 = by * blockH + 4
+                val y1 = (by + 1) * blockH - 4
+
+                if (!hasTexture(a, x0, x1, y0, y1)) continue
+
+                val shift = estimateBlockShift(a, b, x0, x1, y0, y1)
+                listDx.add(shift.first.toFloat())
+                listDy.add(shift.second.toFloat())
+
+                if (bx == 0) leftDys.add(shift.second.toFloat())
+                if (bx == 2) rightDys.add(shift.second.toFloat())
+            }
+        }
+
+        val medX = median(listDx)
+        val medY = median(listDy)
+
+        val leftMedY = if (leftDys.isNotEmpty()) median(leftDys) else medY
+        val rightMedY = if (rightDys.isNotEmpty()) median(rightDys) else medY
+        val span = (ANALYZE_W * 0.66f).coerceAtLeast(1f)
+        val rot = atan2((rightMedY - leftMedY).toDouble(), span.toDouble()).toFloat()
+
+        return Triple(medX, medY, rot.coerceIn(-0.06f, 0.06f))
     }
 
-    private fun estimateShift(
-        a: IntArray, b: IntArray, xFrom: Int, xTo: Int
+    private fun hasTexture(a: IntArray, x0: Int, x1: Int, y0: Int, y1: Int): Boolean {
+        var minVal = 255
+        var maxVal = 0
+        for (y in y0..y1 step 2) {
+            val row = y * ANALYZE_W
+            for (x in x0..x1 step 2) {
+                val v = a[row + x]
+                if (v < minVal) minVal = v
+                if (v > maxVal) maxVal = v
+            }
+        }
+        return (maxVal - minVal) >= 12
+    }
+
+    private fun estimateBlockShift(
+        a: IntArray, b: IntArray,
+        x0: Int, x1: Int, y0: Int, y1: Int
     ): Pair<Int, Int> {
         var bestDx = 0
         var bestDy = 0
         var bestCost = Long.MAX_VALUE
-        val x0 = xFrom.coerceAtLeast(SEARCH)
-        val x1 = xTo.coerceAtMost(ANALYZE_W - SEARCH)
-        val y0 = SEARCH
-        val y1 = ANALYZE_H - SEARCH
-        if (x1 - x0 < 8) return 0 to 0
+        val xMin = x0.coerceAtLeast(SEARCH)
+        val xMax = x1.coerceAtMost(ANALYZE_W - SEARCH)
+        val yMin = y0.coerceAtLeast(SEARCH)
+        val yMax = y1.coerceAtMost(ANALYZE_H - SEARCH)
+
+        if (xMax <= xMin || yMax <= yMin) return 0 to 0
+
         for (dy in -SEARCH..SEARCH) {
             for (dx in -SEARCH..SEARCH) {
                 var cost = 0L
-                var y = y0
-                while (y < y1) {
+                var y = yMin
+                while (y <= yMax) {
                     val rowA = y * ANALYZE_W
                     val rowB = (y + dy) * ANALYZE_W
-                    var x = x0
-                    while (x < x1) {
+                    var x = xMin
+                    while (x <= xMax) {
                         val d = a[rowA + x] - b[rowB + x + dx]
-                        cost += if (d < 0) -d.toLong() else d.toLong()
+                        cost += if (d < 0) -d else d
                         x += 2
                     }
                     y += 2
@@ -214,6 +258,13 @@ object Stabilizer {
             }
         }
         return bestDx to bestDy
+    }
+
+    private fun median(list: List<Float>): Float {
+        if (list.isEmpty()) return 0f
+        val sorted = list.sorted()
+        val m = sorted.size / 2
+        return if (sorted.size % 2 == 1) sorted[m] else (sorted[m - 1] + sorted[m]) / 2f
     }
 
     private fun toGray(src: Bitmap): IntArray {
@@ -231,16 +282,20 @@ object Stabilizer {
         return px
     }
 
-    private fun movingAverage(v: FloatArray, window: Int): FloatArray {
+    private fun gaussianSmooth(v: FloatArray, radius: Int): FloatArray {
         val out = FloatArray(v.size)
-        val half = window / 2
+        val weights = floatArrayOf(0.06f, 0.12f, 0.20f, 0.24f, 0.20f, 0.12f, 0.06f)
+        val half = weights.size / 2
         for (i in v.indices) {
             var sum = 0f
-            var n = 0
-            for (j in (i - half)..(i + half)) {
-                if (j in v.indices) { sum += v[j]; n++ }
+            var wSum = 0f
+            for (k in -half..half) {
+                val idx = (i + k).coerceIn(0, v.size - 1)
+                val w = weights[k + half]
+                sum += v[idx] * w
+                wSum += w
             }
-            out[i] = sum / n
+            out[i] = if (wSum > 0f) sum / wSum else v[i]
         }
         return out
     }

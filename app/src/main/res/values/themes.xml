@@ -4,7 +4,7 @@
     <style name="Theme.MotionPhoto" parent="Theme.Material3.Light.NoActionBar">
         <item name="colorPrimary">@color/ink</item>
         <item name="colorOnPrimary">@color/on_ink</item>
-        <item name="colorSecondary">@color/ink</item>
+        <item name="colorSecondary">@color/gold_live</item>
         <item name="android:colorBackground">@color/paper</item>
         <item name="colorSurface">@color/paper</item>
         <item name="colorOnSurface">@color/ink</item>
@@ -15,14 +15,15 @@
         <item name="sliderStyle">@style/Slider.Flat</item>
     </style>
 
-    <!-- Tombol utama: hitam pekat, flat, tanpa elevasi -->
+    <!-- Tombol utama: Modern squircle dengan visual weight mantap -->
     <style name="Btn.Primary" parent="Widget.Material3.Button">
         <item name="backgroundTint">@color/ink</item>
         <item name="android:textColor">@color/on_ink</item>
-        <item name="android:textSize">15sp</item>
+        <item name="android:textSize">14sp</item>
         <item name="android:textStyle">bold</item>
-        <item name="android:minHeight">56dp</item>
-        <item name="cornerRadius">4dp</item>
+        <item name="android:letterSpacing">0.02</item>
+        <item name="android:minHeight">52dp</item>
+        <item name="cornerRadius">12dp</item>
         <item name="elevation">0dp</item>
         <item name="android:stateListAnimator">@null</item>
         <item name="rippleColor">#33FFFFFF</item>
@@ -30,31 +31,32 @@
 
     <style name="Btn.Ghost" parent="Widget.Material3.Button.OutlinedButton">
         <item name="android:textColor">@color/ink</item>
-        <item name="strokeColor">@color/ink</item>
+        <item name="strokeColor">@color/line_strong</item>
         <item name="strokeWidth">1.5dp</item>
-        <item name="android:textSize">15sp</item>
+        <item name="android:textSize">14sp</item>
         <item name="android:textStyle">bold</item>
-        <item name="android:minHeight">56dp</item>
-        <item name="cornerRadius">4dp</item>
+        <item name="android:letterSpacing">0.02</item>
+        <item name="android:minHeight">52dp</item>
+        <item name="cornerRadius">12dp</item>
         <item name="rippleColor">#1A000000</item>
     </style>
 
     <style name="Slider.Flat" parent="Widget.Material3.Slider">
-        <item name="thumbColor">@color/ink</item>
-        <item name="trackColorActive">@color/ink</item>
+        <item name="thumbColor">@color/gold_live</item>
+        <item name="trackColorActive">@color/gold_live</item>
         <item name="trackColorInactive">@color/line</item>
         <item name="thumbRadius">9dp</item>
-        <item name="trackHeight">3dp</item>
-        <item name="haloColor">#14000000</item>
-        <item name="haloRadius">20dp</item>
+        <item name="trackHeight">4dp</item>
+        <item name="haloColor">@color/gold_live_glow</item>
+        <item name="haloRadius">18dp</item>
         <item name="tickVisible">false</item>
-        <item name="thumbElevation">0dp</item>
+        <item name="thumbElevation">2dp</item>
     </style>
 
     <style name="Label" parent="">
         <item name="android:textColor">@color/text_dim</item>
         <item name="android:textSize">11sp</item>
-        <item name="android:letterSpacing">0.1</item>
+        <item name="android:letterSpacing">0.08</item>
         <item name="android:textAllCaps">true</item>
         <item name="android:textStyle">bold</item>
     </style>

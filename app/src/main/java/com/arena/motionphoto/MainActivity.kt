@@ -19,7 +19,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-/** Editor: slider potong + tool rail bawah (bukan toggle). */
+/** Editor: slider jendela potong + frame kunci + tool rail rasio & kualitas. */
 class MainActivity : AppCompatActivity() {
     private lateinit var b: ActivityMainBinding
     private var videoUri: Uri? = null
@@ -41,24 +41,21 @@ class MainActivity : AppCompatActivity() {
 
         b.btnBack.setOnClickListener { finish() }
         b.btnExport.setOnClickListener { openExport() }
-        b.toolSquare.setOnClickListener {
-            opts = opts.copy(square = !opts.square)
-            paintTools(); updatePlanText(); refreshPreview()
-        }
+        b.toolRatio.setOnClickListener { pickRatio() }
         b.toolEnhance.setOnClickListener {
             opts = opts.copy(enhance = !opts.enhance)
             paintTools(); updatePlanText(); refreshPreview()
             toast(
-                if (opts.enhance) "Bersih: redam noise + pulihkan tepi (video & foto)."
-                else "Bersih dimatikan"
+                if (opts.enhance) "Bersih aktif: filter bilateral & tepi tajam tanpa bintik noise."
+                else "Bersih dinonaktifkan"
             )
         }
         b.toolStab.setOnClickListener {
             opts = opts.copy(stabilize = !opts.stabilize)
             paintTools(); updatePlanText()
             toast(
-                if (opts.stabilize) "Stabil: geser + putar ringan. Matikan kalau mau filter TikTok."
-                else "Stabilisasi dimatikan"
+                if (opts.stabilize) "Stabilisasi aktif: kompensasi multi-blok getaran tangan."
+                else "Stabilisasi dinonaktifkan"
             )
         }
         b.toolRes.setOnClickListener { pickRes() }
@@ -81,7 +78,10 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun paintTools() {
-        paintTool(b.iconSquare, b.lblSquare, opts.square)
+        val isRatioActive = opts.aspectRatio != Converter.AspectRatio.ORIGINAL
+        paintTool(b.iconRatio, b.lblRatio, isRatioActive)
+        b.lblRatio.text = opts.aspectRatio.label
+
         paintTool(b.iconEnhance, b.lblEnhance, opts.enhance)
         paintTool(b.iconStab, b.lblStab, opts.stabilize)
         b.lblRes.text = opts.res.label
@@ -91,22 +91,51 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun paintTool(icon: ImageView, label: TextView, on: Boolean) {
-        val color = ContextCompat.getColor(this, if (on) R.color.ink else R.color.text_mid)
+        val color = ContextCompat.getColor(
+            this,
+            if (on) R.color.gold_live_dark else R.color.text_mid
+        )
         icon.setColorFilter(color)
         label.setTextColor(color)
+    }
+
+    private fun pickRatio() {
+        val items = Converter.AspectRatio.entries.toTypedArray()
+        val labels = items.map {
+            when (it) {
+                Converter.AspectRatio.ORIGINAL -> "Asli · Mengikuti rasio video sumber"
+                Converter.AspectRatio.RATIO_9_16 -> "9:16 · Layar Penuh (TikTok / Reels / Story)"
+                Converter.AspectRatio.RATIO_3_4 -> "3:4 · Standar Foto Portrait"
+                Converter.AspectRatio.RATIO_1_1 -> "1:1 · Persegi / Square Feed"
+                Converter.AspectRatio.RATIO_4_3 -> "4:3 · Format Foto Klasik"
+                Converter.AspectRatio.RATIO_16_9 -> "16:9 · Landscape Cinematic"
+            }
+        }.toTypedArray()
+
+        AlertDialog.Builder(this)
+            .setTitle("Pilih Rasio Aspek")
+            .setSingleChoiceItems(labels, items.indexOf(opts.aspectRatio)) { dialog, which ->
+                opts = opts.copy(aspectRatio = items[which])
+                paintTools()
+                updatePlanText()
+                refreshPreview()
+                dialog.dismiss()
+            }
+            .show()
     }
 
     private fun pickRes() {
         val items = Converter.Res.entries.toTypedArray()
         val labels = items.map {
             when (it) {
-                Converter.Res.P720 -> "Hemat · 720p — lebih cepat, file kecil"
-                Converter.Res.P1080 -> "HD · 1080p — kualitas seimbang"
+                Converter.Res.P720 -> "Hemat · 720p — proses lebih cepat & file ringan"
+                Converter.Res.P1080 -> "HD · 1080p — tajam & seimbang (direkomendasikan)"
                 Converter.Res.SOURCE ->
-                    if (srcH > 0) "Asli · ${srcW}x${srcH} — file bisa besar" else "Asli"
+                    if (srcH > 0) "Asli · ${srcW}x${srcH} — kualitas maksimal sumber" else "Asli"
             }
         }.toTypedArray()
-        AlertDialog.Builder(this).setTitle("Kualitas keluaran")
+        AlertDialog.Builder(this)
+            .setTitle("Kualitas Resolusi")
             .setSingleChoiceItems(labels, items.indexOf(opts.res)) { dialog, which ->
                 opts = opts.copy(res = items[which])
                 paintTools(); updatePlanText(); refreshPreview(); dialog.dismiss()
@@ -170,35 +199,30 @@ class MainActivity : AppCompatActivity() {
         updatePlanText()
     }
 
-    private fun outDim(): Pair<Int, Int> {
-        val h = Converter.evenUp(opts.heightFor(srcH.takeIf { it > 0 } ?: 1080))
-        if (opts.square) return h to h
-        val ratio = if (srcW > 0 && srcH > 0) srcW.toFloat() / srcH else 9f / 16f
-        return Converter.evenUp(h * ratio) to h
-    }
-
     private fun updatePlanText() {
         val p = plan ?: return
         val tools = buildList {
-            if (opts.square) add("crop 1:1")
+            if (opts.aspectRatio != Converter.AspectRatio.ORIGINAL) {
+                add("rasio ${opts.aspectRatio.label}")
+            }
             if (opts.enhance) add("bersih")
             if (opts.stabilize) add("stabil")
         }
-        val (w, h) = outDim()
+        val (w, h) = Converter.calculateDimensions(srcW, srcH, opts)
         b.tvStartValue.text = "%.1f dtk".format(p.startMs / 1000f)
         b.tvKeyValue.text = "%.1f dtk".format(p.keyframeOffsetMs / 1000f)
         b.tvClipHint.text = if (p.durationMs < Converter.TARGET_CLIP_MS) {
             "Video pendek — seluruh klip ${"%.1f".format(p.durationMs / 1000f)} dtk dipakai"
         } else {
-            "Durasi dikunci 3,0 dtk"
+            "Durasi klip dikunci 3,0 dtk (standar Live Photo)"
         }
         b.tvPlan.text = "Sumber   : ${srcW}x${srcH}, %.1f dtk\n".format(p.totalMs / 1000f) +
             "Diambil  : %.1f – %.1f dtk\n".format(
                 p.startMs / 1000f, (p.startMs + p.durationMs) / 1000f
             ) +
-            "Kunci    : %.1f dtk dari awal klip\n".format(p.keyframeOffsetMs / 1000f) +
-            "Keluaran : ${w}x${h} (${opts.res.label})\n" +
-            "Tools    : ${if (tools.isEmpty()) "tidak ada" else tools.joinToString(", ")}"
+            "Cover    : %.1f dtk dari awal klip\n".format(p.keyframeOffsetMs / 1000f) +
+            "Keluaran : ${w}x${h} (${opts.res.label} · ${opts.aspectRatio.label})\n" +
+            "Efek     : ${if (tools.isEmpty()) "standar" else tools.joinToString(", ")}"
     }
 
     private fun refreshPreview() {
@@ -206,11 +230,15 @@ class MainActivity : AppCompatActivity() {
         val p = plan ?: return
         previewJob?.cancel()
         previewJob = lifecycleScope.launch {
-            delay(70)
+            delay(60)
+            val (targetW, targetH) = Converter.calculateDimensions(srcW, srcH, opts)
+            val previewH = 640
+            val previewW = (previewH * (targetW.toFloat() / targetH.coerceAtLeast(1))).toInt()
             val bmp = withContext(Dispatchers.IO) {
                 Converter.extractFrame(
                     this@MainActivity, uri,
-                    p.startMs + p.keyframeOffsetMs, opts, 640
+                    p.startMs + p.keyframeOffsetMs, opts,
+                    previewW, previewH
                 )
             }
             if (bmp != null) b.preview.setImageBitmap(bmp)
@@ -223,7 +251,8 @@ class MainActivity : AppCompatActivity() {
         Settings.save(this, opts)
         startActivity(
             Intent(this, ProcessActivity::class.java).withReadGrant(uri).apply {
-                putExtra(ProcessActivity.EXTRA_SQUARE, opts.square)
+                putExtra(ProcessActivity.EXTRA_ASPECT_RATIO, opts.aspectRatio.name)
+                putExtra(ProcessActivity.EXTRA_SQUARE, opts.aspectRatio == Converter.AspectRatio.RATIO_1_1)
                 putExtra(ProcessActivity.EXTRA_RES, opts.res.name)
                 putExtra(ProcessActivity.EXTRA_ENHANCE, opts.enhance)
                 putExtra(ProcessActivity.EXTRA_STABILIZE, opts.stabilize)

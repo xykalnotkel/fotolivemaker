@@ -7,6 +7,7 @@ object Settings {
 
     private const val FILE = "settings"
     private const val K_RES = "res"
+    private const val K_ASPECT_RATIO = "aspect_ratio"
     private const val K_SQUARE = "square"
     private const val K_ENHANCE = "enhance"
     private const val K_STAB = "stabilize"
@@ -28,18 +29,28 @@ object Settings {
         val resName = p.getString(K_RES, Converter.Res.P1080.name)!!
         val res = runCatching { Converter.Res.valueOf(resName) }
             .getOrDefault(Converter.Res.P1080)
+
+        val ratioName = p.getString(K_ASPECT_RATIO, null)
+        val aspectRatio = if (ratioName != null) {
+            runCatching { Converter.AspectRatio.valueOf(ratioName) }
+                .getOrDefault(Converter.AspectRatio.ORIGINAL)
+        } else if (p.getBoolean(K_SQUARE, false)) {
+            Converter.AspectRatio.RATIO_1_1
+        } else {
+            Converter.AspectRatio.ORIGINAL
+        }
+
         return Converter.Options(
-            square = p.getBoolean(K_SQUARE, false),
+            aspectRatio = aspectRatio,
             res = res,
             enhance = p.getBoolean(K_ENHANCE, false),
             stabilize = p.getBoolean(K_STAB, false),
-            jpegQuality = p.getInt(K_QUALITY, 95)
+            jpegQuality = p.getInt(K_QUALITY, 96)
         )
     }
 
     fun theme(c: Context): Int = sp(c).getInt(K_THEME, THEME_SYSTEM)
 
-    /** Default aktif supaya export panjang tidak mudah terganggu layar terkunci. */
     fun keepScreenOn(c: Context): Boolean = sp(c).getBoolean(K_KEEP_SCREEN_ON, true)
 
     fun seenSplash(c: Context): Boolean = sp(c).getBoolean(K_SEEN_SPLASH, false)
@@ -76,7 +87,8 @@ object Settings {
     fun save(c: Context, o: Converter.Options) {
         sp(c).edit()
             .putString(K_RES, o.res.name)
-            .putBoolean(K_SQUARE, o.square)
+            .putString(K_ASPECT_RATIO, o.aspectRatio.name)
+            .putBoolean(K_SQUARE, o.aspectRatio == Converter.AspectRatio.RATIO_1_1)
             .putBoolean(K_ENHANCE, o.enhance)
             .putBoolean(K_STAB, o.stabilize)
             .putInt(K_QUALITY, o.jpegQuality)

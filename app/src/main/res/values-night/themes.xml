@@ -3,7 +3,7 @@
     <style name="Theme.MotionPhoto" parent="Theme.Material3.Dark.NoActionBar">
         <item name="colorPrimary">@color/ink</item>
         <item name="colorOnPrimary">@color/on_ink</item>
-        <item name="colorSecondary">@color/ink</item>
+        <item name="colorSecondary">@color/gold_live</item>
         <item name="android:colorBackground">@color/paper</item>
         <item name="colorSurface">@color/paper</item>
         <item name="colorOnSurface">@color/ink</item>

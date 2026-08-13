@@ -23,11 +23,11 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 /**
- * Layar export: preview di tengah tanpa background,
- * progress mengikuti kotak preview, estimasi sisa waktu realtime.
+ * Layar export: preview adaptif, progress halus, estimasi waktu tenang & manusiawi.
  */
 class ProcessActivity : AppCompatActivity() {
     companion object {
+        const val EXTRA_ASPECT_RATIO = "aspect_ratio"
         const val EXTRA_SQUARE = "square"
         const val EXTRA_RES = "res"
         const val EXTRA_ENHANCE = "enhance"
@@ -42,14 +42,13 @@ class ProcessActivity : AppCompatActivity() {
     private var job: Job? = null
     private var progress = 0
     private var startedAt = 0L
-    private var etaEma = -1.0
     private var finished = false
     private val handler = Handler(Looper.getMainLooper())
     private val ticker = object : Runnable {
         override fun run() {
             if (finished) return
             updateEta()
-            handler.postDelayed(this, 400)
+            handler.postDelayed(this, 1000)
         }
     }
 
@@ -69,12 +68,22 @@ class ProcessActivity : AppCompatActivity() {
         val res = intent.getStringExtra(EXTRA_RES)
             ?.let { runCatching { Converter.Res.valueOf(it) }.getOrNull() }
             ?: Converter.Res.P1080
+
+        val ratioName = intent.getStringExtra(EXTRA_ASPECT_RATIO)
+        val aspectRatio = if (ratioName != null) {
+            runCatching { Converter.AspectRatio.valueOf(ratioName) }.getOrDefault(Converter.AspectRatio.ORIGINAL)
+        } else if (intent.getBooleanExtra(EXTRA_SQUARE, false)) {
+            Converter.AspectRatio.RATIO_1_1
+        } else {
+            Converter.AspectRatio.ORIGINAL
+        }
+
         val opts = Converter.Options(
-            square = intent.getBooleanExtra(EXTRA_SQUARE, false),
+            aspectRatio = aspectRatio,
             res = res,
             enhance = intent.getBooleanExtra(EXTRA_ENHANCE, false),
             stabilize = intent.getBooleanExtra(EXTRA_STABILIZE, false),
-            jpegQuality = intent.getIntExtra(EXTRA_JPEG_QUALITY, 95)
+            jpegQuality = intent.getIntExtra(EXTRA_JPEG_QUALITY, 96)
         )
         val hint = if (intent.hasExtra(EXTRA_START_MS)) {
             Converter.Plan(
@@ -93,7 +102,7 @@ class ProcessActivity : AppCompatActivity() {
         lifecycleScope.launch {
             val at = (hint?.startMs ?: 0L) + (hint?.keyframeOffsetMs ?: 0L)
             val bmp = withContext(Dispatchers.IO) {
-                Converter.extractFrame(this@ProcessActivity, uri, at, opts, 720)
+                Converter.extractFrame(this@ProcessActivity, uri, at, opts, 720, 720)
             }
             if (bmp != null) fitPreview(bmp)
         }
@@ -106,8 +115,8 @@ class ProcessActivity : AppCompatActivity() {
             val maxH = parent.height
             if (maxW <= 0 || maxH <= 0) return@post
             val density = resources.displayMetrics.density
-            val capW = minOf(maxW, (200 * density).toInt())
-            val capH = minOf(maxH, (268 * density).toInt())
+            val capW = minOf(maxW, (220 * density).toInt())
+            val capH = minOf(maxH, (280 * density).toInt())
             val aspect = bmp.width.toFloat() / bmp.height.coerceAtLeast(1)
             var w = capW
             var h = (w / aspect).toInt()
@@ -171,25 +180,34 @@ class ProcessActivity : AppCompatActivity() {
         updateEta()
     }
 
+    /**
+     * Estimasi waktu tenang & manusiawi.
+     * Tidak memantul tiap milidetik, memberikan perkiraan yang jelas dan tenang bagi user.
+     */
     private fun updateEta() {
         if (finished) return
-        val elapsed = SystemClock.elapsedRealtime() - startedAt
-        if (progress < 4 || elapsed < 400L) {
-            b.tvEta.text = "Berjalan ${fmt(elapsed)}  ·  menghitung sisa…"
-            return
-        }
         if (progress >= 100) {
             b.tvEta.text = "Selesai"
             return
         }
-        val raw = elapsed * (100.0 - progress) / progress.toDouble()
-        etaEma = if (etaEma < 0) raw else etaEma * 0.72 + raw * 0.28
-        b.tvEta.text = "Berjalan ${fmt(elapsed)}  ·  sisa ± ${fmt(etaEma.toLong())}"
-    }
 
-    private fun fmt(ms: Long): String {
-        val s = (ms / 1000L).coerceAtLeast(0L)
-        return if (s < 60) "${s} dtk" else "${s / 60}:${"%02d".format(s % 60)}"
+        val elapsed = SystemClock.elapsedRealtime() - startedAt
+        val etaText = when {
+            progress < 15 -> "Menyiapkan video… perkiraan ~15–30 dtk"
+            progress in 15..45 -> {
+                val remSec = maxOf(5, ((100 - progress) * elapsed / (progress * 1000L)).toInt())
+                val rounded = ((remSec + 4) / 5) * 5
+                "Memproses video  ·  sisa sekitar ${rounded} dtk"
+            }
+            progress in 46..85 -> {
+                val remSec = maxOf(3, ((100 - progress) * elapsed / (progress * 1000L)).toInt())
+                val rounded = ((remSec + 4) / 5) * 5
+                "Mengencode video  ·  sisa sekitar ${rounded} dtk"
+            }
+            else -> "Mengemas metadata Live Photo…"
+        }
+
+        b.tvEta.text = etaText
     }
 
     private fun cancelExport() {

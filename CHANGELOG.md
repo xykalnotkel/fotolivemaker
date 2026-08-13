@@ -5,44 +5,18 @@ Saat rilis, pindahkan ke heading versi + tanggal.
 
 ## Unreleased
 
-### Home
-- Banner **selalu** tampil tanpa internet: "Cek update"
-- Setelah sekali cek (pakai data), cache tahu versi terlewat → "Update terbaru"
-- Ketuk + data: unduh di app atau buka web resmi
-- Tidak ada cek jaringan di latar belakang
-- Cincin 3D krom morphing di tengah, keluar dari bar
+### Core Engine & Kualitas Gambar
+- Filter bilateral edge-preserving dengan coring threshold: redam noise mikro tanpa memunculkan bintik pasir pada area halus (kulit, langit, gradasi).
+- Rotasi frame otomatis (0/90/180/270 derajat) saat ekstraksi cover JPEG dari video sumber.
+- Stabilizer ditingkatkan menjadi Multi-Block Grid (3x3) dengan Median Outlier Rejection dan Gaussian Trajectory Smoothing: mengabaikan subjek bergerak di latar depan dan mengunci getaran tangan secara akurat.
+- Selector Aspect Ratio lengkap: Asli, 9:16 (Layar Penuh TikTok/Reels), 3:4 (Portrait), 1:1 (Persegi), 4:3 (Klasik), dan 16:9 (Landscape).
+- Optimasi unsharp mask di shader OpenGL GLSL dengan smoothstep coring gate.
 
-### Bersih & stabilizer
-- **Bersih** meredam noise di **video + foto**, lalu unsharp ringan supaya tidak empuk
-- Urutan dibetulkan: **stabil dulu, baru bersih** (zoom-lah yang bikin buram)
-- Kalau Stabil nyala, tajam dipulihkan sedikit lebih kuat
-- Stabilizer: geser + **putar ringan**
-- Hint: mau filter TikTok, matikan Bersih & Stabil
-
-### Export
-- Tombol EXPORT berbingkai kotak
-- Progress siku, nempel di tepi preview, mulai pojok kiri atas
-- Persentase cuma angka + `%`, tanpa latar
-- Preview mulai hitam lalu terang mengikuti proses
-- Estimasi bentuk perkiraan (`sekitar 1m 2s`)
-- Preview diperkecil (gaya CapCut), bukan memenuhi layar
-
-### Editor
-- Tool rail bawah (1:1 / Tajam / Stabil / resolusi) menggantikan toggle
-- Label jujur: tajam bukan AI/HD; stabilizer hanya geser X/Y
-
-### Home & riwayat
-- Kartu Project Baru lebih pendek, gradien luruh ke background (pekat di atas supaya judul kebaca)
-- Hapus per item (ikon tong) + Hapus semua
-- Ikon/ilustrasi pakai vector + tint tema (gelap/terang)
-
-### Settings
-- Kualitas JPEG, splash on/off, hapus semua hasil
-- Catatan jujur soal tajam & stabilizer
-
-### Branding
-- Launcher: simbol Live Photo putih di ubin gelap — bukan gunung galeri
-- Splash singkat (~0,7 dtk), warna ikuti tema, bisa dimatikan
+### Tampilan & Pengalaman Pengguna (UI/UX)
+- Palet tema modern dengan aksen Live Gold / Golden Amber, permukaan rounded squircle (14dp-16dp), dan kontras tegas.
+- Seluruh icon vector didesain ulang dengan gaya modern: Live Photo concentric rings, aspect ratio framing, AI clarity sparkle, stabilizer gimbal horizon, dan high-tech resolution badge.
+- Layar hasil dengan badge LIVE beraksen amber dan mode preview interaktif (Statis, Live, Putar).
+- Estimasi waktu export (ETA) disederhanakan menjadi tahapan waktu yang tenang dan informatif.
 
 ## [v1.1.0](https://github.com/xykalnotkel/fotolivemaker/releases/tag/v1.1.0) — 2026-08-13
 
