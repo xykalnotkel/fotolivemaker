@@ -52,6 +52,10 @@ dependencies {
     implementation("androidx.media3:media3-transformer:1.3.1")
     implementation("androidx.media3:media3-effect:1.3.1")
     implementation("androidx.media3:media3-common:1.3.1")
+    // ExoPlayer: pemutar preview yang andal (VideoView sering gagal prepare
+    // saat view-nya belum terlihat)
+    implementation("androidx.media3:media3-exoplayer:1.3.1")
+    implementation("androidx.media3:media3-ui:1.3.1")
 
     testImplementation("junit:junit:4.13.2")
 }

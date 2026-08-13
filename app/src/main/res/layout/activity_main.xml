@@ -31,7 +31,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:layout_marginStart="4dp"
-            android:text="Atur Klip"
+            android:text="Buat Live Photo"
             android:textColor="@color/text_hi"
             android:textSize="18sp"
             android:textStyle="bold" />
@@ -70,7 +70,7 @@
 
             <FrameLayout
                 android:layout_width="match_parent"
-                android:layout_height="300dp"
+                android:layout_height="280dp"
                 android:background="@drawable/bg_preview">
 
                 <ImageView
@@ -98,104 +98,43 @@
                     android:letterSpacing="0.08" />
             </FrameLayout>
 
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
-                android:text="Frame ini yang jadi foto diamnya"
-                android:textColor="@color/text_dim"
-                android:textSize="12sp"
-                android:gravity="center" />
-
+            <!-- rencana potong otomatis -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:layout_marginTop="20dp"
+                android:layout_marginTop="16dp"
                 android:background="@drawable/bg_card"
-                android:padding="20dp">
+                android:padding="18dp">
 
-                <LinearLayout
+                <TextView
+                    style="@style/Label"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Potongan otomatis" />
+
+                <TextView
+                    android:id="@+id/tvPlan"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal">
-                    <TextView
-                        style="@style/Label"
-                        android:layout_width="0dp"
-                        android:layout_weight="1"
-                        android:layout_height="wrap_content"
-                        android:text="Mulai potong" />
-                    <TextView
-                        android:id="@+id/valStart"
-                        style="@style/Value"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="0.0s" />
-                </LinearLayout>
+                    android:layout_marginTop="10dp"
+                    android:fontFamily="monospace"
+                    android:textSize="12sp"
+                    android:textColor="@color/text_mid"
+                    android:lineSpacingExtra="3dp"
+                    android:text="Membaca video…" />
 
-                <com.google.android.material.slider.Slider
-                    android:id="@+id/sliderStart"
+                <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:valueFrom="0"
-                    android:valueTo="10"
-                    android:value="0" />
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:layout_marginTop="10dp">
-                    <TextView
-                        style="@style/Label"
-                        android:layout_width="0dp"
-                        android:layout_weight="1"
-                        android:layout_height="wrap_content"
-                        android:text="Durasi klip" />
-                    <TextView
-                        android:id="@+id/valDur"
-                        style="@style/Value"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="3.0s" />
-                </LinearLayout>
-
-                <com.google.android.material.slider.Slider
-                    android:id="@+id/sliderDur"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:valueFrom="0.5"
-                    android:valueTo="6"
-                    android:value="3" />
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:layout_marginTop="10dp">
-                    <TextView
-                        style="@style/Label"
-                        android:layout_width="0dp"
-                        android:layout_weight="1"
-                        android:layout_height="wrap_content"
-                        android:text="Posisi frame kunci" />
-                    <TextView
-                        android:id="@+id/valKey"
-                        style="@style/Value"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="+1.5s" />
-                </LinearLayout>
-
-                <com.google.android.material.slider.Slider
-                    android:id="@+id/sliderKey"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:valueFrom="0"
-                    android:valueTo="3"
-                    android:value="1.5" />
+                    android:layout_marginTop="10dp"
+                    android:text="Klip 3 detik diambil dari bagian tengah video. Video lebih pendek dipakai seluruhnya."
+                    android:textSize="11sp"
+                    android:textColor="@color/text_dim"
+                    android:lineSpacingExtra="2dp" />
             </LinearLayout>
 
+            <!-- opsi -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -231,14 +170,41 @@
                     android:textSize="14sp" />
             </LinearLayout>
 
-            <TextView
-                android:id="@+id/tvStatus"
+            <!-- log proses -->
+            <LinearLayout
+                android:id="@+id/logCard"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:orientation="vertical"
                 android:layout_marginTop="14dp"
-                android:textSize="12sp"
-                android:textColor="@color/text_dim"
-                android:fontFamily="monospace" />
+                android:background="@drawable/bg_card"
+                android:padding="16dp"
+                android:visibility="gone">
+
+                <TextView
+                    style="@style/Label"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Log proses" />
+
+                <ScrollView
+                    android:id="@+id/logScroll"
+                    android:layout_width="match_parent"
+                    android:layout_height="150dp"
+                    android:layout_marginTop="10dp"
+                    android:scrollbars="vertical">
+
+                    <TextView
+                        android:id="@+id/tvLog"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="monospace"
+                        android:textSize="10sp"
+                        android:textColor="@color/text_mid"
+                        android:lineSpacingExtra="2dp"
+                        android:textIsSelectable="true" />
+                </ScrollView>
+            </LinearLayout>
         </LinearLayout>
     </ScrollView>
 
@@ -254,15 +220,38 @@
         android:background="@color/paper"
         android:padding="20dp">
 
-        <ProgressBar
-            android:id="@+id/progress"
-            style="?android:attr/progressBarStyleHorizontal"
+        <LinearLayout
+            android:id="@+id/progressBox"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
             android:layout_marginBottom="12dp"
-            android:indeterminate="true"
-            android:indeterminateTint="@color/ink"
-            android:visibility="gone" />
+            android:visibility="gone">
+
+            <ProgressBar
+                android:id="@+id/progress"
+                style="?android:attr/progressBarStyleHorizontal"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:max="100"
+                android:indeterminate="true"
+                android:indeterminateTint="@color/ink"
+                android:progressTint="@color/ink" />
+
+            <TextView
+                android:id="@+id/tvPercent"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="12dp"
+                android:minWidth="42dp"
+                android:gravity="end"
+                android:fontFamily="monospace"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                android:textColor="@color/ink" />
+        </LinearLayout>
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnConvert"

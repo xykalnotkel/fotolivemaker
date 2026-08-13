@@ -73,12 +73,15 @@
                     android:scaleType="fitCenter"
                     android:contentDescription="Foto diam" />
 
-                <VideoView
-                    android:id="@+id/video"
+                <androidx.media3.ui.PlayerView
+                    android:id="@+id/playerView"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_gravity="center"
-                    android:visibility="invisible" />
+                    android:visibility="invisible"
+                    app:use_controller="false"
+                    app:resize_mode="fit"
+                    app:surface_type="texture_view" />
 
                 <LinearLayout
                     android:id="@+id/badgeLive"
@@ -315,24 +318,38 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
+        android:orientation="vertical"
         android:background="@color/paper"
         android:padding="20dp">
 
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnAgain"
+            android:id="@+id/btnSaveVideo"
             style="@style/Btn.Ghost"
-            android:layout_width="0dp"
-            android:layout_weight="1"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="10dp"
-            android:text="Buat Lagi" />
+            android:text="Simpan sebagai Video MP4" />
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnShare"
-            android:layout_width="0dp"
-            android:layout_weight="1"
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Bagikan" />
+            android:orientation="horizontal"
+            android:layout_marginTop="10dp">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnAgain"
+                style="@style/Btn.Ghost"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="10dp"
+                android:text="Buat Lagi" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnShare"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:text="Bagikan" />
+        </LinearLayout>
     </LinearLayout>
 </LinearLayout>

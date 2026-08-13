@@ -7,13 +7,19 @@ import android.media.MediaMetadataRetriever
 import android.net.Uri
 import android.os.Build
 import android.os.Environment
+import android.os.Handler
+import android.os.Looper
 import android.provider.MediaStore
+import androidx.media3.common.Effect
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MimeTypes
+import androidx.media3.effect.Presentation
 import androidx.media3.transformer.Composition
 import androidx.media3.transformer.EditedMediaItem
+import androidx.media3.transformer.Effects
 import androidx.media3.transformer.ExportException
 import androidx.media3.transformer.ExportResult
+import androidx.media3.transformer.ProgressHolder
 import androidx.media3.transformer.Transformer
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.suspendCancellableCoroutine
@@ -25,16 +31,35 @@ import kotlin.coroutines.resumeWithException
 
 object Converter {
 
+    /** Durasi klip mengikuti Live Photo Apple: 3 detik. */
+    const val TARGET_CLIP_MS = 3000L
+
     data class Options(
-        val startMs: Long,          // mulai potong
-        val durationMs: Long,       // panjang klip (disarankan 3000)
-        val keyframeOffsetMs: Long, // posisi frame kunci di dalam klip
         val square: Boolean,
         val targetHeight: Int = 1080,
         val jpegQuality: Int = 92
     )
 
-    /** Baca durasi total video (ms). */
+    /** Rencana potong yang dihitung otomatis dari durasi video. */
+    data class Plan(
+        val totalMs: Long,
+        val startMs: Long,
+        val durationMs: Long,
+        val keyframeOffsetMs: Long
+    )
+
+    /**
+     * Tentukan potongan secara otomatis:
+     * - video >= 3 dtk  -> ambil 3 dtk di bagian tengah
+     * - video <  3 dtk  -> pakai seluruh video apa adanya
+     * Frame kunci selalu di tengah klip.
+     */
+    fun plan(totalMs: Long): Plan {
+        val dur = if (totalMs >= TARGET_CLIP_MS) TARGET_CLIP_MS else totalMs
+        val start = if (totalMs > dur) (totalMs - dur) / 2 else 0L
+        return Plan(totalMs, start, dur, dur / 2)
+    }
+
     fun videoDurationMs(context: Context, uri: Uri): Long {
         val r = MediaMetadataRetriever()
         return try {
@@ -47,12 +72,10 @@ object Converter {
         }
     }
 
-    /** Ambil satu frame sebagai bitmap pada posisi tertentu. */
     fun extractFrame(context: Context, uri: Uri, atMs: Long, opts: Options): Bitmap? {
         val r = MediaMetadataRetriever()
         return try {
             r.setDataSource(context, uri)
-            // OPTION_CLOSEST lebih akurat; kalau gagal, mundur ke sync frame
             val bmp = r.getFrameAtTime(atMs * 1000, MediaMetadataRetriever.OPTION_CLOSEST)
                 ?: r.getFrameAtTime(atMs * 1000, MediaMetadataRetriever.OPTION_CLOSEST_SYNC)
                 ?: r.getFrameAtTime()
@@ -67,7 +90,6 @@ object Converter {
         }
     }
 
-    /** Crop 1:1 kalau diminta, lalu scale ke tinggi target, dimensi dibulatkan genap. */
     private fun processBitmap(src: Bitmap, opts: Options): Bitmap {
         var bmp = src
         if (opts.square) {
@@ -81,11 +103,9 @@ object Converter {
             val ratio = targetH.toFloat() / bmp.height
             var w = (bmp.width * ratio).toInt()
             var h = targetH
-            w -= w % 2   // dimensi ganjil bikin encoder & parser rewel
+            w -= w % 2
             h -= h % 2
-            if (w > 0 && h > 0) {
-                bmp = Bitmap.createScaledBitmap(bmp, w, h, true)
-            }
+            if (w > 0 && h > 0) bmp = Bitmap.createScaledBitmap(bmp, w, h, true)
         }
         return bmp
     }
@@ -97,14 +117,19 @@ object Converter {
     }
 
     /**
-     * Trim + transcode video pakai Media3 Transformer.
-     * H.264 + AAC, hardware accelerated, jauh lebih ringan daripada bundling ffmpeg.
+     * Trim + transcode + CROP dengan Media3 Transformer.
+     *
+     * Crop 1:1 dikerjakan di sini lewat efek Presentation, bukan cuma di
+     * bitmap. Sebelumnya opsi kotak hanya mengubah fotonya sementara
+     * videonya tetap utuh, sehingga rasio foto dan video jadi tidak sama.
      */
     private suspend fun transcodeClip(
         context: Context,
         uri: Uri,
+        plan: Plan,
         opts: Options,
-        onProgress: (String) -> Unit
+        log: (String) -> Unit,
+        progress: (Int) -> Unit
     ): ByteArray = withContext(Dispatchers.Main) {
         val outFile = File(context.cacheDir, "clip_${System.currentTimeMillis()}.mp4")
 
@@ -112,13 +137,25 @@ object Converter {
             .setUri(uri)
             .setClippingConfiguration(
                 MediaItem.ClippingConfiguration.Builder()
-                    .setStartPositionMs(opts.startMs)
-                    .setEndPositionMs(opts.startMs + opts.durationMs)
+                    .setStartPositionMs(plan.startMs)
+                    .setEndPositionMs(plan.startMs + plan.durationMs)
                     .build()
             )
             .build()
 
-        val edited = EditedMediaItem.Builder(mediaItem).build()
+        val effects = mutableListOf<Effect>()
+        if (opts.square) {
+            effects += Presentation.createForAspectRatio(
+                1f, Presentation.LAYOUT_SCALE_TO_FIT_WITH_CROP
+            )
+            log("Efek: crop 1:1 diterapkan ke video")
+        }
+        effects += Presentation.createForHeight(opts.targetHeight)
+        log("Efek: skala ke ${opts.targetHeight}p")
+
+        val edited = EditedMediaItem.Builder(mediaItem)
+            .setEffects(Effects(emptyList(), effects))
+            .build()
 
         suspendCancellableCoroutine<ByteArray> { cont ->
             val transformer = Transformer.Builder(context)
@@ -128,6 +165,7 @@ object Converter {
                     override fun onCompleted(composition: Composition, result: ExportResult) {
                         try {
                             val bytes = outFile.readBytes()
+                            log("Encode selesai: ${bytes.size / 1024} KB")
                             outFile.delete()
                             cont.resume(bytes)
                         } catch (e: Exception) {
@@ -143,7 +181,7 @@ object Converter {
                         outFile.delete()
                         cont.resumeWithException(
                             IllegalStateException(
-                                "Video tidak didukung perangkat ini. " +
+                                "Encoder gagal: ${exception.errorCodeName}. " +
                                     "Coba aktifkan 720p atau pilih video lain.",
                                 exception
                             )
@@ -152,49 +190,76 @@ object Converter {
                 })
                 .build()
 
-            onProgress("Meng-encode klip video…")
+            // Laporan kemajuan sungguhan dari Transformer
+            val handler = Handler(Looper.getMainLooper())
+            val holder = ProgressHolder()
+            val poll = object : Runnable {
+                override fun run() {
+                    if (!cont.isActive) return
+                    val state = transformer.getProgress(holder)
+                    if (state != Transformer.PROGRESS_STATE_NOT_STARTED) {
+                        progress(holder.progress)
+                    }
+                    handler.postDelayed(this, 200)
+                }
+            }
+
+            log("Mulai encode H.264 + AAC…")
             transformer.start(edited, outFile.absolutePath)
+            handler.post(poll)
 
             cont.invokeOnCancellation {
+                handler.removeCallbacks(poll)
                 runCatching { transformer.cancel() }
                 outFile.delete()
             }
+            // hentikan polling begitu selesai, apa pun hasilnya
+            cont.invokeOnCompletion { handler.removeCallbacks(poll) }
         }
     }
 
-    /**
-     * Proses penuh: video -> Motion Photo, langsung tersimpan ke DCIM/Camera.
-     * Disimpan ke DCIM/Camera (bukan Download) supaya ter-index MediaStore
-     * dan muncul di picker galeri TikTok.
-     */
+    data class Result(val uri: Uri, val plan: Plan, val verifyLog: String, val bytes: Int)
+
     suspend fun convert(
         context: Context,
         uri: Uri,
         opts: Options,
-        onProgress: (String) -> Unit
-    ): Pair<Uri, String> {
-        onProgress("Mengambil frame kunci…")
+        log: (String) -> Unit,
+        progress: (Int) -> Unit
+    ): Result {
+        log("Membaca info video…")
+        val total = withContext(Dispatchers.IO) { videoDurationMs(context, uri) }
+        if (total <= 0) throw IllegalStateException("Durasi video tidak terbaca")
+        val p = plan(total)
+        log("Durasi video: ${total} ms")
+        log("Potong otomatis: ${p.startMs} → ${p.startMs + p.durationMs} ms")
+        log("Frame kunci: +${p.keyframeOffsetMs} ms")
+
+        log("Mengambil frame kunci…")
         val bmp = withContext(Dispatchers.IO) {
-            extractFrame(context, uri, opts.startMs + opts.keyframeOffsetMs, opts)
+            extractFrame(context, uri, p.startMs + p.keyframeOffsetMs, opts)
         } ?: throw IllegalStateException("Gagal mengambil frame dari video")
+        log("Foto: ${bmp.width}x${bmp.height}")
 
         val jpeg = withContext(Dispatchers.Default) { bmp.toJpeg(opts.jpegQuality) }
+        log("JPEG: ${jpeg.size / 1024} KB")
 
-        val mp4 = transcodeClip(context, uri, opts, onProgress)
+        val mp4 = transcodeClip(context, uri, p, opts, log, progress)
 
-        onProgress("Menggabungkan foto + video…")
+        log("Menyisipkan XMP GCamera…")
         val motionPhoto = withContext(Dispatchers.Default) {
-            MotionPhotoWriter.build(jpeg, mp4, opts.keyframeOffsetMs * 1000)
+            MotionPhotoWriter.build(jpeg, mp4, p.keyframeOffsetMs * 1000)
         }
+        log("Total berkas: ${motionPhoto.size / 1024} KB")
 
         val check = MotionPhotoWriter.verify(motionPhoto)
+        log(if (check.ok) "Struktur: VALID" else "Struktur: BERMASALAH")
 
-        onProgress("Menyimpan ke galeri…")
-        val savedUri = withContext(Dispatchers.IO) {
-            saveToGallery(context, motionPhoto)
-        }
+        log("Menyimpan ke DCIM/Camera…")
+        val savedUri = withContext(Dispatchers.IO) { saveToGallery(context, motionPhoto) }
+        log("Tersimpan.")
 
-        return savedUri to check.log
+        return Result(savedUri, p, check.log, motionPhoto.size)
     }
 
     private fun saveToGallery(context: Context, data: ByteArray): Uri {
@@ -214,10 +279,10 @@ object Converter {
         }
 
         val uri = resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values)
-            ?: throw IllegalStateException("Tidak bisa membuat file di galeri")
+            ?: throw IllegalStateException("Tidak bisa membuat berkas di galeri")
 
         resolver.openOutputStream(uri)?.use { it.write(data) }
-            ?: throw IllegalStateException("Tidak bisa menulis file")
+            ?: throw IllegalStateException("Tidak bisa menulis berkas")
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             values.clear()

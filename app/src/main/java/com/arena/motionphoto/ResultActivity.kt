@@ -1,15 +1,23 @@
 package com.arena.motionphoto
 
+import android.content.ContentValues
 import android.content.Intent
 import android.graphics.BitmapFactory
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
+import android.os.Environment
+import android.provider.MediaStore
 import android.view.MotionEvent
 import android.view.View
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.FileProvider
 import androidx.lifecycle.lifecycleScope
+import androidx.media3.common.MediaItem
+import androidx.media3.common.Player
+import androidx.media3.exoplayer.ExoPlayer
 import com.arena.motionphoto.databinding.ActivityResultBinding
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -17,11 +25,11 @@ import kotlinx.coroutines.withContext
 import java.io.File
 
 /**
- * Layar hasil: menampilkan foto diam, dan kalau ditahan akan memutar
- * video yang tertanam di dalam file — persis kelakuan Live Photo asli.
+ * Layar hasil.
  *
- * Videonya diekstrak langsung dari file yang sudah tersimpan, jadi ini
- * sekaligus membuktikan bahwa struktur Motion Photo-nya memang benar.
+ * Preview memakai ExoPlayer, bukan VideoView. VideoView sering gagal
+ * menyiapkan berkas ketika view-nya masih invisible, sehingga tahan-layar
+ * tidak memutar apa pun.
  */
 class ResultActivity : AppCompatActivity() {
 
@@ -33,6 +41,7 @@ class ResultActivity : AppCompatActivity() {
     private lateinit var b: ActivityResultBinding
     private var savedUri: Uri? = null
     private var clipFile: File? = null
+    private var player: ExoPlayer? = null
     private var prepared = false
     private var playedOk = false
 
@@ -43,12 +52,11 @@ class ResultActivity : AppCompatActivity() {
 
         savedUri = intent.getStringExtra(EXTRA_URI)?.let(Uri::parse)
 
-        runVerification()
-        b.btnRecheck.setOnClickListener { runVerification() }
-
         b.btnClose.setOnClickListener { finish() }
         b.btnAgain.setOnClickListener { finish() }
         b.btnShare.setOnClickListener { share() }
+        b.btnSaveVideo.setOnClickListener { saveVideoToGallery() }
+        b.btnRecheck.setOnClickListener { runVerification() }
 
         b.btnDetail.setOnClickListener {
             val show = b.detail.visibility != View.VISIBLE
@@ -59,30 +67,20 @@ class ResultActivity : AppCompatActivity() {
         loadStill()
         prepareClip()
         setupHoldToPlay()
+        runVerification()
     }
 
-    /**
-     * Jalankan verifikasi sungguhan dan tampilkan hasilnya apa adanya.
-     * Badge LIVE hanya "menyala penuh" kalau Android sendiri yang
-     * mengonfirmasi file ini motion photo — bukan karena kita mengklaim.
-     */
     private fun runVerification() {
         val uri = savedUri ?: return
         b.badgeText.text = "CEK…"
-        b.badgeIcon.alpha = 0.5f
-
         lifecycleScope.launch {
             val rep = withContext(Dispatchers.IO) {
                 MotionPhotoVerifier.verify(this@ResultActivity, uri)
             }
-
             b.statusTitle.text = rep.headline
             b.detail.text = rep.detail
-
-            b.chkStruct.text = mark(rep.lengthOk && rep.xmpOk) +
-                "  Struktur file Motion Photo"
-            b.chkVideo.text = mark(rep.videoPlayable) +
-                "  Video bisa diputar" +
+            b.chkStruct.text = mark(rep.lengthOk && rep.xmpOk) + "  Struktur file Motion Photo"
+            b.chkVideo.text = mark(rep.videoPlayable) + "  Video bisa diputar" +
                 if (rep.videoPlayable) "  ·  ${rep.videoDurationMs} ms  ·  ${rep.videoSize}" else ""
             b.chkSystem.text = when (rep.systemFlag) {
                 true -> mark(true) + "  Ditandai sistem Android"
@@ -94,7 +92,7 @@ class ResultActivity : AppCompatActivity() {
                 MotionPhotoVerifier.Level.CONFIRMED -> {
                     b.statusDot.setBackgroundResource(R.drawable.dot_ok)
                     b.illusResult.setImageResource(R.drawable.illus_done)
-                    b.statusSub.text = "Android mengenali file ini sebagai motion photo"
+                    b.statusSub.text = "Android mengenali berkas ini sebagai motion photo"
                     b.badgeText.text = "LIVE"
                     b.badgeIcon.alpha = 1f
                     b.badgeLive.alpha = 1f
@@ -102,8 +100,7 @@ class ResultActivity : AppCompatActivity() {
                 }
                 MotionPhotoVerifier.Level.LIKELY -> {
                     b.statusDot.setBackgroundResource(R.drawable.dot_accent)
-                    b.statusSub.text =
-                        "Struktur sudah benar. Tahan gambar untuk menguji."
+                    b.statusSub.text = "Struktur sudah benar. Tahan gambar untuk menguji."
                     b.badgeText.text = "LIVE"
                     b.badgeIcon.alpha = 1f
                     b.badgeLive.alpha = 1f
@@ -128,19 +125,14 @@ class ResultActivity : AppCompatActivity() {
         lifecycleScope.launch {
             val bmp = withContext(Dispatchers.IO) {
                 runCatching {
-                    contentResolver.openInputStream(uri)?.use {
-                        BitmapFactory.decodeStream(it)
-                    }
+                    contentResolver.openInputStream(uri)?.use { BitmapFactory.decodeStream(it) }
                 }.getOrNull()
             }
             if (bmp != null) b.still.setImageBitmap(bmp)
         }
     }
 
-    /**
-     * Ambil bagian MP4 dari ekor file — persis cara galeri Android membacanya.
-     * Kalau langkah ini berhasil, berarti file-nya memang motion photo yang sah.
-     */
+    /** Ambil MP4 dari ekor berkas — cara yang sama dipakai galeri Android. */
     private fun prepareClip() {
         val uri = savedUri ?: return
         lifecycleScope.launch {
@@ -149,7 +141,9 @@ class ResultActivity : AppCompatActivity() {
                     val bytes = contentResolver.openInputStream(uri)!!.use { it.readBytes() }
                     val idx = indexOfFtyp(bytes)
                     if (idx < 4) return@runCatching null
-                    val out = File(cacheDir, "preview_${System.currentTimeMillis()}.mp4")
+                    val dir = File(cacheDir, "share").apply { mkdirs() }
+                    dir.listFiles()?.forEach { it.delete() }
+                    val out = File(dir, "LivePhoto_${System.currentTimeMillis()}.mp4")
                     out.writeBytes(bytes.copyOfRange(idx - 4, bytes.size))
                     out
                 }.getOrNull()
@@ -159,22 +153,31 @@ class ResultActivity : AppCompatActivity() {
                 return@launch
             }
             clipFile = f
-            b.video.setVideoPath(f.absolutePath)
-            b.video.setOnPreparedListener { mp ->
-                mp.isLooping = true
-                mp.setVolume(0f, 0f)   // senyap, seperti preview Live Photo
-                prepared = true
-            }
-            b.video.setOnErrorListener { _, _, _ ->
-                b.hintHold.text = "Gagal memutar"
-                true
-            }
+
+            val p = ExoPlayer.Builder(this@ResultActivity).build()
+            player = p
+            b.playerView.player = p
+            b.playerView.useController = false
+            p.setMediaItem(MediaItem.fromUri(Uri.fromFile(f)))
+            p.repeatMode = Player.REPEAT_MODE_ALL
+            p.volume = 0f
+            p.addListener(object : Player.Listener {
+                override fun onPlaybackStateChanged(state: Int) {
+                    if (state == Player.STATE_READY) prepared = true
+                }
+
+                override fun onPlayerError(error: androidx.media3.common.PlaybackException) {
+                    b.hintHold.text = "Gagal memutar: ${error.errorCodeName}"
+                }
+            })
+            p.prepare()
         }
     }
 
     private fun indexOfFtyp(data: ByteArray): Int {
-        val pat = byteArrayOf('f'.code.toByte(), 't'.code.toByte(),
-            'y'.code.toByte(), 'p'.code.toByte())
+        val pat = byteArrayOf(
+            'f'.code.toByte(), 't'.code.toByte(), 'y'.code.toByte(), 'p'.code.toByte()
+        )
         outer@ for (i in 0..data.size - 4) {
             for (j in 0..3) if (data[i + j] != pat[j]) continue@outer
             return i
@@ -186,7 +189,8 @@ class ResultActivity : AppCompatActivity() {
         b.holdArea.setOnTouchListener { v, ev ->
             when (ev.action) {
                 MotionEvent.ACTION_DOWN -> {
-                    if (prepared) startPlay()
+                    if (prepared) startPlay() else
+                        Toast.makeText(this, "Video belum siap…", Toast.LENGTH_SHORT).show()
                     true
                 }
                 MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
@@ -200,81 +204,103 @@ class ResultActivity : AppCompatActivity() {
     }
 
     private fun startPlay() {
-        b.video.visibility = View.VISIBLE
+        val p = player ?: return
+        b.playerView.visibility = View.VISIBLE
         b.still.visibility = View.INVISIBLE
         b.hintHold.visibility = View.GONE
-        b.video.seekTo(0)
-        b.video.start()
-        // memutar = bukti nyata videonya hidup, jadi badge dinyalakan penuh
-        b.badgeLive.alpha = 1f
+        p.seekTo(0)
+        p.playWhenReady = true
         playedOk = true
     }
 
     private fun stopPlay() {
-        if (b.video.isPlaying) b.video.pause()
-        b.video.visibility = View.INVISIBLE
+        player?.playWhenReady = false
+        b.playerView.visibility = View.INVISIBLE
         b.still.visibility = View.VISIBLE
         b.hintHold.visibility = View.VISIBLE
         if (playedOk) b.hintHold.text = "Berhasil diputar · tahan lagi"
     }
 
+    // ---------------- simpan & bagikan ----------------
+
+    /** Simpan klip MP4 sebagai berkas video di galeri (Movies/LivePhotoMaker). */
+    private fun saveVideoToGallery() {
+        val src = clipFile
+        if (src == null || !src.exists()) {
+            Toast.makeText(this, "Klip belum siap", Toast.LENGTH_SHORT).show()
+            return
+        }
+        lifecycleScope.launch {
+            val ok = withContext(Dispatchers.IO) {
+                runCatching {
+                    val name = "LivePhoto_${System.currentTimeMillis()}.mp4"
+                    val v = ContentValues().apply {
+                        put(MediaStore.Video.Media.DISPLAY_NAME, name)
+                        put(MediaStore.Video.Media.MIME_TYPE, "video/mp4")
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                            put(
+                                MediaStore.Video.Media.RELATIVE_PATH,
+                                Environment.DIRECTORY_MOVIES + "/LivePhotoMaker"
+                            )
+                            put(MediaStore.Video.Media.IS_PENDING, 1)
+                        }
+                    }
+                    val u = contentResolver.insert(
+                        MediaStore.Video.Media.EXTERNAL_CONTENT_URI, v
+                    )!!
+                    contentResolver.openOutputStream(u)!!.use { o -> src.inputStream().use { it.copyTo(o) } }
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                        v.clear(); v.put(MediaStore.Video.Media.IS_PENDING, 0)
+                        contentResolver.update(u, v, null, null)
+                    }
+                    true
+                }.getOrDefault(false)
+            }
+            Toast.makeText(
+                this@ResultActivity,
+                if (ok) "Video tersimpan di Movies/LivePhotoMaker" else "Gagal menyimpan video",
+                Toast.LENGTH_LONG
+            ).show()
+        }
+    }
+
     private fun share() {
-        androidx.appcompat.app.AlertDialog.Builder(this)
+        AlertDialog.Builder(this)
             .setTitle("Bagikan sebagai apa?")
             .setItems(
                 arrayOf(
                     "Video MP4  —  pasti bergerak",
                     "Motion Photo  —  hanya utuh lewat galeri"
                 )
-            ) { _, which ->
-                if (which == 0) shareAsVideo() else shareAsMotionPhoto()
-            }
+            ) { _, which -> if (which == 0) shareAsVideo() else shareAsMotionPhoto() }
             .show()
     }
 
-    /**
-     * Bagikan klip MP4-nya saja.
-     *
-     * Ini jalur yang PASTI bergerak di TikTok/Instagram/WhatsApp, karena
-     * yang dikirim memang berkas video biasa. Kalau motion photo dikirim
-     * lewat tombol Bagikan, aplikasi penerima umumnya hanya membaca bagian
-     * JPEG-nya saja sehingga yang sampai cuma foto diam.
-     */
     private fun shareAsVideo() {
         val src = clipFile
         if (src == null || !src.exists()) {
             Toast.makeText(this, "Klip belum siap, tunggu sebentar", Toast.LENGTH_SHORT).show()
             return
         }
-        lifecycleScope.launch {
-            val shared = withContext(Dispatchers.IO) {
-                runCatching {
-                    val dir = File(cacheDir, "share").apply { mkdirs() }
-                    dir.listFiles()?.forEach { it.delete() }
-                    val dst = File(dir, "LivePhoto_${System.currentTimeMillis()}.mp4")
-                    src.copyTo(dst, overwrite = true)
-                    FileProvider.getUriForFile(
-                        this@ResultActivity, "$packageName.fileprovider", dst
-                    )
-                }.getOrNull()
-            }
-            if (shared == null) {
-                Toast.makeText(this@ResultActivity, "Gagal menyiapkan video", Toast.LENGTH_SHORT).show()
-                return@launch
-            }
-            runCatching {
-                startActivity(
-                    Intent.createChooser(
-                        Intent(Intent.ACTION_SEND).apply {
-                            type = "video/mp4"
-                            putExtra(Intent.EXTRA_STREAM, shared)
-                            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                        }, "Bagikan video"
-                    )
+        val shared = runCatching {
+            FileProvider.getUriForFile(this, "$packageName.fileprovider", src)
+        }.getOrNull()
+        if (shared == null) {
+            Toast.makeText(this, "Gagal menyiapkan video", Toast.LENGTH_SHORT).show()
+            return
+        }
+        runCatching {
+            startActivity(
+                Intent.createChooser(
+                    Intent(Intent.ACTION_SEND).apply {
+                        type = "video/mp4"
+                        putExtra(Intent.EXTRA_STREAM, shared)
+                        addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                    }, "Bagikan video"
                 )
-            }.onFailure {
-                Toast.makeText(this@ResultActivity, "Tidak bisa membagikan", Toast.LENGTH_SHORT).show()
-            }
+            )
+        }.onFailure {
+            Toast.makeText(this, "Tidak bisa membagikan", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -297,12 +323,12 @@ class ResultActivity : AppCompatActivity() {
 
     override fun onPause() {
         super.onPause()
-        if (b.video.isPlaying) b.video.pause()
+        player?.playWhenReady = false
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        runCatching { b.video.stopPlayback() }
-        clipFile?.delete()
+        player?.release()
+        player = null
     }
 }

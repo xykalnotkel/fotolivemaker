@@ -3,6 +3,7 @@ package com.arena.motionphoto
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.view.View
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
@@ -10,20 +11,27 @@ import androidx.lifecycle.lifecycleScope
 import com.arena.motionphoto.databinding.ActivityMainBinding
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import kotlin.math.max
-import kotlin.math.min
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
+/**
+ * Layar editor.
+ *
+ * Trim manual sudah dihapus: potongan 3 detik dihitung otomatis dari
+ * durasi video (Converter.plan). Video lebih pendek dari 3 detik dipakai utuh.
+ */
 class MainActivity : AppCompatActivity() {
 
     private lateinit var b: ActivityMainBinding
     private var videoUri: Uri? = null
-    private var durationMs = 0L
+    private var plan: Converter.Plan? = null
     private var busy = false
-    private var ready = false          // penjaga: jangan proses event slider saat setup
     private var previewJob: Job? = null
+    private val logLines = StringBuilder()
+    private val clock = SimpleDateFormat("HH:mm:ss.SSS", Locale.US)
 
     private val pickVideo = registerForActivityResult(
         ActivityResultContracts.OpenDocument()
@@ -45,14 +53,7 @@ class MainActivity : AppCompatActivity() {
         b.btnBack.setOnClickListener { finish() }
         b.btnChange.setOnClickListener { pickVideo.launch(arrayOf("video/*")) }
         b.btnConvert.setOnClickListener { doConvert() }
-
-        b.sliderStart.addOnChangeListener { _, _, fromUser -> if (fromUser) onSliderMoved() }
-        b.sliderKey.addOnChangeListener { _, _, fromUser -> if (fromUser) onSliderMoved() }
-        b.sliderDur.addOnChangeListener { _, _, fromUser ->
-            if (!fromUser) return@addOnChangeListener
-            reclampAfterDuration()
-            onSliderMoved()
-        }
+        b.switchSquare.setOnCheckedChangeListener { _, _ -> refreshPreview() }
 
         setBusy(false)
 
@@ -65,33 +66,7 @@ class MainActivity : AppCompatActivity() {
         loadVideo(uri)
     }
 
-    // ---------------------------------------------------------------
-    // Penyebab crash sebelumnya: Material Slider melempar exception
-    // kalau value/valueTo tidak konsisten. Semua nilai sekarang
-    // dibulatkan ke 0.1 dan diurutkan penulisannya (range dulu, baru value).
-    // ---------------------------------------------------------------
-    private fun round1(v: Float): Float = Math.round(v * 10f) / 10f
-
-    /** Tulis range + value ke slider dengan urutan yang aman. */
-    private fun setSlider(
-        s: com.google.android.material.slider.Slider,
-        from: Float,
-        to: Float,
-        value: Float
-    ) {
-        val f = round1(from)
-        // valueTo harus selalu lebih besar dari valueFrom, minimal 0.1 jaraknya
-        val t = round1(max(to, f + 0.1f))
-        val v = round1(value).coerceIn(f, t)
-        // urutan penting: kalau value lama di luar range baru, set dulu ke batas
-        if (s.value < f || s.value > t) s.value = f
-        s.valueFrom = f
-        s.valueTo = t
-        s.value = v
-    }
-
     private fun loadVideo(uri: Uri) {
-        ready = false
         lifecycleScope.launch {
             val d = withContext(Dispatchers.IO) {
                 Converter.videoDurationMs(this@MainActivity, uri)
@@ -102,52 +77,26 @@ class MainActivity : AppCompatActivity() {
                 return@launch
             }
             videoUri = uri
-            durationMs = d
-            val totalSec = round1(d / 1000f)
+            val p = Converter.plan(d)
+            plan = p
 
-            // durasi klip: maksimal 3 dtk, tapi tidak boleh melebihi panjang video
-            val maxDur = min(6f, totalSec)
-            val defDur = min(3f, totalSec)
-            setSlider(b.sliderDur, 0.5f, maxDur, defDur)
-
-            val dur = b.sliderDur.value
-            val maxStart = max(0f, totalSec - dur)
-            val defStart = maxStart / 2f
-            setSlider(b.sliderStart, 0f, maxStart, defStart)
-            setSlider(b.sliderKey, 0f, dur, dur / 2f)
-
-            ready = true
-            updateLabels()
+            b.tvPlan.text = buildString {
+                append("Durasi video   : %.1f dtk\n".format(d / 1000f))
+                append("Diambil        : %.1f – %.1f dtk\n".format(
+                    p.startMs / 1000f, (p.startMs + p.durationMs) / 1000f))
+                append("Panjang klip   : %.1f dtk\n".format(p.durationMs / 1000f))
+                append("Frame kunci    : +%.1f dtk".format(p.keyframeOffsetMs / 1000f))
+            }
             refreshPreview()
         }
     }
 
-    private fun reclampAfterDuration() {
-        if (!ready) return
-        val totalSec = round1(durationMs / 1000f)
-        val dur = b.sliderDur.value
-        setSlider(b.sliderStart, 0f, max(0f, totalSec - dur), b.sliderStart.value)
-        setSlider(b.sliderKey, 0f, dur, min(b.sliderKey.value, dur))
-    }
-
-    private fun onSliderMoved() {
-        if (!ready) return
-        updateLabels()
-        refreshPreview()
-    }
-
-    private fun updateLabels() {
-        b.valStart.text = "%.1fs".format(b.sliderStart.value)
-        b.valDur.text = "%.1fs".format(b.sliderDur.value)
-        b.valKey.text = "+%.1fs".format(b.sliderKey.value)
-    }
-
     private fun refreshPreview() {
         val uri = videoUri ?: return
+        val p = plan ?: return
         previewJob?.cancel()
         previewJob = lifecycleScope.launch {
-            delay(160)   // debounce biar tidak berat saat slider digeser
-            val at = ((b.sliderStart.value + b.sliderKey.value) * 1000).toLong()
+            val at = p.startMs + p.keyframeOffsetMs
             val opts = currentOptions().copy(targetHeight = 480)
             val bmp = withContext(Dispatchers.IO) {
                 Converter.extractFrame(this@MainActivity, uri, at, opts)
@@ -157,32 +106,43 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun currentOptions() = Converter.Options(
-        startMs = (b.sliderStart.value * 1000).toLong(),
-        durationMs = (b.sliderDur.value * 1000).toLong(),
-        keyframeOffsetMs = (b.sliderKey.value * 1000).toLong(),
         square = b.switchSquare.isChecked,
         targetHeight = if (b.switch720.isChecked) 720 else 1080
     )
+
+    private fun log(msg: String) {
+        logLines.append(clock.format(Date())).append("  ").append(msg).append('\n')
+        b.tvLog.text = logLines.toString().trimEnd()
+        b.logScroll.post { b.logScroll.fullScroll(View.FOCUS_DOWN) }
+    }
 
     private fun doConvert() {
         val uri = videoUri ?: return
         if (busy) return
         setBusy(true)
+        logLines.setLength(0)
+        b.logCard.visibility = View.VISIBLE
+        log("Mulai proses")
 
         lifecycleScope.launch {
             try {
-                val (saved, log) = Converter.convert(
-                    this@MainActivity, uri, currentOptions()
-                ) { msg -> b.tvStatus.text = msg }
-
+                val res = Converter.convert(
+                    this@MainActivity, uri, currentOptions(),
+                    log = { msg -> log(msg) },
+                    progress = { pct ->
+                        b.progress.isIndeterminate = false
+                        b.progress.progress = pct
+                        b.tvPercent.text = "$pct%"
+                    }
+                )
+                log("SELESAI")
                 startActivity(
                     Intent(this@MainActivity, ResultActivity::class.java)
-                        .putExtra(ResultActivity.EXTRA_URI, saved.toString())
-                        .putExtra(ResultActivity.EXTRA_LOG, log)
+                        .putExtra(ResultActivity.EXTRA_URI, res.uri.toString())
+                        .putExtra(ResultActivity.EXTRA_LOG, res.verifyLog)
                 )
-                b.tvStatus.text = ""
             } catch (e: Exception) {
-                b.tvStatus.text = "Gagal: ${e.message}"
+                log("GAGAL: ${e.message}")
                 toast(e.message ?: "Konversi gagal")
             } finally {
                 setBusy(false)
@@ -192,13 +152,14 @@ class MainActivity : AppCompatActivity() {
 
     private fun setBusy(v: Boolean) {
         busy = v
-        b.progress.visibility = if (v) android.view.View.VISIBLE else android.view.View.GONE
+        b.progressBox.visibility = if (v) View.VISIBLE else View.GONE
+        if (v) {
+            b.progress.isIndeterminate = true
+            b.tvPercent.text = ""
+        }
         b.btnConvert.isEnabled = !v
         b.btnConvert.text = if (v) "Memproses…" else "Buat Live Photo"
         b.btnChange.isEnabled = !v
-        b.sliderStart.isEnabled = !v
-        b.sliderDur.isEnabled = !v
-        b.sliderKey.isEnabled = !v
         b.switchSquare.isEnabled = !v
         b.switch720.isEnabled = !v
     }
