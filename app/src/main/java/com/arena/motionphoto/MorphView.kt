@@ -3,6 +3,7 @@ package com.arena.motionphoto
 import android.animation.ValueAnimator
 import android.content.Context
 import android.graphics.Canvas
+import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.RectF
 import android.util.AttributeSet
@@ -13,36 +14,30 @@ import kotlin.math.cos
 import kotlin.math.sin
 
 /**
- * Animasi splash: ikon VIDEO berubah menjadi ikon LIVE PHOTO.
- *
- * Bukan fade in/out. Setiap bagian benar-benar bergerak menyatu:
- *
- *  - Bingkai persegi panjang video menyusut & membulat jadi cincin
- *  - Segitiga play mengerut jadi inti bulat di tengah
- *  - 12 segmen radial tumbuh keluar dari cincin
- *
- * Semuanya digambar dari satu progres 0..1 sehingga transisinya menyatu.
+ * Animasi splash morphing: Ikon Video bertransformasi halus menjadi Ikon Live Photo.
+ * Dengan transisi warna dinamis ke Royal Indigo.
  */
 class MorphView @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyle: Int = 0
 ) : View(context, attrs, defStyle) {
 
-    private val ink = ContextCompat.getColor(context, R.color.ink)
+    private val inkColor = ContextCompat.getColor(context, R.color.ink)
+    private val accentColor = ContextCompat.getColor(context, R.color.accent_primary)
+
     private val stroke = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         style = Paint.Style.STROKE
         strokeCap = Paint.Cap.ROUND
         strokeJoin = Paint.Join.ROUND
-        color = ink
+        color = inkColor
     }
     private val fill = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         style = Paint.Style.FILL
-        color = ink
+        color = inkColor
     }
 
     private var t = 0f
     private val rect = RectF()
 
-    /** Progres 0 = ikon video, 1 = ikon live photo. */
     var progress: Float
         get() = t
         set(v) { t = v.coerceIn(0f, 1f); invalidate() }
@@ -50,7 +45,6 @@ class MorphView @JvmOverloads constructor(
     fun animateMorph(duration: Long = 1150L, onEnd: (() -> Unit)? = null) {
         ValueAnimator.ofFloat(0f, 1f).apply {
             this.duration = duration
-            // percepatan lembut lalu mengendap — terasa menyatu, bukan patah
             interpolator = PathInterpolator(0.22f, 0.9f, 0.16f, 1f)
             addUpdateListener { progress = it.animatedValue as Float }
             if (onEnd != null) {
@@ -65,22 +59,23 @@ class MorphView @JvmOverloads constructor(
     override fun onDraw(canvas: Canvas) {
         val cx = width / 2f
         val cy = height / 2f
-        val unit = minOf(width, height) / 48f      // skala seperti viewport 48
+        val unit = minOf(width, height) / 48f
         stroke.strokeWidth = 2.6f * unit
 
+        // Transisi warna halus dari ink ke royal violet/indigo
+        val curColor = blendColor(inkColor, accentColor, smoothstep(0.35f, 0.95f, t))
+        stroke.color = curColor
+        fill.color = curColor
+
         // ---- 1. Bingkai video -> cincin ----
-        // Lebar menyusut dari 20 ke 10.4 (radius cincin), tinggi dari 14 ke 10.4
         val fw = lerp(20f, 10.4f, ease(t)) * unit
         val fh = lerp(14f, 10.4f, ease(t)) * unit
-        // Radius sudut naik sampai menjadi lingkaran penuh
         val corner = lerp(3f * unit, minOf(fw, fh), ease(t))
 
         rect.set(cx - fw, cy - fh, cx + fw, cy + fh)
         canvas.drawRoundRect(rect, corner, corner, stroke)
 
         // ---- 2. Segitiga play -> inti bulat ----
-        // Segitiga mengecil sambil inti membesar; keduanya tumpang tindih
-        // di tengah animasi sehingga terlihat menyatu, bukan bertukar.
         val triA = (1f - smoothstep(0.15f, 0.62f, t))
         if (triA > 0.01f) {
             val s = lerp(6.4f, 2.2f, ease(t)) * unit
@@ -102,7 +97,6 @@ class MorphView @JvmOverloads constructor(
         fill.alpha = 255
 
         // ---- 3. Segmen radial tumbuh keluar ----
-        // Muncul bergiliran searah jarum jam supaya terasa hidup.
         for (i in 0 until 12) {
             val delay = 0.40f + (i / 12f) * 0.30f
             val a = smoothstep(delay, delay + 0.26f, t)
@@ -122,6 +116,14 @@ class MorphView @JvmOverloads constructor(
             )
         }
         stroke.alpha = 255
+    }
+
+    private fun blendColor(from: Int, to: Int, f: Float): Int {
+        val a = lerp(Color.alpha(from).toFloat(), Color.alpha(to).toFloat(), f).toInt()
+        val r = lerp(Color.red(from).toFloat(), Color.red(to).toFloat(), f).toInt()
+        val g = lerp(Color.green(from).toFloat(), Color.green(to).toFloat(), f).toInt()
+        val b = lerp(Color.blue(from).toFloat(), Color.blue(to).toFloat(), f).toInt()
+        return Color.argb(a, r, g, b)
     }
 
     private fun lerp(a: Float, b: Float, f: Float) = a + (b - a) * f
