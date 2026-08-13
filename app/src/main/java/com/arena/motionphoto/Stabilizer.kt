@@ -5,73 +5,64 @@ import android.graphics.Bitmap
 import android.media.MediaMetadataRetriever
 import android.net.Uri
 import kotlin.math.abs
+import kotlin.math.atan2
 
 /**
- * Stabilisasi video dengan analisis gerakan nyata.
+ * Stabilisasi 3 detik: translasi + rotasi kecil.
  *
- * Cara kerja (tiga tahap, seperti stabilizer pada umumnya):
- *
- *  1. ESTIMASI  — ambil sejumlah frame, ubah ke grayscale kecil, lalu cari
- *                 pergeseran antar-frame dengan pencarian blok (block
- *                 matching) memakai metrik SAD. Hasilnya lintasan kamera.
- *
- *  2. SMOOTHING — lintasan itu dihaluskan dengan moving average. Selisih
- *                 antara lintasan asli dan yang halus = guncangan yang
- *                 harus dikoreksi.
- *
- *  3. KOREKSI   — video di-zoom sedikit lalu digeser berlawanan arah
- *                 guncangan. Zoom perlu supaya tidak muncul tepi kosong.
- *
- * Catatan jujur: koreksinya translasi saja (geser X/Y), tidak menangani
- * rotasi. Efektif untuk guncangan tangan, bukan untuk goyang berputar.
+ * Bukan gimbal / CapCut warp. Cukup untuk goyang tangan.
+ * Tidak memperbaiki jalan kaki, rolling shutter, atau putaran besar.
  */
 object Stabilizer {
 
-    /** Ukuran frame analisis. Kecil supaya cepat, cukup untuk estimasi. */
-    private const val ANALYZE_W = 96
-    private const val ANALYZE_H = 54
+    private const val ANALYZE_W = 128
+    private const val ANALYZE_H = 72
+    private const val SEARCH = 10
+    private const val MAX_SAMPLES = 50
 
-    /** Jangkauan pencarian pergeseran, dalam piksel skala analisis. */
-    private const val SEARCH = 8
-
-    /** Berapa frame yang dianalisis. Lebih banyak = lebih akurat, lebih lama. */
-    private const val MAX_SAMPLES = 45
-
-    /**
-     * Rencana koreksi: zoom + tabel pergeseran per waktu.
-     *
-     * offsets disimpan dalam satuan UV (pecahan lebar/tinggi frame),
-     * siap dipakai langsung oleh shader.
-     */
     data class Plan(
         val zoom: Float,
         val shakiness: Float,
         val sampleCount: Int,
-        /** waktu tiap sampel, milidetik relatif terhadap awal klip */
         val timesMs: LongArray,
         val offsetX: FloatArray,
-        val offsetY: FloatArray
+        val offsetY: FloatArray,
+        val rot: FloatArray
     ) {
-        /** Koreksi pada waktu tertentu, diinterpolasi antar sampel. */
         fun offsetAt(tMs: Long): Pair<Float, Float> {
             if (timesMs.isEmpty()) return 0f to 0f
-            if (tMs <= timesMs.first()) return offsetX.first() to offsetY.first()
-            if (tMs >= timesMs.last()) return offsetX.last() to offsetY.last()
+            val i = indexAt(tMs)
+            if (i <= 0) return offsetX.first() to offsetY.first()
+            if (i >= timesMs.size) return offsetX.last() to offsetY.last()
+            val f = frac(tMs, i)
+            return (offsetX[i - 1] + (offsetX[i] - offsetX[i - 1]) * f) to
+                (offsetY[i - 1] + (offsetY[i] - offsetY[i - 1]) * f)
+        }
 
+        fun rotAt(tMs: Long): Float {
+            if (timesMs.isEmpty() || rot.isEmpty()) return 0f
+            val i = indexAt(tMs)
+            if (i <= 0) return rot.first()
+            if (i >= timesMs.size) return rot.last()
+            val f = frac(tMs, i)
+            return rot[i - 1] + (rot[i] - rot[i - 1]) * f
+        }
+
+        private fun indexAt(tMs: Long): Int {
+            if (tMs <= timesMs.first()) return 0
+            if (tMs >= timesMs.last()) return timesMs.size
             var i = 1
             while (i < timesMs.size && timesMs[i] < tMs) i++
+            return i
+        }
+
+        private fun frac(tMs: Long, i: Int): Float {
             val t0 = timesMs[i - 1]
             val t1 = timesMs[i]
-            val f = if (t1 == t0) 0f else (tMs - t0).toFloat() / (t1 - t0)
-            return (offsetX[i - 1] + (offsetX[i] - offsetX[i - 1]) * f) to
-                   (offsetY[i - 1] + (offsetY[i] - offsetY[i - 1]) * f)
+            return if (t1 == t0) 0f else (tMs - t0).toFloat() / (t1 - t0)
         }
     }
 
-    /**
-     * Analisis guncangan video dan hitung zoom yang dibutuhkan.
-     * Mengembalikan null kalau video tidak bisa dibaca.
-     */
     fun analyze(
         context: Context,
         uri: Uri,
@@ -83,18 +74,17 @@ object Stabilizer {
         val r = MediaMetadataRetriever()
         return try {
             r.setDataSource(context, uri)
-
             val samples = MAX_SAMPLES.coerceAtMost(
                 (durationMs / 33).toInt().coerceAtLeast(4)
             )
             val step = durationMs.toFloat() / samples
-
-            log("Stabilizer: menganalisis $samples frame…")
+            log("Stabilizer: menganalisis $samples frame (geser + putar)…")
 
             var prev: IntArray? = null
             val times = ArrayList<Long>(samples)
             val dxs = ArrayList<Float>(samples)
             val dys = ArrayList<Float>(samples)
+            val drs = ArrayList<Float>(samples)
 
             for (i in 0 until samples) {
                 progress(((i + 1) * 100) / samples)
@@ -104,13 +94,13 @@ object Stabilizer {
                 ) ?: continue
                 val gray = toGray(bmp)
                 bmp.recycle()
-
                 val last = prev
                 if (last != null) {
-                    val (dx, dy) = estimateShift(last, gray)
+                    val motion = estimateMotion(last, gray)
                     times += rel
-                    dxs += dx.toFloat()
-                    dys += dy.toFloat()
+                    dxs += motion.first
+                    dys += motion.second
+                    drs += motion.third
                 }
                 prev = gray
             }
@@ -120,43 +110,40 @@ object Stabilizer {
                 return null
             }
 
-            // lintasan kumulatif kamera
             val n = dxs.size
             val trajX = FloatArray(n)
             val trajY = FloatArray(n)
+            val trajR = FloatArray(n)
             var ax = 0f
             var ay = 0f
+            var ar = 0f
             for (i in 0 until n) {
-                ax += dxs[i]; ay += dys[i]
-                trajX[i] = ax; trajY[i] = ay
+                ax += dxs[i]; ay += dys[i]; ar += drs[i]
+                trajX[i] = ax; trajY[i] = ay; trajR[i] = ar
             }
 
-            // lintasan ideal = versi halus
             val smX = movingAverage(trajX, 9)
             val smY = movingAverage(trajY, 9)
+            val smR = movingAverage(trajR, 9)
 
-            // koreksi = selisihnya, dibalik arahnya
-            val corrX = FloatArray(n)
-            val corrY = FloatArray(n)
             var maxDev = 0f
             var sumDev = 0f
+            var maxRot = 0f
+            val corrX = FloatArray(n)
+            val corrY = FloatArray(n)
+            val corrR = FloatArray(n)
             for (i in 0 until n) {
-                val ex = trajX[i] - smX[i]
-                val ey = trajY[i] - smY[i]
-                corrX[i] = ex
-                corrY[i] = ey
-                val e = maxOf(abs(ex), abs(ey))
+                corrX[i] = trajX[i] - smX[i]
+                corrY[i] = trajY[i] - smY[i]
+                corrR[i] = (trajR[i] - smR[i]).coerceIn(-0.07f, 0.07f)
+                val e = maxOf(abs(corrX[i]), abs(corrY[i]))
                 if (e > maxDev) maxDev = e
+                if (abs(corrR[i]) > maxRot) maxRot = abs(corrR[i])
                 sumDev += e
             }
-            val avgDev = sumDev / n
 
-            // zoom secukupnya menutup simpangan terbesar, plus sedikit ruang
-            val ratio = maxDev / ANALYZE_W
-            val zoom = (1f + ratio * 2.4f).coerceIn(1.0f, 1.30f)
-
-            // ubah koreksi ke satuan UV, dan batasi supaya tidak melewati
-            // ruang yang disediakan zoom
+            val zoom = (1f + (maxDev / ANALYZE_W) * 2.2f + maxRot * 0.9f)
+                .coerceIn(1.02f, 1.28f)
             val limit = (1f - 1f / zoom) * 0.5f
             val offX = FloatArray(n)
             val offY = FloatArray(n)
@@ -165,10 +152,11 @@ object Stabilizer {
                 offY[i] = (corrY[i] / ANALYZE_H).coerceIn(-limit, limit)
             }
 
-            log("Stabilizer: guncangan %.2f px, zoom %.0f%%, %d titik koreksi"
-                .format(avgDev, (zoom - 1f) * 100, n))
-
-            Plan(zoom, avgDev, n, times.toLongArray(), offX, offY)
+            log(
+                "Stabilizer: goyang %.1f px, putar %.1f°, zoom %.0f%%, %d titik"
+                    .format(sumDev / n, Math.toDegrees(maxRot.toDouble()), (zoom - 1f) * 100, n)
+            )
+            Plan(zoom, sumDev / n, n, times.toLongArray(), offX, offY, corrR)
         } catch (e: Exception) {
             log("Stabilizer gagal: ${e.message}")
             null
@@ -180,7 +168,54 @@ object Stabilizer {
         }
     }
 
-    /** Bitmap -> array luminance berukuran ANALYZE_W x ANALYZE_H. */
+    /** dx, dy (piksel analisis), dRot (radian). */
+    private fun estimateMotion(a: IntArray, b: IntArray): Triple<Float, Float, Float> {
+        val mid = ANALYZE_W / 2
+        val left = estimateShift(a, b, SEARCH, mid)
+        val right = estimateShift(a, b, mid, ANALYZE_W - SEARCH)
+        val dx = (left.first + right.first) / 2f
+        val dy = (left.second + right.second) / 2f
+        val span = (ANALYZE_W * 0.5f).coerceAtLeast(1f)
+        val rot = atan2((right.second - left.second).toFloat(), span)
+        return Triple(dx, dy, rot.coerceIn(-0.06f, 0.06f))
+    }
+
+    private fun estimateShift(
+        a: IntArray, b: IntArray, xFrom: Int, xTo: Int
+    ): Pair<Int, Int> {
+        var bestDx = 0
+        var bestDy = 0
+        var bestCost = Long.MAX_VALUE
+        val x0 = xFrom.coerceAtLeast(SEARCH)
+        val x1 = xTo.coerceAtMost(ANALYZE_W - SEARCH)
+        val y0 = SEARCH
+        val y1 = ANALYZE_H - SEARCH
+        if (x1 - x0 < 8) return 0 to 0
+        for (dy in -SEARCH..SEARCH) {
+            for (dx in -SEARCH..SEARCH) {
+                var cost = 0L
+                var y = y0
+                while (y < y1) {
+                    val rowA = y * ANALYZE_W
+                    val rowB = (y + dy) * ANALYZE_W
+                    var x = x0
+                    while (x < x1) {
+                        val d = a[rowA + x] - b[rowB + x + dx]
+                        cost += if (d < 0) -d.toLong() else d.toLong()
+                        x += 2
+                    }
+                    y += 2
+                }
+                if (cost < bestCost) {
+                    bestCost = cost
+                    bestDx = dx
+                    bestDy = dy
+                }
+            }
+        }
+        return bestDx to bestDy
+    }
+
     private fun toGray(src: Bitmap): IntArray {
         val small = Bitmap.createScaledBitmap(src, ANALYZE_W, ANALYZE_H, true)
         val px = IntArray(ANALYZE_W * ANALYZE_H)
@@ -194,46 +229,6 @@ object Stabilizer {
             px[i] = (r * 77 + g * 151 + b * 28) shr 8
         }
         return px
-    }
-
-    /**
-     * Cari pergeseran (dx, dy) yang paling cocok antara dua frame,
-     * memakai Sum of Absolute Differences pada area tengah.
-     */
-    private fun estimateShift(a: IntArray, b: IntArray): Pair<Int, Int> {
-        var bestDx = 0
-        var bestDy = 0
-        var bestCost = Long.MAX_VALUE
-
-        // hanya bandingkan area tengah supaya tepi tidak mengganggu
-        val x0 = SEARCH
-        val x1 = ANALYZE_W - SEARCH
-        val y0 = SEARCH
-        val y1 = ANALYZE_H - SEARCH
-
-        for (dy in -SEARCH..SEARCH) {
-            for (dx in -SEARCH..SEARCH) {
-                var cost = 0L
-                var y = y0
-                while (y < y1) {
-                    val rowA = y * ANALYZE_W
-                    val rowB = (y + dy) * ANALYZE_W
-                    var x = x0
-                    while (x < x1) {
-                        val d = a[rowA + x] - b[rowB + x + dx]
-                        cost += if (d < 0) -d.toLong() else d.toLong()
-                        x += 2          // lompat 2 piksel: cukup akurat, 2x cepat
-                    }
-                    y += 2
-                }
-                if (cost < bestCost) {
-                    bestCost = cost
-                    bestDx = dx
-                    bestDy = dy
-                }
-            }
-        }
-        return bestDx to bestDy
     }
 
     private fun movingAverage(v: FloatArray, window: Int): FloatArray {

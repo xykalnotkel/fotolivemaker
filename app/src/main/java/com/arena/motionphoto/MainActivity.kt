@@ -49,15 +49,15 @@ class MainActivity : AppCompatActivity() {
             opts = opts.copy(enhance = !opts.enhance)
             paintTools(); updatePlanText(); refreshPreview()
             toast(
-                if (opts.enhance) "Tajam: noise + unsharp. Bukan AI, tidak menambah detail."
-                else "Penajaman dimatikan"
+                if (opts.enhance) "Bersih: meredam noise di video + foto. Bukan HD/AI."
+                else "Bersih dimatikan"
             )
         }
         b.toolStab.setOnClickListener {
             opts = opts.copy(stabilize = !opts.stabilize)
             paintTools(); updatePlanText()
             toast(
-                if (opts.stabilize) "Stabil: geser X/Y, video sedikit di-crop"
+                if (opts.stabilize) "Stabil: geser + putar ringan. Matikan kalau mau filter TikTok."
                 else "Stabilisasi dimatikan"
             )
         }
@@ -181,7 +181,7 @@ class MainActivity : AppCompatActivity() {
         val p = plan ?: return
         val tools = buildList {
             if (opts.square) add("crop 1:1")
-            if (opts.enhance) add("tajam")
+            if (opts.enhance) add("bersih")
             if (opts.stabilize) add("stabil")
         }
         val (w, h) = outDim()

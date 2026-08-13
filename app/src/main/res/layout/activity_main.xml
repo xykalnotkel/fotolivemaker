@@ -211,6 +211,15 @@
                     android:lineSpacingExtra="2dp"
                     android:text="Membaca video…" />
             </LinearLayout>
+            <TextView
+                android:id="@+id/tvTiktokHint"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:text="Mau filter di TikTok? Matikan Bersih &amp; Stabil — filter mereka numpuk jadi aneh."
+                android:textColor="@color/text_dim"
+                android:textSize="11sp"
+                android:lineSpacingExtra="2dp" />
         </LinearLayout>
     </ScrollView>
 
@@ -278,7 +287,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
-                android:text="Tajam"
+                android:text="Bersih"
                 android:textColor="@color/text_mid"
                 android:textSize="10sp"
                 android:textStyle="bold" />

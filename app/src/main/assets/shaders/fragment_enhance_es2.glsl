@@ -1,49 +1,34 @@
 #version 100
-// Penghalus + penajam video.
-//
-// Dua tahap nyata, bukan filter warna kosmetik:
-//   1. Bilateral 3x3  -> meredam bintik/noise TAPI tepi tetap tajam,
-//                        karena piksel yang warnanya jauh beda diberi
-//                        bobot kecil.
-//   2. Unsharp mask   -> mengembalikan ketajaman yang hilang akibat
-//                        penghalusan, sehingga hasilnya terlihat lebih
-//                        bersih tanpa jadi buram.
-//
-// Catatan jujur: ini TIDAK menambah detail yang tidak ada di video asli.
-// Yang dilakukan adalah membersihkan noise dan mempertegas tepi.
+// Bersih: meredam bintik di VIDEO (bukan cuma foto).
+// Bilateral 5x5 — tepi dijaga, tidak ada unsharp.
+// Unsharp sengaja tidak dipakai: bentrok dengan filter TikTok.
 
 precision mediump float;
 
 uniform sampler2D uTexSampler;
-uniform float uTexelW;      // 1.0 / lebar
-uniform float uTexelH;      // 1.0 / tinggi
-uniform float uDenoise;     // 0.0 - 1.0
-uniform float uSharpen;     // 0.0 - 1.0
+uniform float uTexelW;
+uniform float uTexelH;
+uniform float uDenoise;
+uniform float uSharpen;     // disimpan supaya shader lama tidak pecah; 0 = mati
 
 varying vec2 vTexSamplingCoord;
 
 void main() {
   vec3 center = texture2D(uTexSampler, vTexSamplingCoord).rgb;
-
   vec3 sum = vec3(0.0);
   float wsum = 0.0;
+  float sigmaC = mix(0.28, 0.09, uDenoise);
 
-  // sigma untuk beda warna: makin kecil, makin menjaga tepi
-  float sigmaC = mix(0.35, 0.10, uDenoise);
-
-  for (int y = -1; y <= 1; y++) {
-    for (int x = -1; x <= 1; x++) {
+  for (int y = -2; y <= 2; y++) {
+    for (int x = -2; x <= 2; x++) {
       vec2 off = vec2(float(x) * uTexelW, float(y) * uTexelH);
       vec3 s = texture2D(uTexSampler, vTexSamplingCoord + off).rgb;
-
-      // bobot jarak spasial (gaussian 3x3 sederhana)
-      float ws = (x == 0 && y == 0) ? 4.0
-               : ((x == 0 || y == 0) ? 2.0 : 1.0);
-
-      // bobot kemiripan warna -> inilah yang menjaga tepi
+      float ws = 1.0;
+      if (x == 0 && y == 0) ws = 5.0;
+      else if (x == 0 || y == 0) ws = 3.0;
+      else if (abs(float(x)) + abs(float(y)) == 2.0) ws = 2.0;
       float d = distance(s, center);
       float wc = exp(-(d * d) / (2.0 * sigmaC * sigmaC));
-
       float w = ws * wc;
       sum += s * w;
       wsum += w;
@@ -53,20 +38,15 @@ void main() {
   vec3 smoothed = sum / max(wsum, 0.0001);
   vec3 base = mix(center, smoothed, uDenoise);
 
-  // Unsharp mask: base + (base - blur) * jumlah
-  vec3 blur = vec3(0.0);
-  blur += texture2D(uTexSampler, vTexSamplingCoord + vec2(-uTexelW, -uTexelH)).rgb;
-  blur += texture2D(uTexSampler, vTexSamplingCoord + vec2( 0.0,    -uTexelH)).rgb * 2.0;
-  blur += texture2D(uTexSampler, vTexSamplingCoord + vec2( uTexelW, -uTexelH)).rgb;
-  blur += texture2D(uTexSampler, vTexSamplingCoord + vec2(-uTexelW,  0.0)).rgb * 2.0;
-  blur += texture2D(uTexSampler, vTexSamplingCoord).rgb * 4.0;
-  blur += texture2D(uTexSampler, vTexSamplingCoord + vec2( uTexelW,  0.0)).rgb * 2.0;
-  blur += texture2D(uTexSampler, vTexSamplingCoord + vec2(-uTexelW,  uTexelH)).rgb;
-  blur += texture2D(uTexSampler, vTexSamplingCoord + vec2( 0.0,     uTexelH)).rgb * 2.0;
-  blur += texture2D(uTexSampler, vTexSamplingCoord + vec2( uTexelW,  uTexelH)).rgb;
-  blur /= 16.0;
+  if (uSharpen > 0.01) {
+    vec3 blur = texture2D(uTexSampler, vTexSamplingCoord).rgb * 4.0;
+    blur += texture2D(uTexSampler, vTexSamplingCoord + vec2(0.0, -uTexelH)).rgb * 2.0;
+    blur += texture2D(uTexSampler, vTexSamplingCoord + vec2(0.0,  uTexelH)).rgb * 2.0;
+    blur += texture2D(uTexSampler, vTexSamplingCoord + vec2(-uTexelW, 0.0)).rgb * 2.0;
+    blur += texture2D(uTexSampler, vTexSamplingCoord + vec2( uTexelW, 0.0)).rgb * 2.0;
+    blur /= 12.0;
+    base += (base - blur) * (uSharpen * 0.7);
+  }
 
-  vec3 sharp = base + (base - blur) * (uSharpen * 1.6);
-
-  gl_FragColor = vec4(clamp(sharp, 0.0, 1.0), 1.0);
+  gl_FragColor = vec4(clamp(base, 0.0, 1.0), 1.0);
 }

@@ -10,14 +10,8 @@ import androidx.media3.common.util.UnstableApi
 import androidx.media3.effect.BaseGlShaderProgram
 
 /**
- * Efek "HD": membersihkan bintik/noise lalu mempertegas tepi.
- *
- * Berjalan di GPU sebagai bagian dari pipeline Media3, jadi ikut ter-encode
- * ke video hasil — bukan sekadar filter tampilan.
- *
- * Jujur soal batasannya: ini tidak menciptakan detail baru. Yang dikerjakan
- * adalah meredam noise dengan bilateral filter (menjaga tepi) lalu unsharp
- * mask untuk mengembalikan ketajaman. Cocok untuk video agak buram/berbintik.
+ * Bersih video: bilateral 5x5 di GPU, ikut ter-encode ke MP4.
+ * Default tanpa unsharp — filter TikTok tidak ikut menumpuk halo.
  */
 @UnstableApi
 class EnhanceShader(

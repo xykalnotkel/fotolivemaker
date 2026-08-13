@@ -1,30 +1,24 @@
 #version 100
-// Koreksi guncangan per-frame.
-//
-// Tiap frame digeser berlawanan arah guncangannya sendiri, lalu di-zoom
-// supaya tepi kosong akibat pergeseran tidak terlihat.
-//
-// Inilah yang membuat stabilisasi jadi nyata: sebelumnya hanya zoom
-// seragam, sehingga guncangan tetap ada dan gambar cuma ter-crop.
+// Koreksi guncangan: rotasi kecil + geser X/Y + zoom penutup tepi.
 
 precision mediump float;
 
 uniform sampler2D uTexSampler;
-uniform float uZoom;        // mis. 1.08
-uniform float uOffsetX;     // pergeseran koreksi, satuan UV (-0.1..0.1)
+uniform float uZoom;
+uniform float uOffsetX;
 uniform float uOffsetY;
+uniform float uRot;         // radian, kecil (mis. -0.05..0.05)
 
 varying vec2 vTexSamplingCoord;
 
 void main() {
-  // zoom terhadap titik tengah, lalu geser
   vec2 c = vTexSamplingCoord - vec2(0.5);
-  c /= uZoom;
+  float s = sin(uRot);
+  float co = cos(uRot);
+  c = vec2(co * c.x - s * c.y, s * c.x + co * c.y);
+  c /= max(uZoom, 1.0);
   c += vec2(0.5);
   c += vec2(uOffsetX, uOffsetY);
-
-  // jaga supaya tidak mengambil di luar tekstur
   c = clamp(c, vec2(0.0), vec2(1.0));
-
   gl_FragColor = texture2D(uTexSampler, c);
 }

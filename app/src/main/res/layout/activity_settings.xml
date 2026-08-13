@@ -457,7 +457,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:minHeight="56dp"
-                    android:text="Bersihkan &amp; pertajam"
+                    android:text="Bersih (video + foto)"
                     android:textColor="@color/text_hi"
                     android:textSize="14sp" />
 

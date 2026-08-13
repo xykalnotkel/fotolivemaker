@@ -219,8 +219,8 @@ object Converter {
     }
 
     /**
-     * Versi CPU dari shader enhance: redam noise lalu unsharp.
-     * Supaya cover JPEG tidak "loncat" dibanding video saat Live diputar.
+     * Cover JPEG memakai denoise yang sama dengan shader video.
+     * Tanpa unsharp — supaya tidak loncat vs klip, dan aman untuk filter TikTok.
      */
     private fun enhanceBitmap(src: Bitmap): Bitmap {
         val w = src.width
@@ -231,14 +231,13 @@ object Converter {
         val inn = IntArray(w * h)
         val out = IntArray(w * h)
         work.getPixels(inn, 0, w, 0, 0, w, h)
-        val denoise = 0.75f
-        val sharpen = 0.55f * 1.6f
+        val denoise = 0.55f
         for (y in 0 until h) {
-            val y0 = if (y > 0) y - 1 else 0
-            val y1 = if (y + 1 < h) y + 1 else h - 1
+            val y0 = (y - 2).coerceAtLeast(0)
+            val y1 = (y + 2).coerceAtMost(h - 1)
             for (x in 0 until w) {
-                val x0 = if (x > 0) x - 1 else 0
-                val x1 = if (x + 1 < w) x + 1 else w - 1
+                val x0 = (x - 2).coerceAtLeast(0)
+                val x1 = (x + 2).coerceAtMost(w - 1)
                 var r = 0
                 var g = 0
                 var b = 0
@@ -257,23 +256,18 @@ object Converter {
                     }
                     yy++
                 }
-                val br = r / n
-                val bg = g / n
-                val bb = b / n
                 val p = inn[y * w + x]
                 val cr = (p ushr 16) and 0xFF
                 val cg = (p ushr 8) and 0xFF
                 val cb = p and 0xFF
                 val a = p ushr 24
-                val baseR = cr + ((br - cr) * denoise).toInt()
-                val baseG = cg + ((bg - cg) * denoise).toInt()
-                val baseB = cb + ((bb - cb) * denoise).toInt()
-                fun ch(base: Int, blur: Int): Int {
-                    val v = base + ((base - blur) * sharpen).toInt()
-                    return v.coerceIn(0, 255)
-                }
-                out[y * w + x] = (a shl 24) or (ch(baseR, br) shl 16) or
-                    (ch(baseG, bg) shl 8) or ch(baseB, bb)
+                val br = r / n
+                val bg = g / n
+                val bb = b / n
+                val outR = (cr + ((br - cr) * denoise).toInt()).coerceIn(0, 255)
+                val outG = (cg + ((bg - cg) * denoise).toInt()).coerceIn(0, 255)
+                val outB = (cb + ((bb - cb) * denoise).toInt()).coerceIn(0, 255)
+                out[y * w + x] = (a shl 24) or (outR shl 16) or (outG shl 8) or outB
             }
         }
         val bmp = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888)
@@ -338,10 +332,11 @@ object Converter {
 
         // 1. Penghalus/penajam lebih dulu, saat resolusi masih penuh.
         if (opts.enhance) {
+            // Bersih = denoise saja. Unsharp dimatikan: bentrok filter TikTok.
             effects += GlEffect { ctx, useHdr ->
-                EnhanceShader(ctx, useHdr, denoise = 0.75f, sharpen = 0.55f)
+                EnhanceShader(ctx, useHdr, denoise = 0.55f, sharpen = 0f)
             }
-            log("Efek: bersihkan noise + pertajam")
+            log("Efek: bersih noise (video + foto, tanpa tajam)")
         }
 
         // 2. Stabilisasi: tiap frame digeser berlawanan arah guncangannya.

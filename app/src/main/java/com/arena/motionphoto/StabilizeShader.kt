@@ -42,12 +42,14 @@ class StabilizeShader(
         try {
             // ambil koreksi untuk waktu frame ini
             val (dx, dy) = plan.offsetAt(presentationTimeUs / 1000L)
+            val rot = plan.rotAt(presentationTimeUs / 1000L)
 
             program.use()
             program.setSamplerTexIdUniform("uTexSampler", inputTexId, 0)
             program.setFloatUniform("uZoom", plan.zoom)
             program.setFloatUniform("uOffsetX", dx)
             program.setFloatUniform("uOffsetY", dy)
+            program.setFloatUniform("uRot", rot)
             program.setBufferAttribute(
                 "aFramePosition",
                 GlUtil.getNormalizedCoordinateBounds(),

@@ -44,7 +44,7 @@ class SettingsActivity : AppCompatActivity() {
             persist(); notify(if (v) "Crop 1:1 aktif" else "Crop 1:1 dimatikan")
         }
         b.swEnhance.setOnCheckedChangeListener { _, v ->
-            persist(); notify(if (v) "Bersihkan & pertajam aktif" else "Penajaman dimatikan")
+            persist(); notify(if (v) "Bersih aktif (video + foto)" else "Bersih dimatikan")
         }
         b.swStab.setOnCheckedChangeListener { _, v ->
             persist(); notify(if (v) "Stabilizer aktif" else "Stabilizer dimatikan")
