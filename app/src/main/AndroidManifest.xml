@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <!-- Hanya untuk cek tag rilis di GitHub. Video tidak pernah diunggah. -->
+    <uses-permission android:name="android.permission.INTERNET" />
+
     <!-- Android 13+; jangan diberi maxSdk agar pemilih video tetap bekerja di Android 15+. -->
     <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"

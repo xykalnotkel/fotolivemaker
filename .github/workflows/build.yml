@@ -134,8 +134,8 @@ jobs:
               mengenali, itu batasan di sisi TikTok.
 
             ### Privasi
-            App berjalan **sepenuhnya offline**. Tidak ada izin `INTERNET`
-            sama sekali, jadi tidak mungkin mengirim data ke mana pun.
+            Video diproses di perangkat. Izin `INTERNET` hanya untuk cek
+            rilis GitHub — file tidak diunggah.
 
             Lisensi Apache 2.0 · Tanpa jaminan — lihat [TERMS.md](TERMS.md)
 

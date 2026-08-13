@@ -4,7 +4,9 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="@color/paper">
+    android:background="@color/paper"
+    android:clipChildren="false"
+    android:clipToPadding="false">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -215,4 +217,53 @@
             </LinearLayout>
         </LinearLayout>
     </ScrollView>
+
+    <!-- Tipis; cincin di tengah keluar dari bar. Hidden sampai ada rilis lebih baru. -->
+    <FrameLayout
+        android:id="@+id/updateBanner"
+        android:layout_width="match_parent"
+        android:layout_height="68dp"
+        android:clipChildren="false"
+        android:clipToPadding="false"
+        android:visibility="gone"
+        android:foreground="?attr/selectableItemBackground"
+        android:contentDescription="Update terbaru">
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="38dp"
+            android:layout_gravity="center_vertical"
+            android:background="@drawable/bg_update_bar" />
+
+        <TextView
+            android:id="@+id/tvUpdateLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical|start"
+            android:layout_marginStart="16dp"
+            android:text="Update terbaru"
+            android:textColor="@color/text_hi"
+            android:textSize="12sp"
+            android:textStyle="bold" />
+
+        <ImageView
+            android:id="@+id/imgUpdate"
+            android:layout_width="68dp"
+            android:layout_height="68dp"
+            android:layout_gravity="center"
+            android:src="@drawable/illus_update_ring"
+            android:scaleType="fitCenter"
+            app:tint="@color/ink"
+            android:contentDescription="@null" />
+
+        <TextView
+            android:id="@+id/tvUpdateVer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical|end"
+            android:layout_marginEnd="16dp"
+            android:textColor="@color/text_dim"
+            android:textSize="11sp"
+            android:fontFamily="monospace" />
+    </FrameLayout>
 </LinearLayout>

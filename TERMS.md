@@ -15,8 +15,8 @@ Live Photo Maker adalah perangkat lunak gratis dan open source yang mengubah
 file video menjadi **Motion Photo** (format Google) — satu file JPEG yang berisi
 klip video di dalamnya.
 
-Aplikasi ini berjalan **sepenuhnya offline di perangkatmu**. Tidak ada file yang
-diunggah ke server mana pun.
+Video diproses di perangkatmu. Tidak ada file yang diunggah. Koneksi jaringan
+hanya dipakai untuk mengecek rilis terbaru di GitHub.
 
 ## 2. Tanpa jaminan
 

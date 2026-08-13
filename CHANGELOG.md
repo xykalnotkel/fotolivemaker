@@ -5,6 +5,12 @@ Saat rilis, pindahkan ke heading versi + tanggal.
 
 ## Unreleased
 
+### Home
+- Banner update tipis di bawah: muncul otomatis kalau GitHub Releases lebih baru
+- Cincin Live Photo di tengah, keluar dari bar
+- Ketuk banner membuka halaman rilis
+- Izin `INTERNET` ditambah **hanya** untuk cek tag GitHub — PRIVACY/README disesuaikan
+
 ### Bersih & stabilizer
 - **Bersih** meredam noise di **video + foto**, lalu unsharp ringan supaya tidak empuk
 - Urutan dibetulkan: **stabil dulu, baru bersih** (zoom-lah yang bikin buram)

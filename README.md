@@ -7,7 +7,8 @@
 Ubah video jadi **Motion Photo** — file yang muncul berlabel **Live** di picker
 galeri TikTok saat mau posting.
 
-Berjalan **sepenuhnya offline**. Tanpa iklan, tanpa akun, tanpa pelacak.
+Video diproses **di perangkat**. Tanpa iklan, tanpa akun, tanpa pelacak.
+Izin `INTERNET` hanya untuk cek rilis di GitHub.
 
 Catatan perubahan lengkap ada di **[CHANGELOG.md](CHANGELOG.md)**.
 
@@ -133,8 +134,8 @@ ada di artifact **laporan-tes**.
 
 **Ringkasnya:** gratis, open source, disediakan **apa adanya tanpa jaminan**.
 
-App ini **tidak punya izin `INTERNET`** sama sekali — bisa kamu cek sendiri di
-`AndroidManifest.xml`. Secara teknis app ini tidak mampu mengirim data ke mana pun.
+App punya izin `INTERNET` **hanya** untuk `GET` rilis GitHub (banner update).
+Video dan hasil konversi tidak pernah diunggah. Cek `AndroidManifest.xml`.
 
 **Tidak berafiliasi** dengan TikTok, ByteDance, Apple, Google, maupun Samsung.
 "Live Photo" merek dagang Apple Inc. · "TikTok" merek dagang ByteDance Ltd. ·

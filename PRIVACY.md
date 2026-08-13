@@ -5,8 +5,9 @@
 
 ## Ringkasan singkat
 
-**Aplikasi ini tidak mengumpulkan data apa pun darimu, dan tidak mengirim
-apa pun ke internet.** Semua pemrosesan terjadi di dalam perangkat, secara offline.
+Video diproses **di perangkat**. Satu-satunya koneksi jaringan: mengecek
+tag rilis terbaru di GitHub supaya banner update bisa muncul. Tidak ada
+analytics, tidak ada unggah file.
 
 ---
 
@@ -17,20 +18,20 @@ apa pun ke internet.** Semua pemrosesan terjadi di dalam perangkat, secara offli
 Aplikasi ini:
 
 - Tidak mengumpulkan data pribadi
-- Tidak mengirim file atau data apa pun ke internet
+- Tidak mengirim video atau file hasil ke mana pun
 - Tidak memiliki server, akun, atau login
 - Tidak memakai analytics, pelacak, maupun iklan
 - Tidak membaca kontak, lokasi, mikrofon, atau kamera
 - Tidak menampilkan iklan pihak ketiga
 
-Aplikasi ini **tidak meminta izin akses internet** (`INTERNET` permission
-tidak ada di AndroidManifest), jadi secara teknis aplikasi ini **tidak mampu**
-mengirim datamu ke mana pun — ini bisa kamu verifikasi sendiri di kode sumbernya.
+Aplikasi **meminta izin `INTERNET`** hanya untuk `GET` halaman rilis GitHub
+(`api.github.com/.../releases/latest`). Tidak ada data pribadimu di permintaan itu.
 
 ## Izin yang diminta dan alasannya
 
 | Izin | Kegunaan |
 |---|---|
+| `INTERNET` | Cek versi rilis di GitHub (banner update). Video tidak diunggah |
 | `READ_MEDIA_VIDEO` (Android 13+) | Menampilkan kisi video di pemilih internal |
 | `READ_EXTERNAL_STORAGE` (Android ≤12) | Sama seperti di atas, untuk versi Android lama |
 | `WRITE_EXTERNAL_STORAGE` (Android ≤9) | Menyimpan hasil ke folder DCIM/Camera |
