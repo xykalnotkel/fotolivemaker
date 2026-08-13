@@ -70,7 +70,7 @@
             android:paddingEnd="20dp"
             android:paddingBottom="28dp">
 
-            <!-- Hero Action Card -->
+            <!-- Hero Action Card dengan Gradasi Luruh Menyatu Mulus ke Background -->
             <FrameLayout
                 android:id="@+id/cardAdd"
                 android:layout_width="match_parent"
@@ -87,7 +87,7 @@
                     android:layout_marginBottom="4dp"
                     android:alpha="0.16"
                     android:src="@drawable/ic_livephoto"
-                    app:tint="@color/gold_live"
+                    app:tint="@color/accent_primary"
                     android:contentDescription="@null" />
 
                 <LinearLayout
@@ -133,7 +133,7 @@
                         android:paddingTop="4dp"
                         android:paddingBottom="4dp"
                         android:background="@drawable/bg_hero_chip"
-                        android:textColor="@color/gold_live"
+                        android:textColor="@color/hero_sub"
                         android:textSize="10sp"
                         android:textStyle="bold"
                         android:fontFamily="monospace" />

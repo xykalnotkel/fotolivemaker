@@ -93,7 +93,7 @@ class MainActivity : AppCompatActivity() {
     private fun paintTool(icon: ImageView, label: TextView, on: Boolean) {
         val color = ContextCompat.getColor(
             this,
-            if (on) R.color.gold_live_dark else R.color.text_mid
+            if (on) R.color.accent_primary else R.color.text_mid
         )
         icon.setColorFilter(color)
         label.setTextColor(color)

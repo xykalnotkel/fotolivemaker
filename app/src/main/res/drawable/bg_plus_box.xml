@@ -2,20 +2,23 @@
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
     <item>
         <shape android:shape="rectangle">
-            <solid android:color="#00000000" />
-            <stroke android:width="2dp" android:color="@color/hero_line" />
-            <corners android:radius="4dp" />
+            <solid android:color="#26FFFFFF" />
+            <stroke android:width="1.5dp" android:color="@color/hero_line" />
+            <corners android:radius="12dp" />
         </shape>
     </item>
-    <!-- tanda plus -->
-    <item android:top="21dp" android:bottom="21dp" android:left="13dp" android:right="13dp">
+    <!-- tanda plus horizontal -->
+    <item android:top="19dp" android:bottom="19dp" android:left="13dp" android:right="13dp">
         <shape android:shape="rectangle">
-            <solid android:color="@color/on_ink" />
+            <solid android:color="#FFFFFFFF" />
+            <corners android:radius="2dp" />
         </shape>
     </item>
-    <item android:top="13dp" android:bottom="13dp" android:left="21dp" android:right="21dp">
+    <!-- tanda plus vertikal -->
+    <item android:top="13dp" android:bottom="13dp" android:left="19dp" android:right="19dp">
         <shape android:shape="rectangle">
-            <solid android:color="@color/on_ink" />
+            <solid android:color="#FFFFFFFF" />
+            <corners android:radius="2dp" />
         </shape>
     </item>
 </layer-list>

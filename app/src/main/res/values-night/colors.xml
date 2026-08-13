@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Palet Modern Dark (Obsidian & Deep Slate) -->
+    <!-- Palet Modern Dark: Obsidian, Deep Slate, Electric Violet & Indigo -->
     <color name="paper">#FF090D16</color>
     <color name="paper_dim">#FF111827</color>
     <color name="ink">#FFF8FAFC</color>
@@ -12,22 +12,24 @@
     <color name="line">#FF1E293B</color>
     <color name="line_strong">#FF334155</color>
 
-    <!-- Aksen Live Photo Premium (Golden Amber Glow) -->
-    <color name="gold_live">#FFFBBF24</color>
-    <color name="gold_live_dark">#FFF59E0B</color>
-    <color name="gold_live_glow">#33FBBF24</color>
-    <color name="gold_live_soft">#22FBBF24</color>
+    <!-- Aksen Electric Indigo & Violet (Dark Mode) -->
+    <color name="accent_primary">#FF818CF8</color>
+    <color name="accent_dark">#FF6366F1</color>
+    <color name="accent_glow">#33818CF8</color>
+    <color name="accent_soft">#20818CF8</color>
+    <color name="accent_purple">#FFA78BFA</color>
 
     <!-- Status & Feedback -->
     <color name="ok">#FF34D399</color>
     <color name="bad">#FFF87171</color>
-    <color name="warn">#FFFBBF24</color>
+    <color name="warn">#FF818CF8</color>
 
     <color name="on_ink">#FF090D16</color>
 
-    <!-- Hero Card Modern Dark Gradient -->
-    <color name="hero_start">#FF1E293B</color>
-    <color name="hero_end">#FF0F172A</color>
-    <color name="hero_sub">#B394A3B8</color>
-    <color name="hero_line">#3364748B</color>
+    <!-- Hero Card Seamless Fade Gradient (Dark Mode) -->
+    <color name="hero_start">#FF1E1B4B</color>
+    <color name="hero_mid">#802E1065</color>
+    <color name="hero_end">#FF090D16</color>
+    <color name="hero_sub">#C7D2FE</color>
+    <color name="hero_line">#33818CF8</color>
 </resources>

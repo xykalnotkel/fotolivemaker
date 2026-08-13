@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Palet Modern Light: Elegan, Bersih, Berdimensi -->
+    <!-- Palet Modern Light: Royal Indigo & Deep Violet -->
     <color name="paper">#FFF8FAFC</color>
     <color name="paper_dim">#FFF1F5F9</color>
     <color name="ink">#FF0F172A</color>
@@ -12,22 +12,24 @@
     <color name="line">#FFE2E8F0</color>
     <color name="line_strong">#FFCBD5E1</color>
 
-    <!-- Aksen Live Photo Premium (Golden Amber) -->
-    <color name="gold_live">#FFF59E0B</color>
-    <color name="gold_live_dark">#FFD97706</color>
-    <color name="gold_live_glow">#26F59E0B</color>
-    <color name="gold_live_soft">#1AF59E0B</color>
+    <!-- Aksen Royal Indigo & Electric Violet -->
+    <color name="accent_primary">#FF6366F1</color>
+    <color name="accent_dark">#FF4F46E5</color>
+    <color name="accent_glow">#266366F1</color>
+    <color name="accent_soft">#146366F1</color>
+    <color name="accent_purple">#FF8B5CF6</color>
 
     <!-- Status & Feedback -->
     <color name="ok">#FF10B981</color>
     <color name="bad">#FFEF4444</color>
-    <color name="warn">#FFF59E0B</color>
+    <color name="warn">#FF6366F1</color>
 
     <color name="on_ink">#FFFFFFFF</color>
 
-    <!-- Hero Card Modern Gradient -->
-    <color name="hero_start">#FF0F172A</color>
-    <color name="hero_end">#FF1E293B</color>
-    <color name="hero_sub">#B3F8FAFC</color>
-    <color name="hero_line">#33F8FAFC</color>
+    <!-- Hero Card Seamless Fade Gradient (Light Mode) -->
+    <color name="hero_start">#FF312E81</color>
+    <color name="hero_mid">#994338CA</color>
+    <color name="hero_end">#FFF8FAFC</color>
+    <color name="hero_sub">#E0E7FF</color>
+    <color name="hero_line">#33A5B4FC</color>
 </resources>

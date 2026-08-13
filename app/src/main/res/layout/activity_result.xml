@@ -84,7 +84,7 @@
                     app:use_controller="false"
                     app:resize_mode="fit" />
 
-                <!-- Badge LIVE Beraksen Amber / Gold -->
+                <!-- Badge LIVE Beraksen Royal Indigo -->
                 <LinearLayout
                     android:id="@+id/badgeLive"
                     android:layout_width="wrap_content"
@@ -154,7 +154,7 @@
                         android:text="Live"
                         android:textSize="11sp"
                         android:textStyle="bold"
-                        android:textColor="@color/gold_live_dark" />
+                        android:textColor="@color/accent_primary" />
 
                     <TextView
                         android:id="@+id/modeLoop"
@@ -233,7 +233,7 @@
                     android:layout_height="wrap_content"
                     android:padding="8dp"
                     android:text="Cek ulang"
-                    android:textColor="@color/gold_live_dark"
+                    android:textColor="@color/accent_primary"
                     android:textSize="12sp"
                     android:textStyle="bold"
                     android:visibility="gone" />

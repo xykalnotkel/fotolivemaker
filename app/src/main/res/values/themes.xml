@@ -4,7 +4,7 @@
     <style name="Theme.MotionPhoto" parent="Theme.Material3.Light.NoActionBar">
         <item name="colorPrimary">@color/ink</item>
         <item name="colorOnPrimary">@color/on_ink</item>
-        <item name="colorSecondary">@color/gold_live</item>
+        <item name="colorSecondary">@color/accent_primary</item>
         <item name="android:colorBackground">@color/paper</item>
         <item name="colorSurface">@color/paper</item>
         <item name="colorOnSurface">@color/ink</item>
@@ -42,12 +42,12 @@
     </style>
 
     <style name="Slider.Flat" parent="Widget.Material3.Slider">
-        <item name="thumbColor">@color/gold_live</item>
-        <item name="trackColorActive">@color/gold_live</item>
+        <item name="thumbColor">@color/accent_primary</item>
+        <item name="trackColorActive">@color/accent_primary</item>
         <item name="trackColorInactive">@color/line</item>
         <item name="thumbRadius">9dp</item>
         <item name="trackHeight">4dp</item>
-        <item name="haloColor">@color/gold_live_glow</item>
+        <item name="haloColor">@color/accent_glow</item>
         <item name="haloRadius">18dp</item>
         <item name="tickVisible">false</item>
         <item name="thumbElevation">2dp</item>
