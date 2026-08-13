@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="@color/ink">
+    android:background="@color/paper">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -23,7 +23,7 @@
             android:padding="11dp"
             android:src="@drawable/ic_back"
             android:background="?attr/selectableItemBackgroundBorderless"
-            app:tint="@color/text_hi"
+            app:tint="@color/ink"
             android:contentDescription="Kembali" />
 
         <TextView
@@ -36,6 +36,11 @@
             android:textSize="18sp"
             android:textStyle="bold" />
     </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1.5dp"
+        android:background="@color/line" />
 
     <ScrollView
         android:layout_width="match_parent"
@@ -50,6 +55,7 @@
             android:orientation="vertical"
             android:paddingStart="20dp"
             android:paddingEnd="20dp"
+            android:paddingTop="20dp"
             android:paddingBottom="20dp">
 
             <!-- AREA TES: tahan untuk memutar -->
@@ -63,6 +69,7 @@
                     android:id="@+id/still"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
+                    android:layout_margin="1dp"
                     android:scaleType="fitCenter"
                     android:contentDescription="Foto diam" />
 
@@ -73,27 +80,26 @@
                     android:layout_gravity="center"
                     android:visibility="invisible" />
 
-                <!-- badge LIVE: ikon Live Photo asli, status dari verifikasi nyata -->
                 <LinearLayout
                     android:id="@+id/badgeLive"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="top|start"
-                    android:layout_margin="12dp"
+                    android:layout_margin="10dp"
                     android:orientation="horizontal"
                     android:gravity="center_vertical"
                     android:background="@drawable/bg_pill"
-                    android:paddingStart="10dp"
-                    android:paddingEnd="12dp"
-                    android:paddingTop="6dp"
-                    android:paddingBottom="6dp">
+                    android:paddingStart="9dp"
+                    android:paddingEnd="11dp"
+                    android:paddingTop="5dp"
+                    android:paddingBottom="5dp">
 
                     <ImageView
                         android:id="@+id/badgeIcon"
-                        android:layout_width="15dp"
-                        android:layout_height="15dp"
+                        android:layout_width="14dp"
+                        android:layout_height="14dp"
                         android:src="@drawable/ic_livephoto"
-                        app:tint="@color/text_hi"
+                        app:tint="@color/on_ink"
                         android:contentDescription="Live Photo" />
 
                     <TextView
@@ -102,7 +108,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginStart="6dp"
                         android:text="LIVE"
-                        android:textColor="@color/text_hi"
+                        android:textColor="@color/on_ink"
                         android:textSize="11sp"
                         android:textStyle="bold"
                         android:letterSpacing="0.1" />
@@ -114,47 +120,45 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="bottom|center_horizontal"
                     android:layout_marginBottom="14dp"
-                    android:background="@drawable/bg_pill"
-                    android:paddingStart="16dp"
-                    android:paddingEnd="16dp"
-                    android:paddingTop="9dp"
-                    android:paddingBottom="9dp"
+                    android:background="@drawable/bg_pill_outline"
+                    android:paddingStart="14dp"
+                    android:paddingEnd="14dp"
+                    android:paddingTop="8dp"
+                    android:paddingBottom="8dp"
                     android:text="Tahan untuk memutar"
-                    android:textColor="@color/text_hi"
+                    android:textColor="@color/ink"
                     android:textSize="12sp"
                     android:textStyle="bold" />
             </FrameLayout>
 
-            <!-- status verifikasi -->
+            <!-- status utama -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:gravity="center_vertical"
-                android:layout_marginTop="16dp"
-                android:background="@drawable/bg_card"
-                android:padding="16dp">
+                android:layout_marginTop="18dp">
 
                 <View
                     android:id="@+id/statusDot"
-                    android:layout_width="10dp"
-                    android:layout_height="10dp"
-                    android:background="@drawable/dot_accent" />
+                    android:layout_width="8dp"
+                    android:layout_height="8dp"
+                    android:background="@color/ink" />
 
                 <LinearLayout
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:layout_marginStart="14dp"
+                    android:layout_marginStart="12dp"
                     android:orientation="vertical">
 
                     <TextView
                         android:id="@+id/statusTitle"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Format valid"
+                        android:text="Memeriksa…"
                         android:textColor="@color/text_hi"
-                        android:textSize="15sp"
+                        android:textSize="17sp"
                         android:textStyle="bold" />
 
                     <TextView
@@ -163,8 +167,8 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="2dp"
                         android:text="Tersimpan di DCIM/Camera"
-                        android:textColor="@color/text_dim"
-                        android:textSize="12sp" />
+                        android:textColor="@color/text_mid"
+                        android:textSize="13sp" />
                 </LinearLayout>
 
                 <TextView
@@ -173,18 +177,18 @@
                     android:layout_height="wrap_content"
                     android:padding="8dp"
                     android:text="Cek ulang"
-                    android:textColor="@color/accent"
+                    android:textColor="@color/ink"
                     android:textSize="12sp"
                     android:textStyle="bold"
                     android:visibility="gone" />
             </LinearLayout>
 
-            <!-- rincian 3 pemeriksaan -->
+            <!-- rincian pemeriksaan -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:layout_marginTop="12dp"
+                android:layout_marginTop="16dp"
                 android:background="@drawable/bg_card"
                 android:padding="18dp">
 
@@ -219,16 +223,16 @@
                     android:textSize="13sp" />
             </LinearLayout>
 
-            <!-- detail teknis, bisa dibuka -->
             <TextView
                 android:id="@+id/btnDetail"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
+                android:layout_marginTop="10dp"
                 android:padding="8dp"
                 android:text="Lihat detail teknis"
-                android:textColor="@color/accent"
-                android:textSize="13sp" />
+                android:textColor="@color/text_mid"
+                android:textSize="13sp"
+                android:textStyle="bold" />
 
             <TextView
                 android:id="@+id/detail"
@@ -242,7 +246,7 @@
                 android:textColor="@color/text_mid"
                 android:lineSpacingExtra="3dp" />
 
-            <!-- langkah selanjutnya -->
+            <!-- langkah tes, dengan ilustrasi -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -250,6 +254,16 @@
                 android:layout_marginTop="16dp"
                 android:background="@drawable/bg_card"
                 android:padding="20dp">
+
+                <ImageView
+                    android:id="@+id/illusResult"
+                    android:layout_width="match_parent"
+                    android:layout_height="130dp"
+                    android:layout_marginBottom="18dp"
+                    android:src="@drawable/illus_hold"
+                    android:scaleType="fitCenter"
+                    android:adjustViewBounds="true"
+                    android:contentDescription="Tahan layar" />
 
                 <TextView
                     style="@style/Label"
@@ -260,7 +274,7 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
+                    android:layout_marginTop="12dp"
                     android:text="1.  Buka Galeri bawaan HP-mu\n2.  Cari fotonya, tahan layar\n3.  Kalau bergerak, format sudah benar\n4.  Baru coba upload di TikTok"
                     android:textColor="@color/text_mid"
                     android:textSize="13sp"
@@ -278,11 +292,16 @@
         </LinearLayout>
     </ScrollView>
 
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1.5dp"
+        android:background="@color/line" />
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:background="@color/ink_soft"
+        android:background="@color/paper"
         android:padding="20dp">
 
         <com.google.android.material.button.MaterialButton

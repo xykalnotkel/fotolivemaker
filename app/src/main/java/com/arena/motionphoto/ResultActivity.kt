@@ -93,6 +93,7 @@ class ResultActivity : AppCompatActivity() {
             when (rep.level) {
                 MotionPhotoVerifier.Level.CONFIRMED -> {
                     b.statusDot.setBackgroundResource(R.drawable.dot_ok)
+                    b.illusResult.setImageResource(R.drawable.illus_done)
                     b.statusSub.text = "Android mengenali file ini sebagai motion photo"
                     b.badgeText.text = "LIVE"
                     b.badgeIcon.alpha = 1f
@@ -105,15 +106,15 @@ class ResultActivity : AppCompatActivity() {
                         "Struktur sudah benar. Tahan gambar untuk menguji."
                     b.badgeText.text = "LIVE"
                     b.badgeIcon.alpha = 1f
-                    b.badgeLive.alpha = 0.9f
+                    b.badgeLive.alpha = 1f
                     b.btnRecheck.visibility = View.VISIBLE
                 }
                 MotionPhotoVerifier.Level.FAILED -> {
                     b.statusDot.setBackgroundResource(R.drawable.dot_bad)
                     b.statusSub.text = "Coba ulangi dengan pengaturan lain"
                     b.badgeText.text = "GAGAL"
-                    b.badgeIcon.alpha = 0.4f
-                    b.badgeLive.alpha = 0.7f
+                    b.badgeIcon.alpha = 0.45f
+                    b.badgeLive.alpha = 0.55f
                     b.btnRecheck.visibility = View.VISIBLE
                 }
             }

@@ -1,63 +1,68 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources xmlns:tools="http://schemas.android.com/tools">
+<resources>
 
-    <style name="Theme.MotionPhoto" parent="Theme.Material3.Dark.NoActionBar">
-        <item name="colorPrimary">@color/accent</item>
-        <item name="colorOnPrimary">@color/on_accent</item>
-        <item name="colorSecondary">@color/accent</item>
-        <item name="android:colorBackground">@color/ink</item>
-        <item name="colorSurface">@color/ink_soft</item>
-        <item name="colorOnSurface">@color/text_hi</item>
-        <item name="android:statusBarColor">@color/ink</item>
-        <item name="android:navigationBarColor">@color/ink</item>
-        <item name="android:windowLightStatusBar">false</item>
+    <style name="Theme.MotionPhoto" parent="Theme.Material3.Light.NoActionBar">
+        <item name="colorPrimary">@color/ink</item>
+        <item name="colorOnPrimary">@color/on_ink</item>
+        <item name="colorSecondary">@color/ink</item>
+        <item name="android:colorBackground">@color/paper</item>
+        <item name="colorSurface">@color/paper</item>
+        <item name="colorOnSurface">@color/ink</item>
+        <item name="android:statusBarColor">@color/paper</item>
+        <item name="android:navigationBarColor">@color/paper</item>
+        <item name="android:windowLightStatusBar">true</item>
         <item name="materialButtonStyle">@style/Btn.Primary</item>
         <item name="sliderStyle">@style/Slider.Flat</item>
     </style>
 
-    <!-- Tombol utama: flat, sudut membulat, tanpa gradient -->
+    <!-- Tombol utama: hitam pekat, flat, tanpa elevasi -->
     <style name="Btn.Primary" parent="Widget.Material3.Button">
-        <item name="backgroundTint">@color/accent</item>
-        <item name="android:textColor">@color/on_accent</item>
+        <item name="backgroundTint">@color/ink</item>
+        <item name="android:textColor">@color/on_ink</item>
         <item name="android:textSize">15sp</item>
         <item name="android:textStyle">bold</item>
-        <item name="android:letterSpacing">0.01</item>
-        <item name="android:minHeight">54dp</item>
-        <item name="cornerRadius">14dp</item>
+        <item name="android:minHeight">56dp</item>
+        <item name="cornerRadius">4dp</item>
         <item name="elevation">0dp</item>
         <item name="android:stateListAnimator">@null</item>
+        <item name="rippleColor">#33FFFFFF</item>
     </style>
 
     <style name="Btn.Ghost" parent="Widget.Material3.Button.OutlinedButton">
-        <item name="android:textColor">@color/text_hi</item>
-        <item name="strokeColor">@color/ink_line</item>
-        <item name="strokeWidth">1dp</item>
+        <item name="android:textColor">@color/ink</item>
+        <item name="strokeColor">@color/ink</item>
+        <item name="strokeWidth">1.5dp</item>
         <item name="android:textSize">15sp</item>
-        <item name="android:minHeight">54dp</item>
-        <item name="cornerRadius">14dp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:minHeight">56dp</item>
+        <item name="cornerRadius">4dp</item>
+        <item name="rippleColor">#1A000000</item>
     </style>
 
     <style name="Slider.Flat" parent="Widget.Material3.Slider">
-        <item name="thumbColor">@color/accent</item>
-        <item name="trackColorActive">@color/accent</item>
-        <item name="trackColorInactive">@color/ink_line</item>
-        <item name="thumbRadius">10dp</item>
-        <item name="trackHeight">4dp</item>
+        <item name="thumbColor">@color/ink</item>
+        <item name="trackColorActive">@color/ink</item>
+        <item name="trackColorInactive">@color/line</item>
+        <item name="thumbRadius">9dp</item>
+        <item name="trackHeight">3dp</item>
+        <item name="haloColor">#14000000</item>
         <item name="haloRadius">20dp</item>
         <item name="tickVisible">false</item>
+        <item name="thumbElevation">0dp</item>
     </style>
 
     <style name="Label" parent="">
-        <item name="android:textColor">@color/text_mid</item>
-        <item name="android:textSize">12sp</item>
-        <item name="android:letterSpacing">0.06</item>
+        <item name="android:textColor">@color/text_dim</item>
+        <item name="android:textSize">11sp</item>
+        <item name="android:letterSpacing">0.1</item>
         <item name="android:textAllCaps">true</item>
         <item name="android:textStyle">bold</item>
     </style>
 
     <style name="Value" parent="">
-        <item name="android:textColor">@color/accent</item>
+        <item name="android:textColor">@color/ink</item>
         <item name="android:textSize">13sp</item>
+        <item name="android:textStyle">bold</item>
         <item name="android:fontFamily">monospace</item>
     </style>
 </resources>

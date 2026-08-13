@@ -25,6 +25,9 @@ class HomeActivity : AppCompatActivity() {
         b.f2.txt.text = "Tes langsung dengan menahan layar"
         b.f3.txt.text = "Berjalan offline, tanpa iklan"
 
+        // Tampilkan versi supaya bisa dipastikan APK mana yang terpasang
+        b.tvVersion.text = "v${BuildConfig.VERSION_NAME}  ·  build ${BuildConfig.VERSION_CODE}"
+
         b.btnStart.setOnClickListener {
             pickVideo.launch(arrayOf("video/*"))
         }

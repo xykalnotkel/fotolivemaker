@@ -11,8 +11,10 @@ android {
         applicationId = "com.arena.motionphoto"
         minSdk = 26
         targetSdk = 34
-        versionCode = 1
-        versionName = "1.0"
+        // Versi diambil dari nomor run GitHub Actions supaya SELALU sinkron
+        // dengan tag Release dan nama file APK. Build lokal jatuh ke 0/1.0.0-dev.
+        versionCode = (System.getenv("BUILD_NUMBER") ?: "0").toInt()
+        versionName = System.getenv("BUILD_NUMBER")?.let { "1.0.$it" } ?: "1.0.0-dev"
     }
 
     buildTypes {
@@ -32,6 +34,7 @@ android {
     }
     buildFeatures {
         viewBinding = true
+        buildConfig = true
     }
 }
 
