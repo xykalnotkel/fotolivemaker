@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="20dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Video → Live Photo"
+            android:textSize="24sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:layout_marginBottom="16dp"
+            android:text="Hasil disimpan sebagai Motion Photo di DCIM/Camera"
+            android:textSize="13sp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnPick"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Pilih Video" />
+
+        <ImageView
+            android:id="@+id/preview"
+            android:layout_width="match_parent"
+            android:layout_height="260dp"
+            android:layout_marginTop="16dp"
+            android:background="#11000000"
+            android:scaleType="fitCenter"
+            android:contentDescription="Preview frame kunci" />
+
+        <TextView
+            android:id="@+id/tvInfo"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:text="Belum ada video dipilih"
+            android:textSize="13sp"
+            android:fontFamily="monospace" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="Mulai potong (detik)"
+            android:textStyle="bold" />
+
+        <com.google.android.material.slider.Slider
+            android:id="@+id/sliderStart"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:stepSize="0.1"
+            android:valueFrom="0"
+            android:valueTo="10"
+            android:value="0" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Durasi klip (detik) — 3 detik paling aman"
+            android:textStyle="bold" />
+
+        <com.google.android.material.slider.Slider
+            android:id="@+id/sliderDur"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:stepSize="0.1"
+            android:valueFrom="0.5"
+            android:valueTo="6"
+            android:value="3" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Posisi frame kunci (foto diamnya)"
+            android:textStyle="bold" />
+
+        <com.google.android.material.slider.Slider
+            android:id="@+id/sliderKey"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:stepSize="0.1"
+            android:valueFrom="0"
+            android:valueTo="3"
+            android:value="1.5" />
+
+        <com.google.android.material.materialswitch.MaterialSwitch
+            android:id="@+id/switchSquare"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="Crop 1:1 (kotak)" />
+
+        <com.google.android.material.materialswitch.MaterialSwitch
+            android:id="@+id/switch720"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Kualitas 720p (lebih kecil &amp; cepat)" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnConvert"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:text="Buat Live Photo" />
+
+        <ProgressBar
+            android:id="@+id/progress"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:visibility="gone"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:indeterminate="true" />
+
+        <TextView
+            android:id="@+id/tvStatus"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:textSize="12sp"
+            android:fontFamily="monospace" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginTop="24dp"
+            android:background="#22000000" />
+
+        <TextView
+            android:id="@+id/tvLegal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:layout_marginBottom="24dp"
+            android:textSize="11sp"
+            android:lineSpacingExtra="2dp"
+            android:text="@string/legal_notice" />
+
+    </LinearLayout>
+</ScrollView>

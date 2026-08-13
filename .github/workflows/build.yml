@@ -1,0 +1,101 @@
+name: Build APK
+
+# Otomatis saat push, atau jalankan manual dari tab Actions.
+# Setiap build sukses di branch utama otomatis jadi Release baru.
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: write   # dibutuhkan untuk membuat Release
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Ambil kode
+        uses: actions/checkout@v4
+
+      - name: Siapkan JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      # Gradle di-install oleh action ini, jadi kita TIDAK butuh
+      # gradle-wrapper.jar di repo (file biner susah di-upload dari HP).
+      - name: Siapkan Gradle
+        uses: gradle/actions/setup-gradle@v3
+        with:
+          gradle-version: '8.7'
+
+      - name: Tes unit (verifikasi format Motion Photo)
+        run: gradle :app:testDebugUnitTest --no-daemon --stacktrace
+
+      - name: Build APK release
+        run: gradle :app:assembleRelease --no-daemon --stacktrace
+
+      - name: Siapkan berkas APK
+        id: prep
+        run: |
+          mkdir -p out
+          VER="v1.0.${{ github.run_number }}"
+          cp app/build/outputs/apk/release/app-release.apk \
+             "out/LivePhotoMaker-${VER}.apk"
+          echo "version=${VER}" >> "$GITHUB_OUTPUT"
+          ls -la out
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: LivePhotoMaker-APK
+          path: out/*.apk
+          if-no-files-found: error
+          retention-days: 90
+
+      # ---- Release hanya dibuat untuk push ke branch utama ----
+      - name: Terbitkan Release
+        if: github.event_name != 'pull_request'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.prep.outputs.version }}
+          name: Live Photo Maker ${{ steps.prep.outputs.version }}
+          files: out/*.apk
+          generate_release_notes: true
+          body: |
+            ## Live Photo Maker ${{ steps.prep.outputs.version }}
+
+            Ubah video jadi **Motion Photo** — file yang muncul berlabel
+            **Live** di picker galeri TikTok saat mau posting.
+
+            ### Cara pasang
+            1. Download berkas `.apk` di bagian **Assets** di bawah
+            2. Buka berkasnya, izinkan **Install unknown apps** kalau diminta
+            3. Buka app → Pilih Video → atur slider → **Buat Live Photo**
+            4. Hasil tersimpan di `DCIM/Camera`
+
+            ### Catatan penting
+            - APK ditandatangani dengan **debug key**, jadi langsung bisa
+              di-install, tapi **jangan** diunggah ke Play Store apa adanya.
+            - Dukungan label Live **berbeda-beda tiap perangkat dan versi TikTok**.
+              Paling andal di Samsung (One UI) dan Google Pixel.
+            - Tes dulu di **Galeri bawaan**: kalau di sana sudah bergerak,
+              berarti format file sudah benar. Kalau galeri OK tapi TikTok tidak
+              mengenali, itu batasan di sisi TikTok.
+
+            ### Privasi
+            App berjalan **sepenuhnya offline**. Tidak ada izin `INTERNET`
+            sama sekali, jadi tidak mungkin mengirim data ke mana pun.
+
+            Lisensi MIT · Tanpa jaminan — lihat [TERMS.md](TERMS.md)
+
+      - name: Laporan tes kalau gagal
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: laporan-tes
+          path: app/build/reports/
+          if-no-files-found: ignore
