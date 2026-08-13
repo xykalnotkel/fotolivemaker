@@ -34,6 +34,7 @@ class ResultActivity : AppCompatActivity() {
     private var savedUri: Uri? = null
     private var clipFile: File? = null
     private var prepared = false
+    private var playedOk = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -41,16 +42,9 @@ class ResultActivity : AppCompatActivity() {
         setContentView(b.root)
 
         savedUri = intent.getStringExtra(EXTRA_URI)?.let(Uri::parse)
-        val log = intent.getStringExtra(EXTRA_LOG).orEmpty()
 
-        b.detail.text = log
-        val valid = log.contains("VALID")
-        b.statusTitle.text = if (valid) "Format valid" else "Format bermasalah"
-        b.statusSub.text = if (valid)
-            "Tersimpan di DCIM/Camera" else "Coba ulangi dengan pengaturan lain"
-        b.statusDot.setBackgroundResource(
-            if (valid) R.drawable.dot_ok else R.drawable.dot_bad
-        )
+        runVerification()
+        b.btnRecheck.setOnClickListener { runVerification() }
 
         b.btnClose.setOnClickListener { finish() }
         b.btnAgain.setOnClickListener { finish() }
@@ -66,6 +60,67 @@ class ResultActivity : AppCompatActivity() {
         prepareClip()
         setupHoldToPlay()
     }
+
+    /**
+     * Jalankan verifikasi sungguhan dan tampilkan hasilnya apa adanya.
+     * Badge LIVE hanya "menyala penuh" kalau Android sendiri yang
+     * mengonfirmasi file ini motion photo — bukan karena kita mengklaim.
+     */
+    private fun runVerification() {
+        val uri = savedUri ?: return
+        b.badgeText.text = "CEK…"
+        b.badgeIcon.alpha = 0.5f
+
+        lifecycleScope.launch {
+            val rep = withContext(Dispatchers.IO) {
+                MotionPhotoVerifier.verify(this@ResultActivity, uri)
+            }
+
+            b.statusTitle.text = rep.headline
+            b.detail.text = rep.detail
+
+            b.chkStruct.text = mark(rep.lengthOk && rep.xmpOk) +
+                "  Struktur file Motion Photo"
+            b.chkVideo.text = mark(rep.videoPlayable) +
+                "  Video bisa diputar" +
+                if (rep.videoPlayable) "  ·  ${rep.videoDurationMs} ms  ·  ${rep.videoSize}" else ""
+            b.chkSystem.text = when (rep.systemFlag) {
+                true -> mark(true) + "  Ditandai sistem Android"
+                false -> "○  Belum ditandai sistem — coba Cek ulang"
+                null -> "–  Penanda sistem tak tersedia di Android ini"
+            }
+
+            when (rep.level) {
+                MotionPhotoVerifier.Level.CONFIRMED -> {
+                    b.statusDot.setBackgroundResource(R.drawable.dot_ok)
+                    b.statusSub.text = "Android mengenali file ini sebagai motion photo"
+                    b.badgeText.text = "LIVE"
+                    b.badgeIcon.alpha = 1f
+                    b.badgeLive.alpha = 1f
+                    b.btnRecheck.visibility = View.GONE
+                }
+                MotionPhotoVerifier.Level.LIKELY -> {
+                    b.statusDot.setBackgroundResource(R.drawable.dot_accent)
+                    b.statusSub.text =
+                        "Struktur sudah benar. Tahan gambar untuk menguji."
+                    b.badgeText.text = "LIVE"
+                    b.badgeIcon.alpha = 1f
+                    b.badgeLive.alpha = 0.9f
+                    b.btnRecheck.visibility = View.VISIBLE
+                }
+                MotionPhotoVerifier.Level.FAILED -> {
+                    b.statusDot.setBackgroundResource(R.drawable.dot_bad)
+                    b.statusSub.text = "Coba ulangi dengan pengaturan lain"
+                    b.badgeText.text = "GAGAL"
+                    b.badgeIcon.alpha = 0.4f
+                    b.badgeLive.alpha = 0.7f
+                    b.btnRecheck.visibility = View.VISIBLE
+                }
+            }
+        }
+    }
+
+    private fun mark(ok: Boolean) = if (ok) "✓" else "✕"
 
     private fun loadStill() {
         val uri = savedUri ?: return
@@ -147,9 +202,11 @@ class ResultActivity : AppCompatActivity() {
         b.video.visibility = View.VISIBLE
         b.still.visibility = View.INVISIBLE
         b.hintHold.visibility = View.GONE
-        b.badgeLive.alpha = 1f
         b.video.seekTo(0)
         b.video.start()
+        // memutar = bukti nyata videonya hidup, jadi badge dinyalakan penuh
+        b.badgeLive.alpha = 1f
+        playedOk = true
     }
 
     private fun stopPlay() {
@@ -157,7 +214,7 @@ class ResultActivity : AppCompatActivity() {
         b.video.visibility = View.INVISIBLE
         b.still.visibility = View.VISIBLE
         b.hintHold.visibility = View.VISIBLE
-        b.badgeLive.alpha = 0.85f
+        if (playedOk) b.hintHold.text = "Berhasil diputar · tahan lagi"
     }
 
     private fun share() {

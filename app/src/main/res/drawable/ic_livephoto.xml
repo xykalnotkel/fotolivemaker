@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Ikon Live Photo yang sesungguhnya: inti padat, cincin tengah,
+  dan cincin luar putus-putus (12 segmen) — bentuk yang sama yang
+  dipakai iOS Photos dan galeri Android untuk menandai motion photo.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="48"
+    android:viewportHeight="48">
+
+    <!-- inti padat -->
+    <path
+        android:fillColor="@android:color/white"
+        android:pathData="M24,24m-5.6,0a5.6,5.6 0 1,1 11.2,0a5.6,5.6 0 1,1 -11.2,0z" />
+
+    <!-- cincin tengah -->
+    <path
+        android:strokeColor="@android:color/white"
+        android:strokeWidth="2.6"
+        android:fillColor="@android:color/transparent"
+        android:pathData="M24,24m-10.9,0a10.9,10.9 0 1,1 21.8,0a10.9,10.9 0 1,1 -21.8,0z" />
+
+    <!-- cincin luar putus-putus: 12 segmen mengelilingi -->
+    <group>
+        <path
+            android:strokeColor="@android:color/white"
+            android:strokeWidth="2.8"
+            android:strokeLineCap="round"
+            android:fillColor="@android:color/transparent"
+            android:pathData="M24,4.6 L24,7.4" />
+        <path
+            android:strokeColor="@android:color/white"
+            android:strokeWidth="2.8"
+            android:strokeLineCap="round"
+            android:fillColor="@android:color/transparent"
+            android:pathData="M33.7,7.2 L32.3,9.6" />
+        <path
+            android:strokeColor="@android:color/white"
+            android:strokeWidth="2.8"
+            android:strokeLineCap="round"
+            android:fillColor="@android:color/transparent"
+            android:pathData="M40.8,14.3 L38.4,15.7" />
+        <path
+            android:strokeColor="@android:color/white"
+            android:strokeWidth="2.8"
+            android:strokeLineCap="round"
+            android:fillColor="@android:color/transparent"
+            android:pathData="M43.4,24 L40.6,24" />
+        <path
+            android:strokeColor="@android:color/white"
+            android:strokeWidth="2.8"
+            android:strokeLineCap="round"
+            android:fillColor="@android:color/transparent"
+            android:pathData="M40.8,33.7 L38.4,32.3" />
+        <path
+            android:strokeColor="@android:color/white"
+            android:strokeWidth="2.8"
+            android:strokeLineCap="round"
+            android:fillColor="@android:color/transparent"
+            android:pathData="M33.7,40.8 L32.3,38.4" />
+        <path
+            android:strokeColor="@android:color/white"
+            android:strokeWidth="2.8"
+            android:strokeLineCap="round"
+            android:fillColor="@android:color/transparent"
+            android:pathData="M24,43.4 L24,40.6" />
+        <path
+            android:strokeColor="@android:color/white"
+            android:strokeWidth="2.8"
+            android:strokeLineCap="round"
+            android:fillColor="@android:color/transparent"
+            android:pathData="M14.3,40.8 L15.7,38.4" />
+        <path
+            android:strokeColor="@android:color/white"
+            android:strokeWidth="2.8"
+            android:strokeLineCap="round"
+            android:fillColor="@android:color/transparent"
+            android:pathData="M7.2,33.7 L9.6,32.3" />
+        <path
+            android:strokeColor="@android:color/white"
+            android:strokeWidth="2.8"
+            android:strokeLineCap="round"
+            android:fillColor="@android:color/transparent"
+            android:pathData="M4.6,24 L7.4,24" />
+        <path
+            android:strokeColor="@android:color/white"
+            android:strokeWidth="2.8"
+            android:strokeLineCap="round"
+            android:fillColor="@android:color/transparent"
+            android:pathData="M7.2,14.3 L9.6,15.7" />
+        <path
+            android:strokeColor="@android:color/white"
+            android:strokeWidth="2.8"
+            android:strokeLineCap="round"
+            android:fillColor="@android:color/transparent"
+            android:pathData="M14.3,7.2 L15.7,9.6" />
+    </group>
+</vector>

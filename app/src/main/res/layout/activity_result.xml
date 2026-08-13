@@ -73,7 +73,7 @@
                     android:layout_gravity="center"
                     android:visibility="invisible" />
 
-                <!-- badge LIVE ala iPhone -->
+                <!-- badge LIVE: ikon Live Photo asli, status dari verifikasi nyata -->
                 <LinearLayout
                     android:id="@+id/badgeLive"
                     android:layout_width="wrap_content"
@@ -89,13 +89,15 @@
                     android:paddingBottom="6dp">
 
                     <ImageView
-                        android:layout_width="14dp"
-                        android:layout_height="14dp"
-                        android:src="@drawable/ic_live"
+                        android:id="@+id/badgeIcon"
+                        android:layout_width="15dp"
+                        android:layout_height="15dp"
+                        android:src="@drawable/ic_livephoto"
                         app:tint="@color/text_hi"
-                        android:contentDescription="Live" />
+                        android:contentDescription="Live Photo" />
 
                     <TextView
+                        android:id="@+id/badgeText"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="6dp"
@@ -164,6 +166,57 @@
                         android:textColor="@color/text_dim"
                         android:textSize="12sp" />
                 </LinearLayout>
+
+                <TextView
+                    android:id="@+id/btnRecheck"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:padding="8dp"
+                    android:text="Cek ulang"
+                    android:textColor="@color/accent"
+                    android:textSize="12sp"
+                    android:textStyle="bold"
+                    android:visibility="gone" />
+            </LinearLayout>
+
+            <!-- rincian 3 pemeriksaan -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginTop="12dp"
+                android:background="@drawable/bg_card"
+                android:padding="18dp">
+
+                <TextView
+                    style="@style/Label"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Hasil pemeriksaan" />
+
+                <TextView
+                    android:id="@+id/chkStruct"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:textColor="@color/text_mid"
+                    android:textSize="13sp" />
+
+                <TextView
+                    android:id="@+id/chkVideo"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:textColor="@color/text_mid"
+                    android:textSize="13sp" />
+
+                <TextView
+                    android:id="@+id/chkSystem"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:textColor="@color/text_mid"
+                    android:textSize="13sp" />
             </LinearLayout>
 
             <!-- detail teknis, bisa dibuka -->

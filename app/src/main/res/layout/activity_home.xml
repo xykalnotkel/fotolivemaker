@@ -15,7 +15,7 @@
     <ImageView
         android:layout_width="88dp"
         android:layout_height="88dp"
-        android:src="@drawable/ic_live"
+        android:src="@drawable/ic_livephoto"
         app:tint="@color/accent"
         xmlns:app="http://schemas.android.com/apk/res-auto"
         android:contentDescription="@string/app_name" />
