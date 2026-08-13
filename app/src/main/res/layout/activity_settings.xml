@@ -6,21 +6,22 @@
     android:orientation="vertical"
     android:background="@color/paper">
 
+    <!-- Top Header -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:gravity="center_vertical"
-        android:paddingStart="8dp"
-        android:paddingEnd="20dp"
-        android:paddingTop="10dp"
-        android:paddingBottom="10dp">
+        android:paddingStart="12dp"
+        android:paddingEnd="16dp"
+        android:paddingTop="12dp"
+        android:paddingBottom="12dp">
 
         <ImageView
             android:id="@+id/btnBack"
-            android:layout_width="44dp"
-            android:layout_height="44dp"
-            android:padding="11dp"
+            android:layout_width="42dp"
+            android:layout_height="42dp"
+            android:padding="10dp"
             android:src="@drawable/ic_back"
             android:background="?attr/selectableItemBackgroundBorderless"
             app:tint="@color/ink"
@@ -29,15 +30,18 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="4dp"
+            android:layout_marginStart="6dp"
             android:text="Pengaturan"
             android:textColor="@color/text_hi"
             android:textSize="18sp"
-            android:textStyle="bold" />
+            android:textStyle="bold"
+            android:letterSpacing="-0.02" />
     </LinearLayout>
 
-    <View android:layout_width="match_parent"
-        android:layout_height="1.5dp" android:background="@color/line" />
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/line" />
 
     <ScrollView
         android:layout_width="match_parent"
@@ -49,39 +53,26 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="20dp">
+            android:paddingStart="20dp"
+            android:paddingEnd="20dp"
+            android:paddingTop="18dp"
+            android:paddingBottom="28dp">
 
             <!-- ====== PENYIMPANAN ====== -->
-            <LinearLayout
-                android:layout_width="match_parent"
+            <TextView
+                style="@style/Label"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical">
-
-                <ImageView
-                    android:layout_width="15dp"
-                    android:layout_height="15dp"
-                    android:src="@drawable/ic_stats"
-                    app:tint="@color/text_dim"
-                    android:contentDescription="@null" />
-
-                <TextView
-                    style="@style/Label"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
-                    android:text="Penyimpanan" />
-            </LinearLayout>
+                android:text="Penyimpanan" />
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:layout_marginTop="12dp"
+                android:layout_marginTop="10dp"
                 android:background="@drawable/bg_card"
-                android:padding="20dp">
+                android:padding="18dp">
 
-                <!-- angka besar -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -100,7 +91,7 @@
                             android:layout_height="wrap_content"
                             android:text="—"
                             android:textColor="@color/ink"
-                            android:textSize="26sp"
+                            android:textSize="24sp"
                             android:textStyle="bold"
                             android:letterSpacing="-0.03" />
 
@@ -109,7 +100,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="1dp"
-                            android:text="hasil"
+                            android:text="hasil dibuat"
                             android:textColor="@color/text_dim"
                             android:textSize="11sp" />
                     </LinearLayout>
@@ -133,7 +124,7 @@
                             android:layout_height="wrap_content"
                             android:text="—"
                             android:textColor="@color/ink"
-                            android:textSize="26sp"
+                            android:textSize="24sp"
                             android:textStyle="bold"
                             android:letterSpacing="-0.03" />
 
@@ -141,21 +132,20 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="1dp"
-                            android:text="sisa ruang"
+                            android:text="sisa memori"
                             android:textColor="@color/text_dim"
                             android:textSize="11sp" />
                     </LinearLayout>
                 </LinearLayout>
 
-                <!-- bar pemakaian penyimpanan -->
                 <ProgressBar
                     android:id="@+id/barStorage"
                     style="?android:attr/progressBarStyleHorizontal"
                     android:layout_width="match_parent"
                     android:layout_height="6dp"
-                    android:layout_marginTop="18dp"
+                    android:layout_marginTop="16dp"
                     android:max="100"
-                    android:progressTint="@color/ink"
+                    android:progressTint="@color/accent_primary"
                     android:progressBackgroundTint="@color/line" />
 
                 <TextView
@@ -167,42 +157,35 @@
                     android:textSize="11sp"
                     android:fontFamily="monospace" />
 
-                <View android:layout_width="match_parent"
+                <View
+                    android:layout_width="match_parent"
                     android:layout_height="1dp"
-                    android:layout_marginTop="18dp"
+                    android:layout_marginTop="16dp"
                     android:layout_marginBottom="4dp"
                     android:background="@color/line" />
 
-                <!-- rincian -->
                 <LinearLayout
+                    android:id="@+id/rowCache"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
-                    android:minHeight="42dp"
-                    android:gravity="center_vertical">
-
-                    <ImageView
-                        android:layout_width="16dp"
-                        android:layout_height="16dp"
-                        android:src="@drawable/ic_storage"
-                        app:tint="@color/text_mid"
-                        android:contentDescription="@null" />
+                    android:minHeight="44dp"
+                    android:gravity="center_vertical"
+                    android:background="?attr/selectableItemBackground">
 
                     <TextView
                         android:layout_width="0dp"
                         android:layout_weight="1"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="12dp"
-                        android:text="Dipakai aplikasi"
+                        android:text="Bersihkan cache sementara"
                         android:textColor="@color/text_hi"
                         android:textSize="13sp" />
 
                     <TextView
-                        android:id="@+id/statData"
+                        android:id="@+id/statCache"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="—"
-                        android:textColor="@color/text_mid"
+                        android:textColor="@color/text_dim"
                         android:textSize="12sp"
                         android:fontFamily="monospace" />
                 </LinearLayout>
@@ -212,201 +195,34 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
-                    android:minHeight="42dp"
+                    android:minHeight="44dp"
                     android:gravity="center_vertical"
                     android:background="?attr/selectableItemBackground">
-
-                    <ImageView
-                        android:layout_width="16dp"
-                        android:layout_height="16dp"
-                        android:src="@drawable/ic_trash"
-                        app:tint="@color/text_mid"
-                        android:contentDescription="@null" />
 
                     <TextView
                         android:layout_width="0dp"
                         android:layout_weight="1"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="12dp"
-                        android:text="Hapus semua hasil"
-                        android:textColor="@color/text_hi"
-                        android:textSize="13sp" />
-                </LinearLayout>
-
-                <LinearLayout
-                    android:id="@+id/rowCache"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:minHeight="42dp"
-                    android:gravity="center_vertical"
-                    android:background="?attr/selectableItemBackground">
-
-                    <ImageView
-                        android:layout_width="16dp"
-                        android:layout_height="16dp"
-                        android:src="@drawable/ic_trash"
-                        app:tint="@color/text_mid"
-                        android:contentDescription="@null" />
-
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_weight="1"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="12dp"
-                        android:orientation="vertical">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Cache sementara"
-                            android:textColor="@color/text_hi"
-                            android:textSize="13sp" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Ketuk untuk membersihkan"
-                            android:textColor="@color/text_dim"
-                            android:textSize="10sp" />
-                    </LinearLayout>
-
-                    <TextView
-                        android:id="@+id/statCache"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="—"
-                        android:textColor="@color/text_mid"
-                        android:textSize="12sp"
-                        android:fontFamily="monospace" />
-                </LinearLayout>
-            </LinearLayout>
-
-            <!-- ====== TAMPILAN ====== -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:layout_marginTop="28dp">
-
-                <ImageView
-                    android:layout_width="15dp"
-                    android:layout_height="15dp"
-                    android:src="@drawable/ic_theme"
-                    app:tint="@color/text_dim"
-                    android:contentDescription="@null" />
-
-                <TextView
-                    style="@style/Label"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
-                    android:text="Tampilan" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:layout_marginTop="12dp"
-                android:background="@drawable/bg_card"
-                android:paddingStart="18dp"
-                android:paddingEnd="18dp">
-
-                <com.google.android.material.materialswitch.MaterialSwitch
-                    android:id="@+id/swKeepScreenOn"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:minHeight="64dp"
-                    android:text="Jaga layar tetap menyala"
-                    android:textColor="@color/text_hi"
-                    android:textSize="14sp"
-                    android:checked="true" />
-
-                <View android:layout_width="match_parent"
-                    android:layout_height="1dp" android:background="@color/line" />
-
-                <com.google.android.material.materialswitch.MaterialSwitch
-                    android:id="@+id/swSplash"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:minHeight="64dp"
-                    android:text="Splash singkat saat buka"
-                    android:textColor="@color/text_hi"
-                    android:textSize="14sp"
-                    android:checked="true" />
-
-                <View android:layout_width="match_parent"
-                    android:layout_height="1dp" android:background="@color/line" />
-
-                <LinearLayout
-                    android:id="@+id/rowTheme"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:minHeight="56dp"
-                    android:gravity="center_vertical"
-                    android:background="?attr/selectableItemBackground">
-
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_weight="1"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Tema"
-                            android:textColor="@color/text_hi"
-                            android:textSize="14sp" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Terang, gelap, atau ikut sistem"
-                            android:textColor="@color/text_dim"
-                            android:textSize="11sp" />
-                    </LinearLayout>
-
-                    <TextView
-                        android:id="@+id/tvTheme"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textColor="@color/ink"
+                        android:text="Hapus seluruh hasil Live Photo"
+                        android:textColor="@color/bad"
                         android:textSize="13sp"
                         android:textStyle="bold" />
                 </LinearLayout>
             </LinearLayout>
 
-            <!-- ====== BAWAAN PROJECT ====== -->
-            <LinearLayout
-                android:layout_width="match_parent"
+            <!-- ====== PREFERENSI EXPORT ====== -->
+            <TextView
+                style="@style/Label"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:layout_marginTop="28dp">
-
-                <ImageView
-                    android:layout_width="15dp"
-                    android:layout_height="15dp"
-                    android:src="@drawable/ic_gear"
-                    app:tint="@color/text_dim"
-                    android:contentDescription="@null" />
-
-                <TextView
-                    style="@style/Label"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
-                    android:text="Bawaan project baru" />
-            </LinearLayout>
+                android:layout_marginTop="24dp"
+                android:text="Preferensi Ekspor" />
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:layout_marginTop="12dp"
+                android:layout_marginTop="10dp"
                 android:background="@drawable/bg_card"
                 android:paddingStart="18dp"
                 android:paddingEnd="18dp">
@@ -415,7 +231,7 @@
                     android:id="@+id/rowRes"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:minHeight="56dp"
+                    android:minHeight="52dp"
                     android:gravity="center_vertical"
                     android:background="?attr/selectableItemBackground">
 
@@ -423,7 +239,7 @@
                         android:layout_width="0dp"
                         android:layout_weight="1"
                         android:layout_height="wrap_content"
-                        android:text="Resolusi"
+                        android:text="Resolusi Bawaan"
                         android:textColor="@color/text_hi"
                         android:textSize="14sp" />
 
@@ -431,56 +247,18 @@
                         android:id="@+id/tvRes"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:textColor="@color/ink"
+                        android:textColor="@color/accent_primary"
                         android:textSize="13sp"
-                        android:textStyle="bold"
-                        android:fontFamily="monospace" />
+                        android:textStyle="bold" />
                 </LinearLayout>
 
-                <View android:layout_width="match_parent"
-                    android:layout_height="1dp" android:background="@color/line" />
-
-                <com.google.android.material.materialswitch.MaterialSwitch
-                    android:id="@+id/swSquare"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:minHeight="56dp"
-                    android:text="Crop kotak 1:1"
-                    android:textColor="@color/text_hi"
-                    android:textSize="14sp" />
-
-                <View android:layout_width="match_parent"
-                    android:layout_height="1dp" android:background="@color/line" />
-
-                <com.google.android.material.materialswitch.MaterialSwitch
-                    android:id="@+id/swEnhance"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:minHeight="56dp"
-                    android:text="Bersih (video + foto)"
-                    android:textColor="@color/text_hi"
-                    android:textSize="14sp" />
-
-                <View android:layout_width="match_parent"
-                    android:layout_height="1dp" android:background="@color/line" />
-
-                <com.google.android.material.materialswitch.MaterialSwitch
-                    android:id="@+id/swStab"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:minHeight="56dp"
-                    android:text="Stabilkan guncangan"
-                    android:textColor="@color/text_hi"
-                    android:textSize="14sp" />
-
-                <View android:layout_width="match_parent"
-                    android:layout_height="1dp" android:background="@color/line" />
+                <View android:layout_width="match_parent" android:layout_height="1dp" android:background="@color/line" />
 
                 <LinearLayout
                     android:id="@+id/rowQuality"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:minHeight="56dp"
+                    android:minHeight="52dp"
                     android:gravity="center_vertical"
                     android:background="?attr/selectableItemBackground">
 
@@ -488,7 +266,7 @@
                         android:layout_width="0dp"
                         android:layout_weight="1"
                         android:layout_height="wrap_content"
-                        android:text="Kualitas JPEG"
+                        android:text="Kualitas Cover JPEG"
                         android:textColor="@color/text_hi"
                         android:textSize="14sp" />
 
@@ -496,50 +274,264 @@
                         android:id="@+id/tvQuality"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:textColor="@color/ink"
+                        android:textColor="@color/accent_primary"
                         android:textSize="13sp"
-                        android:textStyle="bold"
-                        android:fontFamily="monospace" />
+                        android:textStyle="bold" />
+                </LinearLayout>
+
+                <View android:layout_width="match_parent" android:layout_height="1dp" android:background="@color/line" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:minHeight="56dp"
+                    android:gravity="center_vertical">
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Jaga Layar Tetap Menyala"
+                            android:textColor="@color/text_hi"
+                            android:textSize="14sp" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:text="Mencegah sleep saat proses ekspor"
+                            android:textColor="@color/text_dim"
+                            android:textSize="11sp" />
+                    </LinearLayout>
+
+                    <com.google.android.material.materialswitch.MaterialSwitch
+                        android:id="@+id/swKeepScreenOn"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" />
                 </LinearLayout>
             </LinearLayout>
 
+            <!-- ====== AKSESIBILITAS & INTERAKSI ====== -->
             <TextView
-                android:layout_width="match_parent"
+                style="@style/Label"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:text="Bersih: redam noise di video+foto, lalu pulihkan tepi yang empuk karena zoom stabilizer. Stabil: geser + putar ringan. Mau filter TikTok? Matikan keduanya."
-                android:textColor="@color/text_dim"
-                android:textSize="11sp"
-                android:lineSpacingExtra="2dp" />
-
-            <!-- ====== TENTANG ====== -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:layout_marginTop="28dp">
-
-                <ImageView
-                    android:layout_width="15dp"
-                    android:layout_height="15dp"
-                    android:src="@drawable/ic_info"
-                    app:tint="@color/text_dim"
-                    android:contentDescription="@null" />
-
-                <TextView
-                    style="@style/Label"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
-                    android:text="Tentang" />
-            </LinearLayout>
+                android:layout_marginTop="24dp"
+                android:text="Aksesibilitas &amp; Interaksi" />
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:layout_marginTop="12dp"
+                android:layout_marginTop="10dp"
+                android:background="@drawable/bg_card"
+                android:paddingStart="18dp"
+                android:paddingEnd="18dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:minHeight="56dp"
+                    android:gravity="center_vertical">
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Mode Kontras Tinggi"
+                            android:textColor="@color/text_hi"
+                            android:textSize="14sp" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:text="Tingkatkan ketebalan garis &amp; kepekatan teks"
+                            android:textColor="@color/text_dim"
+                            android:textSize="11sp" />
+                    </LinearLayout>
+
+                    <com.google.android.material.materialswitch.MaterialSwitch
+                        android:id="@+id/swHighContrast"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" />
+                </LinearLayout>
+
+                <View android:layout_width="match_parent" android:layout_height="1dp" android:background="@color/line" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:minHeight="56dp"
+                    android:gravity="center_vertical">
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Umpan Balik Getar (Haptics)"
+                            android:textColor="@color/text_hi"
+                            android:textSize="14sp" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:text="Getaran mikro saat menggeser slider &amp; tombol"
+                            android:textColor="@color/text_dim"
+                            android:textSize="11sp" />
+                    </LinearLayout>
+
+                    <com.google.android.material.materialswitch.MaterialSwitch
+                        android:id="@+id/swHaptics"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" />
+                </LinearLayout>
+
+                <View android:layout_width="match_parent" android:layout_height="1dp" android:background="@color/line" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:minHeight="56dp"
+                    android:gravity="center_vertical">
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Kurangi Animasi (Reduce Motion)"
+                            android:textColor="@color/text_hi"
+                            android:textSize="14sp" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:text="Matikan transisi untuk performa instan"
+                            android:textColor="@color/text_dim"
+                            android:textSize="11sp" />
+                    </LinearLayout>
+
+                    <com.google.android.material.materialswitch.MaterialSwitch
+                        android:id="@+id/swReduceMotion"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- ====== TAMPILAN ====== -->
+            <TextView
+                style="@style/Label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:text="Tampilan &amp; Tema" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginTop="10dp"
+                android:background="@drawable/bg_card"
+                android:paddingStart="18dp"
+                android:paddingEnd="18dp">
+
+                <LinearLayout
+                    android:id="@+id/rowTheme"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:minHeight="52dp"
+                    android:gravity="center_vertical"
+                    android:background="?attr/selectableItemBackground">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        android:layout_height="wrap_content"
+                        android:text="Tema Warna"
+                        android:textColor="@color/text_hi"
+                        android:textSize="14sp" />
+
+                    <TextView
+                        android:id="@+id/tvTheme"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/accent_primary"
+                        android:textSize="13sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+
+                <View android:layout_width="match_parent" android:layout_height="1dp" android:background="@color/line" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:minHeight="56dp"
+                    android:gravity="center_vertical">
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Animasi Splash Pembuka"
+                            android:textColor="@color/text_hi"
+                            android:textSize="14sp" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:text="Tampilkan intro singkat saat membuka app"
+                            android:textColor="@color/text_dim"
+                            android:textSize="11sp" />
+                    </LinearLayout>
+
+                    <com.google.android.material.materialswitch.MaterialSwitch
+                        android:id="@+id/swSplash"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- ====== INFORMASI ====== -->
+            <TextView
+                style="@style/Label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:text="Tentang Aplikasi" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginTop="10dp"
                 android:background="@drawable/bg_card"
                 android:paddingStart="18dp"
                 android:paddingEnd="18dp">
@@ -555,13 +547,12 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Lisensi &amp; Privasi"
+                        android:text="Lisensi &amp; Privasi Data"
                         android:textColor="@color/text_hi"
                         android:textSize="14sp" />
                 </LinearLayout>
 
-                <View android:layout_width="match_parent"
-                    android:layout_height="1dp" android:background="@color/line" />
+                <View android:layout_width="match_parent" android:layout_height="1dp" android:background="@color/line" />
 
                 <LinearLayout
                     android:id="@+id/rowSource"
@@ -574,7 +565,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Kode sumber di GitHub"
+                        android:text="Kode Sumber di GitHub"
                         android:textColor="@color/text_hi"
                         android:textSize="14sp" />
                 </LinearLayout>
@@ -584,7 +575,7 @@
                 android:id="@+id/tvVersion"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="22dp"
+                android:layout_marginTop="24dp"
                 android:gravity="center"
                 android:textColor="@color/text_dim"
                 android:textSize="11sp"

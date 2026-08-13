@@ -7,7 +7,6 @@ import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
@@ -40,9 +39,16 @@ class MainActivity : AppCompatActivity() {
         opts = Settings.load(this)
 
         b.btnBack.setOnClickListener { finish() }
-        b.btnExport.setOnClickListener { openExport() }
-        b.toolRatio.setOnClickListener { pickRatio() }
+        b.btnExport.setOnClickListener {
+            Settings.triggerHaptic(it)
+            openExport()
+        }
+        b.toolRatio.setOnClickListener {
+            Settings.triggerHaptic(it)
+            pickRatio()
+        }
         b.toolEnhance.setOnClickListener {
+            Settings.triggerHaptic(it)
             opts = opts.copy(enhance = !opts.enhance)
             paintTools(); updatePlanText(); refreshPreview()
             toast(
@@ -51,6 +57,7 @@ class MainActivity : AppCompatActivity() {
             )
         }
         b.toolStab.setOnClickListener {
+            Settings.triggerHaptic(it)
             opts = opts.copy(stabilize = !opts.stabilize)
             paintTools(); updatePlanText()
             toast(
@@ -58,7 +65,10 @@ class MainActivity : AppCompatActivity() {
                 else "Stabilisasi dinonaktifkan"
             )
         }
-        b.toolRes.setOnClickListener { pickRes() }
+        b.toolRes.setOnClickListener {
+            Settings.triggerHaptic(it)
+            pickRes()
+        }
 
         b.sliderStart.addOnChangeListener { _, value, fromUser ->
             if (bindingSliders || !fromUser) return@addOnChangeListener
@@ -101,45 +111,56 @@ class MainActivity : AppCompatActivity() {
 
     private fun pickRatio() {
         val items = Converter.AspectRatio.entries.toTypedArray()
-        val labels = items.map {
+        val choices = items.map {
             when (it) {
-                Converter.AspectRatio.ORIGINAL -> "Asli · Mengikuti rasio video sumber"
-                Converter.AspectRatio.RATIO_9_16 -> "9:16 · Layar Penuh (TikTok / Reels / Story)"
-                Converter.AspectRatio.RATIO_3_4 -> "3:4 · Standar Foto Portrait"
-                Converter.AspectRatio.RATIO_1_1 -> "1:1 · Persegi / Square Feed"
-                Converter.AspectRatio.RATIO_4_3 -> "4:3 · Format Foto Klasik"
-                Converter.AspectRatio.RATIO_16_9 -> "16:9 · Landscape Cinematic"
+                Converter.AspectRatio.ORIGINAL -> CustomDialogs.ChoiceItem("Asli", "Mengikuti rasio bawaan sensor video")
+                Converter.AspectRatio.RATIO_9_16 -> CustomDialogs.ChoiceItem("9:16 (Layar Penuh)", "Format vertikal untuk TikTok, IG Reels, dan Story")
+                Converter.AspectRatio.RATIO_3_4 -> CustomDialogs.ChoiceItem("3:4 (Portrait)", "Standar rasio kamera portrait")
+                Converter.AspectRatio.RATIO_1_1 -> CustomDialogs.ChoiceItem("1:1 (Persegi)", "Format persegi untuk thumbnail & feed")
+                Converter.AspectRatio.RATIO_4_3 -> CustomDialogs.ChoiceItem("4:3 (Klasik)", "Format foto klasik kamera digital")
+                Converter.AspectRatio.RATIO_16_9 -> CustomDialogs.ChoiceItem("16:9 (Landscape)", "Format horizontal cinematic")
             }
-        }.toTypedArray()
+        }
 
-        AlertDialog.Builder(this)
-            .setTitle("Pilih Rasio Aspek")
-            .setSingleChoiceItems(labels, items.indexOf(opts.aspectRatio)) { dialog, which ->
-                opts = opts.copy(aspectRatio = items[which])
-                paintTools()
-                updatePlanText()
-                refreshPreview()
-                dialog.dismiss()
-            }
-            .show()
+        CustomDialogs.showChoiceDialog(
+            this,
+            title = "Rasio Aspek",
+            subtitle = "Pilih proporsi framing untuk foto cover dan video Live",
+            choices = choices,
+            selectedIndex = items.indexOf(opts.aspectRatio)
+        ) { which ->
+            opts = opts.copy(aspectRatio = items[which])
+            paintTools()
+            updatePlanText()
+            refreshPreview()
+        }
     }
 
     private fun pickRes() {
         val items = Converter.Res.entries.toTypedArray()
-        val labels = items.map {
+        val choices = items.map {
             when (it) {
-                Converter.Res.P720 -> "Hemat · 720p — proses lebih cepat & file ringan"
-                Converter.Res.P1080 -> "HD · 1080p — tajam & seimbang (direkomendasikan)"
-                Converter.Res.SOURCE ->
-                    if (srcH > 0) "Asli · ${srcW}x${srcH} — kualitas maksimal sumber" else "Asli"
+                Converter.Res.P720 -> CustomDialogs.ChoiceItem("720p (Hemat)", "Proses lebih cepat & ukuran berkas lebih ringan")
+                Converter.Res.P1080 -> CustomDialogs.ChoiceItem("1080p (Full HD)", "Kualitas tajam & seimbang (sangat direkomendasikan)")
+                Converter.Res.SOURCE -> CustomDialogs.ChoiceItem(
+                    "Resolusi Asli" + if (srcH > 0) " (${srcW}x${srcH})" else "",
+                    "Mengikuti resolusi maksimal video tanpa downscaling"
+                )
             }
-        }.toTypedArray()
-        AlertDialog.Builder(this)
-            .setTitle("Kualitas Resolusi")
-            .setSingleChoiceItems(labels, items.indexOf(opts.res)) { dialog, which ->
-                opts = opts.copy(res = items[which])
-                paintTools(); updatePlanText(); refreshPreview(); dialog.dismiss()
-            }.show()
+        }
+
+        CustomDialogs.showChoiceDialog(
+            this,
+            title = "Kualitas Resolusi",
+            subtitle = "Pilih resolusi hasil ekspor",
+            choices = choices,
+            selectedIndex = items.indexOf(opts.res)
+        ) { which ->
+            opts = opts.copy(res = items[which])
+            paintTools()
+            updatePlanText()
+            refreshPreview()
+        }
     }
 
     private fun loadVideo(uri: Uri) = lifecycleScope.launch {

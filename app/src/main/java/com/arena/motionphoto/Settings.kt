@@ -1,6 +1,9 @@
 package com.arena.motionphoto
 
 import android.content.Context
+import android.os.Build
+import android.view.HapticFeedbackConstants
+import android.view.View
 
 /** Pengaturan yang tersimpan antar sesi. */
 object Settings {
@@ -16,6 +19,11 @@ object Settings {
     private const val K_KEEP_SCREEN_ON = "keep_screen_on"
     private const val K_SEEN_SPLASH = "seen_splash"
     private const val K_SHOW_SPLASH = "show_splash"
+
+    // Pengaturan Aksesibilitas & Kontras
+    private const val K_HIGH_CONTRAST = "high_contrast"
+    private const val K_HAPTICS = "haptics"
+    private const val K_REDUCE_MOTION = "reduce_motion"
 
     /** 0 = ikut sistem, 1 = terang, 2 = gelap */
     const val THEME_SYSTEM = 0
@@ -67,6 +75,37 @@ object Settings {
 
     fun setKeepScreenOn(c: Context, enabled: Boolean) {
         sp(c).edit().putBoolean(K_KEEP_SCREEN_ON, enabled).apply()
+    }
+
+    // Aksesibilitas: High Contrast, Haptics, Reduce Motion
+    fun isHighContrast(c: Context): Boolean = sp(c).getBoolean(K_HIGH_CONTRAST, false)
+
+    fun setHighContrast(c: Context, enabled: Boolean) {
+        sp(c).edit().putBoolean(K_HIGH_CONTRAST, enabled).apply()
+    }
+
+    fun isHapticsEnabled(c: Context): Boolean = sp(c).getBoolean(K_HAPTICS, true)
+
+    fun setHapticsEnabled(c: Context, enabled: Boolean) {
+        sp(c).edit().putBoolean(K_HAPTICS, enabled).apply()
+    }
+
+    fun isReduceMotion(c: Context): Boolean = sp(c).getBoolean(K_REDUCE_MOTION, false)
+
+    fun setReduceMotion(c: Context, enabled: Boolean) {
+        sp(c).edit().putBoolean(K_REDUCE_MOTION, enabled).apply()
+    }
+
+    fun triggerHaptic(view: View) {
+        if (isHapticsEnabled(view.context)) {
+            view.performHapticFeedback(
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    HapticFeedbackConstants.CONTEXT_CLICK
+                } else {
+                    HapticFeedbackConstants.VIRTUAL_KEY
+                }
+            )
+        }
     }
 
     fun setTheme(c: Context, mode: Int) {
