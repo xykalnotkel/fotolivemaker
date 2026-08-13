@@ -352,7 +352,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="6dp"
-                    android:text="Jangan pakai tombol Bagikan. Aplikasi penerima memproses ulang gambarnya, jadi bagian video di dalam berkas ikut terbuang dan yang sampai cuma foto diam.\n\nBerkasnya harus dipilih langsung dari galeri di dalam TikTok, lewat tombol + lalu tab Upload."
+                    android:text="Jangan pakai tombol Bagikan. Pilih berkasnya langsung dari galeri di TikTok (+ lalu Upload).\n\nKalau mau tambah filter/beauty TikTok, export ulang tanpa Bersih &amp; Stabil. Filter mereka menumpuk di atas efek kita jadi kelihatan aneh."
                     android:textColor="@color/text_dim"
                     android:textSize="12sp"
                     android:lineSpacingExtra="4dp" />
