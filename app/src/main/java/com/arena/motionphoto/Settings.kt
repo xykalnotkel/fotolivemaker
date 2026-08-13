@@ -11,6 +11,12 @@ object Settings {
     private const val K_ENHANCE = "enhance"
     private const val K_STAB = "stabilize"
     private const val K_QUALITY = "jpeg_quality"
+    private const val K_THEME = "theme"
+
+    /** 0 = ikut sistem, 1 = terang, 2 = gelap */
+    const val THEME_SYSTEM = 0
+    const val THEME_LIGHT = 1
+    const val THEME_DARK = 2
 
     private fun sp(c: Context) = c.getSharedPreferences(FILE, Context.MODE_PRIVATE)
 
@@ -25,6 +31,23 @@ object Settings {
             enhance = p.getBoolean(K_ENHANCE, false),
             stabilize = p.getBoolean(K_STAB, false),
             jpegQuality = p.getInt(K_QUALITY, 95)
+        )
+    }
+
+    fun theme(c: Context): Int = sp(c).getInt(K_THEME, THEME_SYSTEM)
+
+    fun setTheme(c: Context, mode: Int) {
+        sp(c).edit().putInt(K_THEME, mode).apply()
+        applyTheme(mode)
+    }
+
+    fun applyTheme(mode: Int) {
+        androidx.appcompat.app.AppCompatDelegate.setDefaultNightMode(
+            when (mode) {
+                THEME_LIGHT -> androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_NO
+                THEME_DARK -> androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_YES
+                else -> androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
+            }
         )
     }
 

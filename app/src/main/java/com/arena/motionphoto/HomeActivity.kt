@@ -88,6 +88,9 @@ class HomeActivity : AppCompatActivity() {
             val items = withContext(Dispatchers.IO) { ProjectStore.list(this@HomeActivity) }
             adapter.submit(items)
             b.tvCount.text = if (items.isEmpty()) "" else "${items.size}"
+            val bytes = items.sumOf { it.sizeBytes }
+            b.heroStat.text = if (items.isEmpty()) "SIAP DIPAKAI"
+                else "${items.size} HASIL  ·  ${Stats.human(bytes)}"
             b.emptyBox.visibility = if (items.isEmpty()) View.VISIBLE else View.GONE
             b.list.visibility = if (items.isEmpty()) View.GONE else View.VISIBLE
         }

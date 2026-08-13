@@ -148,7 +148,10 @@ class ResultActivity : AppCompatActivity() {
                 b.hintHold.text = "Tahan untuk memutar"
             }
             Mode.LOOP -> {
-                b.hintHold.visibility = View.GONE
+                // Putar berulang terus. Berkasnya TIDAK diubah sama sekali —
+                // ini hanya cara menonton, jadi statusnya tetap Live Photo.
+                b.hintHold.visibility = View.VISIBLE
+                b.hintHold.text = "Diputar berulang · berkas tetap Live Photo"
                 if (prepared) startPlay() else
                     Toast.makeText(this, "Video belum siap…", Toast.LENGTH_SHORT).show()
             }

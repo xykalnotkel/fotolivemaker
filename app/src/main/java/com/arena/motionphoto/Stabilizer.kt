@@ -38,13 +38,36 @@ object Stabilizer {
     /** Berapa frame yang dianalisis. Lebih banyak = lebih akurat, lebih lama. */
     private const val MAX_SAMPLES = 45
 
-    data class Result(
-        /** Zoom yang diperlukan, mis. 1.08 = perbesar 8%. */
+    /**
+     * Rencana koreksi: zoom + tabel pergeseran per waktu.
+     *
+     * offsets disimpan dalam satuan UV (pecahan lebar/tinggi frame),
+     * siap dipakai langsung oleh shader.
+     */
+    data class Plan(
         val zoom: Float,
-        /** Guncangan rata-rata (piksel skala analisis), untuk laporan. */
         val shakiness: Float,
-        val sampleCount: Int
-    )
+        val sampleCount: Int,
+        /** waktu tiap sampel, milidetik relatif terhadap awal klip */
+        val timesMs: LongArray,
+        val offsetX: FloatArray,
+        val offsetY: FloatArray
+    ) {
+        /** Koreksi pada waktu tertentu, diinterpolasi antar sampel. */
+        fun offsetAt(tMs: Long): Pair<Float, Float> {
+            if (timesMs.isEmpty()) return 0f to 0f
+            if (tMs <= timesMs.first()) return offsetX.first() to offsetY.first()
+            if (tMs >= timesMs.last()) return offsetX.last() to offsetY.last()
+
+            var i = 1
+            while (i < timesMs.size && timesMs[i] < tMs) i++
+            val t0 = timesMs[i - 1]
+            val t1 = timesMs[i]
+            val f = if (t1 == t0) 0f else (tMs - t0).toFloat() / (t1 - t0)
+            return (offsetX[i - 1] + (offsetX[i] - offsetX[i - 1]) * f) to
+                   (offsetY[i - 1] + (offsetY[i] - offsetY[i - 1]) * f)
+        }
+    }
 
     /**
      * Analisis guncangan video dan hitung zoom yang dibutuhkan.
@@ -56,7 +79,7 @@ object Stabilizer {
         startMs: Long,
         durationMs: Long,
         log: (String) -> Unit
-    ): Result? {
+    ): Plan? {
         val r = MediaMetadataRetriever()
         return try {
             r.setDataSource(context, uri)
@@ -69,19 +92,21 @@ object Stabilizer {
             log("Stabilizer: menganalisis $samples frame…")
 
             var prev: IntArray? = null
+            val times = ArrayList<Long>(samples)
             val dxs = ArrayList<Float>(samples)
             val dys = ArrayList<Float>(samples)
 
             for (i in 0 until samples) {
-                val t = startMs + (i * step).toLong()
+                val rel = (i * step).toLong()
                 val bmp = r.getFrameAtTime(
-                    t * 1000, MediaMetadataRetriever.OPTION_CLOSEST
+                    (startMs + rel) * 1000, MediaMetadataRetriever.OPTION_CLOSEST
                 ) ?: continue
                 val gray = toGray(bmp)
                 bmp.recycle()
 
                 if (prev != null) {
                     val (dx, dy) = estimateShift(prev!!, gray)
+                    times += rel
                     dxs += dx.toFloat()
                     dys += dy.toFloat()
                 }
@@ -93,41 +118,55 @@ object Stabilizer {
                 return null
             }
 
-            // lintasan kumulatif
-            val trajX = FloatArray(dxs.size)
-            val trajY = FloatArray(dys.size)
+            // lintasan kumulatif kamera
+            val n = dxs.size
+            val trajX = FloatArray(n)
+            val trajY = FloatArray(n)
             var ax = 0f
             var ay = 0f
-            for (i in dxs.indices) {
+            for (i in 0 until n) {
                 ax += dxs[i]; ay += dys[i]
                 trajX[i] = ax; trajY[i] = ay
             }
 
-            // haluskan lintasan
-            val smX = movingAverage(trajX, 7)
-            val smY = movingAverage(trajY, 7)
+            // lintasan ideal = versi halus
+            val smX = movingAverage(trajX, 9)
+            val smY = movingAverage(trajY, 9)
 
-            // guncangan = selisih lintasan asli vs halus
+            // koreksi = selisihnya, dibalik arahnya
+            val corrX = FloatArray(n)
+            val corrY = FloatArray(n)
             var maxDev = 0f
             var sumDev = 0f
-            for (i in trajX.indices) {
-                val ex = abs(trajX[i] - smX[i])
-                val ey = abs(trajY[i] - smY[i])
-                val e = maxOf(ex, ey)
+            for (i in 0 until n) {
+                val ex = trajX[i] - smX[i]
+                val ey = trajY[i] - smY[i]
+                corrX[i] = ex
+                corrY[i] = ey
+                val e = maxOf(abs(ex), abs(ey))
                 if (e > maxDev) maxDev = e
                 sumDev += e
             }
-            val avgDev = sumDev / trajX.size
+            val avgDev = sumDev / n
 
-            // Zoom secukupnya untuk menutupi simpangan terbesar.
-            // maxDev dalam skala analisis -> ubah ke rasio lebar frame.
+            // zoom secukupnya menutup simpangan terbesar, plus sedikit ruang
             val ratio = maxDev / ANALYZE_W
-            val zoom = (1f + ratio * 2.2f).coerceIn(1.0f, 1.25f)
+            val zoom = (1f + ratio * 2.4f).coerceIn(1.0f, 1.30f)
 
-            log("Stabilizer: guncangan rata-rata %.2f px, zoom %.0f%%"
-                .format(avgDev, (zoom - 1f) * 100))
+            // ubah koreksi ke satuan UV, dan batasi supaya tidak melewati
+            // ruang yang disediakan zoom
+            val limit = (1f - 1f / zoom) * 0.5f
+            val offX = FloatArray(n)
+            val offY = FloatArray(n)
+            for (i in 0 until n) {
+                offX[i] = (corrX[i] / ANALYZE_W).coerceIn(-limit, limit)
+                offY[i] = (corrY[i] / ANALYZE_H).coerceIn(-limit, limit)
+            }
 
-            Result(zoom, avgDev, dxs.size)
+            log("Stabilizer: guncangan %.2f px, zoom %.0f%%, %d titik koreksi"
+                .format(avgDev, (zoom - 1f) * 100, n))
+
+            Plan(zoom, avgDev, n, times.toLongArray(), offX, offY)
         } catch (e: Exception) {
             log("Stabilizer gagal: ${e.message}")
             null

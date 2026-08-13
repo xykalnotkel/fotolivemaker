@@ -16,7 +16,6 @@ import androidx.media3.common.MediaItem
 import androidx.media3.common.MimeTypes
 import androidx.media3.effect.Presentation
 import androidx.media3.effect.GlEffect
-import androidx.media3.effect.ScaleAndRotateTransformation
 import androidx.media3.transformer.Composition
 import androidx.media3.transformer.DefaultEncoderFactory
 import androidx.media3.transformer.EditedMediaItem
@@ -166,7 +165,7 @@ object Converter {
         opts: Options,
         outW: Int,
         outH: Int,
-        zoom: Float,
+        stab: Stabilizer.Plan?,
         log: (String) -> Unit,
         progress: (Int) -> Unit
     ): ByteArray = withContext(Dispatchers.Main) {
@@ -192,12 +191,10 @@ object Converter {
             log("Efek: bersihkan noise + pertajam")
         }
 
-        // 2. Stabilisasi = zoom sedikit supaya guncangan punya ruang koreksi.
-        if (zoom > 1.001f) {
-            effects += ScaleAndRotateTransformation.Builder()
-                .setScale(zoom, zoom)
-                .build()
-            log("Efek: stabilisasi, zoom %.0f%%".format((zoom - 1f) * 100))
+        // 2. Stabilisasi: tiap frame digeser berlawanan arah guncangannya.
+        if (stab != null && stab.zoom > 1.001f) {
+            effects += GlEffect { ctx, useHdr -> StabilizeShader(ctx, useHdr, stab) }
+            log("Efek: stabilisasi aktif (${stab.sampleCount} titik koreksi)")
         }
 
         // 3. Presentation HARUS satu saja dan paling akhir.
@@ -321,13 +318,12 @@ object Converter {
         }
         log("Target: ${outW}x${outH}${if (opts.square) " (kotak 1:1)" else ""}")
 
-        // Stabilisasi: analisis dulu untuk tahu berapa zoom yang perlu
-        var zoom = 1f
+        // Stabilisasi: analisis gerakan untuk menyusun tabel koreksi per-frame
+        var stab: Stabilizer.Plan? = null
         if (opts.stabilize) {
-            val st = withContext(Dispatchers.Default) {
+            stab = withContext(Dispatchers.Default) {
                 Stabilizer.analyze(context, uri, p.startMs, p.durationMs, log)
             }
-            if (st != null) zoom = st.zoom
         }
 
         log("Mengambil frame kunci…")
@@ -339,7 +335,7 @@ object Converter {
         val jpeg = withContext(Dispatchers.Default) { bmp.toJpeg(opts.jpegQuality) }
         log("JPEG: ${jpeg.size / 1024} KB")
 
-        val mp4 = transcodeClip(context, uri, p, opts, outW, outH, zoom, log, progress)
+        val mp4 = transcodeClip(context, uri, p, opts, outW, outH, stab, log, progress)
 
         log("Menyisipkan XMP GCamera + trailer Samsung…")
         val motionPhoto = withContext(Dispatchers.Default) {

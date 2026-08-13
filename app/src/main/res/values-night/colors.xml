@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Mode gelap: warna dibalik, tetap monokrom murni. -->
+    <color name="paper">#FF0B0B0C</color>
+    <color name="paper_dim">#FF17171A</color>
+    <color name="ink">#FFFFFFFF</color>
+
+    <color name="text_hi">#FFFFFFFF</color>
+    <color name="text_mid">#FFA8A8AE</color>
+    <color name="text_dim">#FF6E6E76</color>
+
+    <color name="line">#FF2A2A2F</color>
+    <color name="line_strong">#FFFFFFFF</color>
+
+    <color name="ok">#FFFFFFFF</color>
+    <color name="bad">#FF6E6E76</color>
+
+    <color name="on_ink">#FF0B0B0C</color>
+</resources>
