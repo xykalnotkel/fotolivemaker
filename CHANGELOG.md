@@ -6,10 +6,11 @@ Saat rilis, pindahkan ke heading versi + tanggal.
 ## Unreleased
 
 ### Home
-- Banner update tipis di bawah: muncul otomatis kalau GitHub Releases lebih baru
-- Cincin 3D krom morphing (kotak→lingkaran) di tengah, keluar dari bar
-- Ketuk banner membuka halaman rilis
-- Izin `INTERNET` ditambah **hanya** untuk cek tag GitHub — PRIVACY/README disesuaikan
+- Banner **selalu** tampil tanpa internet: "Cek update"
+- Setelah sekali cek (pakai data), cache tahu versi terlewat → "Update terbaru"
+- Ketuk + data: unduh di app atau buka web resmi
+- Tidak ada cek jaringan di latar belakang
+- Cincin 3D krom morphing di tengah, keluar dari bar
 
 ### Bersih & stabilizer
 - **Bersih** meredam noise di **video + foto**, lalu unsharp ringan supaya tidak empuk

@@ -5,6 +5,7 @@ import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.provider.Settings as SysSettings
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -14,6 +15,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.FileProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -51,11 +53,124 @@ class HomeActivity : AppCompatActivity() {
         b.list.isNestedScrollingEnabled = false
 
         handleIncoming(intent)
+        paintBanner(UpdateCheck.cached(this))
     }
 
     override fun onResume() {
         super.onResume()
         refresh()
+        paintBanner(UpdateCheck.cached(this))
+    }
+
+    /** Tanpa jaringan. Cache cek terakhir yang menandai versi terlewat. */
+    private fun paintBanner(info: UpdateCheck.Info?) {
+        b.updateBanner.visibility = View.VISIBLE
+        if (info != null && info.newer) {
+            b.tvUpdateLabel.text = "Update terbaru"
+            b.tvUpdateVer.text = info.tag.removePrefix("v")
+        } else {
+            b.tvUpdateLabel.text = "Cek update"
+            b.tvUpdateVer.text = "v${BuildConfig.VERSION_NAME}"
+        }
+    }
+
+    private fun openUpdate() {
+        if (!UpdateCheck.online(this)) {
+            AlertDialog.Builder(this)
+                .setTitle("Nyalakan data")
+                .setMessage(
+                    "Banner tidak memakai internet. Jaringan hanya dipakai " +
+                        "saat kamu mau cek atau unduh update.\n\nNyalakan data/Wi-Fi, lalu ketuk lagi."
+                )
+                .setPositiveButton("Mengerti", null)
+                .show()
+            return
+        }
+        val wait = AlertDialog.Builder(this)
+            .setMessage("Mengecek rilis GitHub…")
+            .setCancelable(false)
+            .show()
+        lifecycleScope.launch {
+            val info = withContext(Dispatchers.IO) { UpdateCheck.fetch(this@HomeActivity) }
+            wait.dismiss()
+            paintBanner(info)
+            if (info == null) {
+                Toast.makeText(this@HomeActivity, "Gagal cek rilis. Coba lagi.", Toast.LENGTH_SHORT).show()
+                return@launch
+            }
+            if (!info.newer) {
+                Toast.makeText(this@HomeActivity, "Sudah versi terbaru", Toast.LENGTH_SHORT).show()
+                return@launch
+            }
+            AlertDialog.Builder(this@HomeActivity)
+                .setTitle("Update ${info.tag}")
+                .setMessage("Ada rilis lebih baru. Unduh di app, atau buka halaman resmi.")
+                .setPositiveButton("Unduh di app") { _, _ -> startDownload(info) }
+                .setNeutralButton("Buka web") { _, _ ->
+                    runCatching {
+                        startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(info.pageUrl)))
+                    }
+                }
+                .setNegativeButton("Nanti", null)
+                .show()
+        }
+    }
+
+    private fun startDownload(info: UpdateCheck.Info) {
+        val url = info.apkUrl
+        if (url.isNullOrBlank()) {
+            runCatching {
+                startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(info.pageUrl)))
+            }
+            return
+        }
+        val dlg = AlertDialog.Builder(this)
+            .setTitle("Mengunduh ${info.tag}")
+            .setMessage("0%")
+            .setCancelable(false)
+            .show()
+        lifecycleScope.launch {
+            val dest = UpdateCheck.apkFile(this@HomeActivity)
+            val ok = withContext(Dispatchers.IO) {
+                runCatching {
+                    UpdateCheck.downloadApk(url, dest) { p ->
+                        runOnMain { dlg.setMessage("$p%") }
+                    }
+                }.isSuccess
+            }
+            dlg.dismiss()
+            if (!ok || !dest.exists()) {
+                Toast.makeText(this@HomeActivity, "Unduhan gagal. Buka web saja.", Toast.LENGTH_LONG).show()
+                return@launch
+            }
+            installApk(dest)
+        }
+    }
+
+    private fun installApk(file: java.io.File) {
+        if (Build.VERSION.SDK_INT >= 26 && !packageManager.canRequestPackageInstalls()) {
+            AlertDialog.Builder(this)
+                .setTitle("Izin pasang aplikasi")
+                .setMessage("Android minta izin memasang APK dari sumber ini. Aktifkan, lalu ketuk update lagi.")
+                .setPositiveButton("Buka pengaturan") { _, _ ->
+                    startActivity(
+                        Intent(
+                            SysSettings.ACTION_MANAGE_UNKNOWN_APP_SOURCES,
+                            Uri.parse("package:$packageName")
+                        )
+                    )
+                }
+                .setNegativeButton("Batal", null)
+                .show()
+            return
+        }
+        val uri = FileProvider.getUriForFile(this, "$packageName.files", file)
+        startActivity(
+            Intent(Intent.ACTION_VIEW).apply {
+                setDataAndType(uri, "application/vnd.android.package-archive")
+                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            }
+        )
     }
 
     override fun onNewIntent(intent: Intent) {

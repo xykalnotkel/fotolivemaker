@@ -134,8 +134,8 @@ jobs:
               mengenali, itu batasan di sisi TikTok.
 
             ### Privasi
-            Video diproses di perangkat. Izin `INTERNET` hanya untuk cek
-            rilis GitHub — file tidak diunggah.
+            Video diproses di perangkat. Banner update offline. Internet
+            hanya saat pengguna mengetuk update (GitHub Releases).
 
             Lisensi Apache 2.0 · Tanpa jaminan — lihat [TERMS.md](TERMS.md)
 

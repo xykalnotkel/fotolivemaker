@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <!-- Hanya untuk cek tag rilis di GitHub. Video tidak pernah diunggah. -->
+    <!-- Izin ada di APK, tapi jaringan HANYA dipakai saat pengguna ketuk update. -->
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
 
     <!-- Android 13+; jangan diberi maxSdk agar pemilih video tetap bekerja di Android 15+. -->
     <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" />
@@ -20,6 +22,16 @@
         android:supportsRtl="true"
         android:requestLegacyExternalStorage="true"
         android:theme="@style/Theme.MotionPhoto">
+
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.files"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
 
         <activity
             android:name=".SplashActivity"

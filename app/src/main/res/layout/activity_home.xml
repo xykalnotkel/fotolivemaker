@@ -225,9 +225,9 @@
         android:layout_height="68dp"
         android:clipChildren="false"
         android:clipToPadding="false"
-        android:visibility="gone"
+        android:visibility="visible"
         android:foreground="?attr/selectableItemBackground"
-        android:contentDescription="Update terbaru">
+        android:contentDescription="Cek update">
 
         <View
             android:layout_width="match_parent"
@@ -241,7 +241,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical|start"
             android:layout_marginStart="16dp"
-            android:text="Update terbaru"
+            android:text="Cek update"
             android:textColor="@color/text_hi"
             android:textSize="12sp"
             android:textStyle="bold" />

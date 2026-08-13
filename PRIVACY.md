@@ -5,9 +5,9 @@
 
 ## Ringkasan singkat
 
-Video diproses **di perangkat**. Satu-satunya koneksi jaringan: mengecek
-tag rilis terbaru di GitHub supaya banner update bisa muncul. Tidak ada
-analytics, tidak ada unggah file.
+Video diproses **di perangkat**. Banner update **tidak** memakai jaringan.
+Internet hanya dipakai **saat kamu mengetuk** banner (cek rilis / unduh APK).
+Tidak ada analytics, tidak ada unggah file.
 
 ---
 
@@ -24,14 +24,18 @@ Aplikasi ini:
 - Tidak membaca kontak, lokasi, mikrofon, atau kamera
 - Tidak menampilkan iklan pihak ketiga
 
-Aplikasi **meminta izin `INTERNET`** hanya untuk `GET` halaman rilis GitHub
-(`api.github.com/.../releases/latest`). Tidak ada data pribadimu di permintaan itu.
+Izin `INTERNET` ada di APK karena Android tidak bisa menambahkannya nanti.
+**Tidak ada permintaan jaringan di latar belakang.** Koneksi terjadi hanya
+kalau kamu ketuk banner update: `GET` rilis GitHub, lalu (kalau kamu pilih)
+unduh berkas `.apk`. Tidak ada data pribadi di permintaan itu.
 
 ## Izin yang diminta dan alasannya
 
 | Izin | Kegunaan |
 |---|---|
-| `INTERNET` | Cek versi rilis di GitHub (banner update). Video tidak diunggah |
+| `INTERNET` | Hanya saat ketuk update: cek/unduh APK dari GitHub |
+| `ACCESS_NETWORK_STATE` | Tahu apakah data/Wi-Fi nyala, tanpa mengirim apa pun |
+| `REQUEST_INSTALL_PACKAGES` | Memasang APK update yang kamu unduh sendiri |
 | `READ_MEDIA_VIDEO` (Android 13+) | Menampilkan kisi video di pemilih internal |
 | `READ_EXTERNAL_STORAGE` (Android ≤12) | Sama seperti di atas, untuk versi Android lama |
 | `WRITE_EXTERNAL_STORAGE` (Android ≤9) | Menyimpan hasil ke folder DCIM/Camera |
