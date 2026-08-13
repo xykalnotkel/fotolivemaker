@@ -147,23 +147,25 @@ class PickerActivity : AppCompatActivity() {
         override fun getItemCount() = items.size
 
         override fun onBindViewHolder(h: VH, pos: Int) {
-            val it = items[pos]
-            h.dur.text = fmt(it.durationMs)
+            // jangan pakai nama "it": lambda runCatching punya "it" sendiri
+            val video = items[pos]
+            h.dur.text = fmt(video.durationMs)
             h.img.setImageDrawable(null)
-            h.itemView.setOnClickListener { onPick(it.uri) }
+            h.itemView.setOnClickListener { onPick(video.uri) }
 
-            val id = android.content.ContentUris.parseId(it.uri)
+            val id = android.content.ContentUris.parseId(video.uri)
             val cached = thumbs[id]
             if (cached != null) {
                 h.img.setImageBitmap(cached)
                 return
             }
+            val uri = video.uri
             lifecycleScope.launch {
                 val bmp = withContext(Dispatchers.IO) {
                     runCatching {
                         if (Build.VERSION.SDK_INT >= 29) {
                             contentResolver.loadThumbnail(
-                                it.uri, android.util.Size(320, 320), null
+                                uri, android.util.Size(320, 320), null
                             )
                         } else {
                             @Suppress("DEPRECATION")

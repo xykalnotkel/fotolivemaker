@@ -7,6 +7,27 @@ android {
     namespace = "com.arena.motionphoto"
     compileSdk = 34
 
+    // Keystore rilis diambil dari GitHub Secrets saat build di CI.
+    // Kalau tidak ada (build lokal), jatuh ke debug key supaya tetap jalan.
+    val ksFile = rootProject.file("release.jks")
+    val hasRelease = ksFile.exists() &&
+        !System.getenv("KEYSTORE_PASSWORD").isNullOrBlank()
+
+    signingConfigs {
+        if (hasRelease) {
+            create("release") {
+                storeFile = ksFile
+                storePassword = System.getenv("KEYSTORE_PASSWORD")
+                keyAlias = System.getenv("KEY_ALIAS")
+                keyPassword = System.getenv("KEY_PASSWORD")
+                enableV1Signing = true
+                enableV2Signing = true
+                enableV3Signing = true
+                enableV4Signing = false
+            }
+        }
+    }
+
     defaultConfig {
         applicationId = "com.arena.motionphoto"
         minSdk = 26
@@ -21,8 +42,10 @@ android {
     buildTypes {
         release {
             isMinifyEnabled = false
-            // debug key dipakai supaya APK release langsung bisa di-install
-            signingConfig = signingConfigs.getByName("debug")
+            signingConfig = if (hasRelease)
+                signingConfigs.getByName("release")
+            else
+                signingConfigs.getByName("debug")
         }
     }
 

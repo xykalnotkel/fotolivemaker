@@ -32,6 +32,17 @@ jobs:
         with:
           gradle-version: '8.7'
 
+      - name: Siapkan keystore rilis
+        env:
+          KS: ${{ secrets.KEYSTORE_BASE64 }}
+        run: |
+          if [ -n "$KS" ]; then
+            echo "$KS" | base64 -d > release.jks
+            echo "Keystore rilis disiapkan ($(stat -c%s release.jks) byte)"
+          else
+            echo "::warning::KEYSTORE_BASE64 kosong - APK akan pakai debug key"
+          fi
+
       - name: Tes unit (verifikasi format Motion Photo)
         env:
           BUILD_NUMBER: ${{ github.run_number }}
@@ -42,7 +53,22 @@ jobs:
           # versionCode & versionName di dalam APK ikut nomor ini,
           # jadi selalu sinkron dengan tag Release & nama file.
           BUILD_NUMBER: ${{ github.run_number }}
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
         run: gradle :app:assembleRelease --no-daemon --stacktrace
+
+      - name: Periksa tanda tangan APK
+        run: |
+          APK=app/build/outputs/apk/release/app-release.apk
+          BT=$(ls "$ANDROID_HOME"/build-tools | sort -V | tail -1)
+          "$ANDROID_HOME/build-tools/$BT/apksigner" verify --print-certs "$APK" \
+            | tee /tmp/sig.txt
+          if grep -qi "CN=Android Debug" /tmp/sig.txt; then
+            echo "::error::APK masih ditandatangani debug key"
+            exit 1
+          fi
+          echo "APK ditandatangani kunci rilis."
 
       - name: Siapkan berkas APK
         id: prep
@@ -97,6 +123,10 @@ jobs:
             sama sekali, jadi tidak mungkin mengirim data ke mana pun.
 
             Lisensi MIT · Tanpa jaminan — lihat [TERMS.md](TERMS.md)
+
+      - name: Hapus keystore dari runner
+        if: always()
+        run: rm -f release.jks
 
       - name: Laporan tes kalau gagal
         if: failure()

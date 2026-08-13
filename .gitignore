@@ -9,3 +9,10 @@ captures/
 .externalNativeBuild
 .cxx
 out/
+
+# JANGAN PERNAH commit keystore atau kata sandinya
+*.jks
+*.keystore
+*.p12
+*.b64
+keystore.properties

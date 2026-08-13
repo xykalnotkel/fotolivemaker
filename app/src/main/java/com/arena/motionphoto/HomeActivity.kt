@@ -119,27 +119,33 @@ class HomeActivity : AppCompatActivity() {
         override fun getItemCount() = items.size
 
         override fun onBindViewHolder(h: VH, pos: Int) {
-            val it = items[pos]
-            h.name.text = it.name
-            h.meta.text = "${fmt.format(Date(it.dateMs))}   ·   " +
-                "${it.width}x${it.height}   ·   ${it.sizeBytes / 1024} KB"
+            // jangan pakai nama "it": lambda runCatching/let punya "it" sendiri
+            val item = items[pos]
+            h.name.text = item.name
+            h.meta.text = "${fmt.format(Date(item.dateMs))}   ·   " +
+                "${item.width}x${item.height}   ·   ${item.sizeBytes / 1024} KB"
             h.thumb.setImageDrawable(null)
 
-            h.itemView.setOnClickListener { open(it) }
-            h.more.setOnClickListener { v -> menuFor(v, it) }
+            h.itemView.setOnClickListener { open(item) }
+            h.more.setOnClickListener { v -> menuFor(v, item) }
 
-            val key = it.uri.toString()
-            cache[key]?.let { c -> h.thumb.setImageBitmap(c); return }
+            val key = item.uri.toString()
+            val cached = cache[key]
+            if (cached != null) {
+                h.thumb.setImageBitmap(cached)
+                return
+            }
 
+            val uri = item.uri
             lifecycleScope.launch {
                 val bmp = withContext(Dispatchers.IO) {
                     runCatching {
                         if (Build.VERSION.SDK_INT >= 29) {
                             contentResolver.loadThumbnail(
-                                it.uri, android.util.Size(200, 200), null
+                                uri, android.util.Size(200, 200), null
                             )
                         } else {
-                            contentResolver.openInputStream(it.uri)?.use { s ->
+                            contentResolver.openInputStream(uri)?.use { s ->
                                 val o = android.graphics.BitmapFactory.Options()
                                     .apply { inSampleSize = 8 }
                                 android.graphics.BitmapFactory.decodeStream(s, null, o)
@@ -154,23 +160,23 @@ class HomeActivity : AppCompatActivity() {
             }
         }
 
-        private fun open(it: ProjectStore.Item) {
+        private fun open(item: ProjectStore.Item) {
             startActivity(
                 Intent(this@HomeActivity, ResultActivity::class.java)
-                    .putExtra(ResultActivity.EXTRA_URI, it.uri.toString())
+                    .putExtra(ResultActivity.EXTRA_URI, item.uri.toString())
             )
         }
 
-        private fun menuFor(anchor: View, it: ProjectStore.Item) {
+        private fun menuFor(anchor: View, item: ProjectStore.Item) {
             PopupMenu(this@HomeActivity, anchor).apply {
                 menu.add(0, 1, 0, "Buka")
                 menu.add(0, 2, 1, "Bagikan")
                 menu.add(0, 3, 2, "Hapus")
                 setOnMenuItemClickListener { mi ->
                     when (mi.itemId) {
-                        1 -> open(it)
-                        2 -> share(it.uri)
-                        3 -> confirmDelete(it)
+                        1 -> open(item)
+                        2 -> share(item.uri)
+                        3 -> confirmDelete(item)
                     }
                     true
                 }
@@ -192,15 +198,15 @@ class HomeActivity : AppCompatActivity() {
             }
         }
 
-        private fun confirmDelete(it: ProjectStore.Item) {
+        private fun confirmDelete(item: ProjectStore.Item) {
             AlertDialog.Builder(this@HomeActivity)
                 .setTitle("Hapus berkas ini?")
-                .setMessage(it.name)
+                .setMessage(item.name)
                 .setNegativeButton("Batal", null)
                 .setPositiveButton("Hapus") { _, _ ->
                     lifecycleScope.launch {
                         val ok = withContext(Dispatchers.IO) {
-                            ProjectStore.delete(this@HomeActivity, it.uri)
+                            ProjectStore.delete(this@HomeActivity, item.uri)
                         }
                         Toast.makeText(
                             this@HomeActivity,
