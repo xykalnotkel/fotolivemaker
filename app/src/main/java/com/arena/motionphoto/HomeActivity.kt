@@ -43,6 +43,7 @@ class HomeActivity : AppCompatActivity() {
         b.btnSettings.setOnClickListener {
             startActivity(Intent(this, SettingsActivity::class.java))
         }
+        b.btnHapusSemua.setOnClickListener { confirmDeleteAll() }
 
         b.list.layoutManager = LinearLayoutManager(this)
         b.list.adapter = adapter
@@ -89,7 +90,29 @@ class HomeActivity : AppCompatActivity() {
                 else "${items.size} HASIL  ·  ${Stats.human(bytes)}"
             b.emptyBox.visibility = if (items.isEmpty()) View.VISIBLE else View.GONE
             b.list.visibility = if (items.isEmpty()) View.GONE else View.VISIBLE
+            b.btnHapusSemua.visibility = if (items.isEmpty()) View.GONE else View.VISIBLE
         }
+    }
+
+    private fun confirmDeleteAll() {
+        AlertDialog.Builder(this)
+            .setTitle("Hapus semua hasil?")
+            .setMessage("Berkas Live Photo di DCIM/Camera yang dibuat app ini akan dihapus.")
+            .setNegativeButton("Batal", null)
+            .setPositiveButton("Hapus") { _, _ ->
+                lifecycleScope.launch {
+                    val n = withContext(Dispatchers.IO) {
+                        ProjectStore.deleteAll(this@HomeActivity)
+                    }
+                    Toast.makeText(
+                        this@HomeActivity,
+                        if (n > 0) "$n berkas dihapus" else "Tidak ada yang terhapus",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    refresh()
+                }
+            }
+            .show()
     }
 
     // ---------------- adapter riwayat ----------------
@@ -110,6 +133,7 @@ class HomeActivity : AppCompatActivity() {
             val name: TextView = v.findViewById(R.id.name)
             val meta: TextView = v.findViewById(R.id.meta)
             val more: ImageView = v.findViewById(R.id.more)
+            val del: ImageView = v.findViewById(R.id.btnDelete)
         }
 
         override fun onCreateViewHolder(p: ViewGroup, t: Int) =
@@ -127,6 +151,7 @@ class HomeActivity : AppCompatActivity() {
 
             h.itemView.setOnClickListener { open(item) }
             h.more.setOnClickListener { v -> menuFor(v, item) }
+            h.del.setOnClickListener { confirmDelete(item) }
 
             val key = item.uri.toString()
             val cached = cache[key]

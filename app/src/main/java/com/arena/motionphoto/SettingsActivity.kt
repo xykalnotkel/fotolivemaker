@@ -29,11 +29,15 @@ class SettingsActivity : AppCompatActivity() {
         b.swStab.isChecked = o.stabilize
         b.tvRes.text = o.res.label
         b.swKeepScreenOn.isChecked = Settings.keepScreenOn(this)
+        b.swSplash.isChecked = Settings.showSplash(this)
         b.tvTheme.text = themeLabel(Settings.theme(this))
+        b.tvQuality.text = "${o.jpegQuality}"
 
         b.rowRes.setOnClickListener { pickRes() }
         b.rowTheme.setOnClickListener { pickTheme() }
         b.rowCache.setOnClickListener { clearCache() }
+        b.rowQuality.setOnClickListener { pickQuality() }
+        b.rowDeleteAll.setOnClickListener { deleteAllResults() }
 
         // konfirmasi tiap toggle, jangan diam saja
         b.swSquare.setOnCheckedChangeListener { _, v ->
@@ -48,6 +52,10 @@ class SettingsActivity : AppCompatActivity() {
         b.swKeepScreenOn.setOnCheckedChangeListener { _, enabled ->
             Settings.setKeepScreenOn(this, enabled)
             notify(if (enabled) "Layar dijaga tetap menyala saat export" else "Layar boleh mati saat export")
+        }
+        b.swSplash.setOnCheckedChangeListener { _, enabled ->
+            Settings.setShowSplash(this, enabled)
+            notify(if (enabled) "Splash singkat aktif" else "Langsung ke beranda")
         }
 
         b.tvVersion.text = "v${BuildConfig.VERSION_NAME}  ·  build ${BuildConfig.VERSION_CODE}"
@@ -143,7 +151,39 @@ class SettingsActivity : AppCompatActivity() {
             .show()
     }
 
-    private fun persist(res: Converter.Res? = null) {
+    private fun pickQuality() {
+        val values = intArrayOf(80, 85, 90, 95, 100)
+        val labels = values.map { "$it" }.toTypedArray()
+        val cur = values.indexOf(Settings.load(this).jpegQuality).let { if (it < 0) 3 else it }
+        AlertDialog.Builder(this)
+            .setTitle("Kualitas JPEG cover")
+            .setSingleChoiceItems(labels, cur) { d, w ->
+                persist(quality = values[w])
+                b.tvQuality.text = "${values[w]}"
+                notify("Kualitas JPEG: ${values[w]}")
+                d.dismiss()
+            }
+            .show()
+    }
+
+    private fun deleteAllResults() {
+        AlertDialog.Builder(this)
+            .setTitle("Hapus semua hasil?")
+            .setMessage("Berkas MP_ di DCIM/Camera yang dibuat app ini akan dihapus dari galeri.")
+            .setNegativeButton("Batal", null)
+            .setPositiveButton("Hapus") { _, _ ->
+                lifecycleScope.launch {
+                    val n = withContext(Dispatchers.IO) {
+                        ProjectStore.deleteAll(this@SettingsActivity)
+                    }
+                    notify(if (n > 0) "$n berkas dihapus" else "Tidak ada yang terhapus")
+                    loadStats()
+                }
+            }
+            .show()
+    }
+
+    private fun persist(res: Converter.Res? = null, quality: Int? = null) {
         val cur = Settings.load(this)
         Settings.save(
             this,
@@ -151,7 +191,8 @@ class SettingsActivity : AppCompatActivity() {
                 res = res ?: cur.res,
                 square = b.swSquare.isChecked,
                 enhance = b.swEnhance.isChecked,
-                stabilize = b.swStab.isChecked
+                stabilize = b.swStab.isChecked,
+                jpegQuality = quality ?: cur.jpegQuality
             )
         )
     }

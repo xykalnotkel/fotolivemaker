@@ -9,37 +9,36 @@ import com.arena.motionphoto.databinding.ActivitySplashBinding
 
 class SplashActivity : AppCompatActivity() {
 
-    private lateinit var b: ActivitySplashBinding
     private var moved = false
+    private val handler = Handler(Looper.getMainLooper())
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // Animasi morph hanya sekali. Launch berikutnya langsung ke Home.
-        if (Settings.seenSplash(this)) {
+        if (!Settings.showSplash(this)) {
             goNext(animate = false)
             return
         }
 
-        b = ActivitySplashBinding.inflate(layoutInflater)
+        val b = ActivitySplashBinding.inflate(layoutInflater)
         setContentView(b.root)
 
-        b.morph.animateMorph(1150L) { goNext(animate = true) }
-
+        b.morph.animateMorph(720L) { goNext(animate = true) }
         b.title.alpha = 0f
-        b.title.animate().alpha(1f).setStartDelay(560).setDuration(420).start()
-
-        Handler(Looper.getMainLooper()).postDelayed({ goNext(animate = true) }, 2000)
+        b.title.animate().alpha(1f).setStartDelay(180).setDuration(280).start()
+        handler.postDelayed({ goNext(animate = true) }, 1100)
     }
 
     private fun goNext(animate: Boolean) {
         if (moved) return
         moved = true
-        Settings.markSplashSeen(this)
+        handler.removeCallbacksAndMessages(null)
         startActivity(Intent(this, HomeActivity::class.java))
         if (animate) {
+            @Suppress("DEPRECATION")
             overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
         } else {
+            @Suppress("DEPRECATION")
             overridePendingTransition(0, 0)
         }
         finish()

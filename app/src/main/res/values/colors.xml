@@ -17,4 +17,10 @@
     <color name="bad">#FF9A9A9F</color>
 
     <color name="on_ink">#FFFFFFFF</color>
+
+    <!-- Hero card: pekat di atas (judul kebaca), luruh ke paper di bawah. -->
+    <color name="hero_start">#E6000000</color>
+    <color name="hero_end">#00000000</color>
+    <color name="hero_sub">#B3FFFFFF</color>
+    <color name="hero_line">#59FFFFFF</color>
 </resources>

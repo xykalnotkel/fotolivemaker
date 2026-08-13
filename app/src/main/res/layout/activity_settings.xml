@@ -208,6 +208,32 @@
                 </LinearLayout>
 
                 <LinearLayout
+                    android:id="@+id/rowDeleteAll"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:minHeight="42dp"
+                    android:gravity="center_vertical"
+                    android:background="?attr/selectableItemBackground">
+
+                    <ImageView
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
+                        android:src="@drawable/ic_trash"
+                        app:tint="@color/text_mid"
+                        android:contentDescription="@null" />
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="12dp"
+                        android:text="Hapus semua hasil"
+                        android:textColor="@color/text_hi"
+                        android:textSize="13sp" />
+                </LinearLayout>
+
+                <LinearLayout
                     android:id="@+id/rowCache"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -294,6 +320,19 @@
                     android:layout_height="wrap_content"
                     android:minHeight="64dp"
                     android:text="Jaga layar tetap menyala"
+                    android:textColor="@color/text_hi"
+                    android:textSize="14sp"
+                    android:checked="true" />
+
+                <View android:layout_width="match_parent"
+                    android:layout_height="1dp" android:background="@color/line" />
+
+                <com.google.android.material.materialswitch.MaterialSwitch
+                    android:id="@+id/swSplash"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:minHeight="64dp"
+                    android:text="Splash singkat saat buka"
                     android:textColor="@color/text_hi"
                     android:textSize="14sp"
                     android:checked="true" />
@@ -433,7 +472,45 @@
                     android:text="Stabilkan guncangan"
                     android:textColor="@color/text_hi"
                     android:textSize="14sp" />
+
+                <View android:layout_width="match_parent"
+                    android:layout_height="1dp" android:background="@color/line" />
+
+                <LinearLayout
+                    android:id="@+id/rowQuality"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:minHeight="56dp"
+                    android:gravity="center_vertical"
+                    android:background="?attr/selectableItemBackground">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        android:layout_height="wrap_content"
+                        android:text="Kualitas JPEG"
+                        android:textColor="@color/text_hi"
+                        android:textSize="14sp" />
+
+                    <TextView
+                        android:id="@+id/tvQuality"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/ink"
+                        android:textSize="13sp"
+                        android:textStyle="bold"
+                        android:fontFamily="monospace" />
+                </LinearLayout>
             </LinearLayout>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="Tajam bukan AI/HD: redam noise + unsharp, tidak menambah detail. Stabilizer hanya geser X/Y, video sedikit ter-crop, tidak untuk goyang berputar."
+                android:textColor="@color/text_dim"
+                android:textSize="11sp"
+                android:lineSpacingExtra="2dp" />
 
             <!-- ====== TENTANG ====== -->
             <LinearLayout

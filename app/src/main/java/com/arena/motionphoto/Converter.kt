@@ -428,7 +428,7 @@ object Converter {
 
             log("Mulai encode H.264 + AAC…")
             transformer.start(edited, outFile.absolutePath)
-            handler.post(poll!!)
+            poll?.let { handler.post(it) }
 
             cont.invokeOnCancellation {
                 stopPolling()

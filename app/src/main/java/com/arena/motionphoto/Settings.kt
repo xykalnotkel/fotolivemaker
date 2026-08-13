@@ -14,6 +14,7 @@ object Settings {
     private const val K_THEME = "theme"
     private const val K_KEEP_SCREEN_ON = "keep_screen_on"
     private const val K_SEEN_SPLASH = "seen_splash"
+    private const val K_SHOW_SPLASH = "show_splash"
 
     /** 0 = ikut sistem, 1 = terang, 2 = gelap */
     const val THEME_SYSTEM = 0

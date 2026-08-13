@@ -12,7 +12,7 @@
         android:orientation="horizontal"
         android:gravity="center_vertical"
         android:paddingStart="8dp"
-        android:paddingEnd="20dp"
+        android:paddingEnd="14dp"
         android:paddingTop="10dp"
         android:paddingBottom="10dp">
 
@@ -39,16 +39,16 @@
         <TextView
             android:id="@+id/btnExport"
             android:layout_width="wrap_content"
-            android:layout_height="44dp"
+            android:layout_height="36dp"
             android:gravity="center"
-            android:paddingStart="12dp"
-            android:paddingEnd="12dp"
+            android:paddingStart="14dp"
+            android:paddingEnd="14dp"
             android:text="EXPORT"
             android:textColor="@color/ink"
-            android:textSize="12sp"
+            android:textSize="11sp"
             android:textStyle="bold"
             android:letterSpacing="0.08"
-            android:background="?attr/selectableItemBackgroundBorderless"
+            android:background="@drawable/bg_export_box"
             android:contentDescription="Export Live Photo" />
     </LinearLayout>
 
@@ -70,12 +70,12 @@
             android:orientation="vertical"
             android:paddingStart="20dp"
             android:paddingEnd="20dp"
-            android:paddingTop="20dp"
-            android:paddingBottom="20dp">
+            android:paddingTop="16dp"
+            android:paddingBottom="16dp">
 
             <FrameLayout
                 android:layout_width="match_parent"
-                android:layout_height="290dp"
+                android:layout_height="240dp"
                 android:background="@drawable/bg_preview">
 
                 <ImageView
@@ -107,9 +107,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:layout_marginTop="16dp"
+                android:layout_marginTop="14dp"
                 android:background="@drawable/bg_card"
-                android:padding="18dp">
+                android:padding="16dp">
 
                 <TextView
                     style="@style/Label"
@@ -122,7 +122,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:layout_marginTop="12dp">
+                    android:layout_marginTop="10dp">
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -162,7 +162,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
-                    android:layout_marginTop="4dp">
+                    android:layout_marginTop="2dp">
 
                     <TextView
                         android:layout_width="0dp"
@@ -196,7 +196,7 @@
                     android:id="@+id/tvClipHint"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Durasi dikunci 3,0 dtk · sama seperti Live Photo iPhone"
+                    android:text="Durasi dikunci 3,0 dtk"
                     android:textColor="@color/text_dim"
                     android:textSize="11sp" />
 
@@ -204,122 +204,140 @@
                     android:id="@+id/tvPlan"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="12dp"
+                    android:layout_marginTop="10dp"
                     android:fontFamily="monospace"
-                    android:textSize="12sp"
+                    android:textSize="11sp"
                     android:textColor="@color/text_mid"
-                    android:lineSpacingExtra="3dp"
+                    android:lineSpacingExtra="2dp"
                     android:text="Membaca video…" />
             </LinearLayout>
-
-            <TextView
-                style="@style/Label"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="22dp"
-                android:text="Tools" />
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:layout_marginTop="12dp"
-                android:background="@drawable/bg_card"
-                android:paddingStart="18dp"
-                android:paddingEnd="18dp">
-
-                <LinearLayout
-                    android:id="@+id/rowRes"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical"
-                    android:minHeight="56dp"
-                    android:background="?attr/selectableItemBackground">
-
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_weight="1"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Resolusi"
-                            android:textColor="@color/text_hi"
-                            android:textSize="14sp" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Bitrate ikut naik, tidak pecah"
-                            android:textColor="@color/text_dim"
-                            android:textSize="11sp" />
-                    </LinearLayout>
-
-                    <TextView
-                        android:id="@+id/tvRes"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textColor="@color/ink"
-                        android:textSize="13sp"
-                        android:textStyle="bold"
-                        android:fontFamily="monospace" />
-                </LinearLayout>
-
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="1dp"
-                    android:background="@color/line" />
-
-                <com.google.android.material.materialswitch.MaterialSwitch
-                    android:id="@+id/swSquare"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:minHeight="56dp"
-                    android:text="Crop kotak 1:1"
-                    android:textColor="@color/text_hi"
-                    android:textSize="14sp" />
-
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="1dp"
-                    android:background="@color/line" />
-
-                <com.google.android.material.materialswitch.MaterialSwitch
-                    android:id="@+id/swEnhance"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:minHeight="56dp"
-                    android:text="Bersihkan &amp; pertajam"
-                    android:textColor="@color/text_hi"
-                    android:textSize="14sp" />
-
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="1dp"
-                    android:background="@color/line" />
-
-                <com.google.android.material.materialswitch.MaterialSwitch
-                    android:id="@+id/swStab"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:minHeight="56dp"
-                    android:text="Stabilkan guncangan"
-                    android:textColor="@color/text_hi"
-                    android:textSize="14sp" />
-            </LinearLayout>
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
-                android:text="Bersihkan &amp; pertajam meredam bintik lalu menajamkan tepi. Stabilisasi mengurangi geser ringan; ia sedikit memperbesar gambar dan tidak memperbaiki guncangan berputar."
-                android:textColor="@color/text_dim"
-                android:textSize="11sp"
-                android:lineSpacingExtra="2dp" />
         </LinearLayout>
     </ScrollView>
 
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1.5dp"
+        android:background="@color/line" />
+
+    <LinearLayout
+        android:id="@+id/toolBar"
+        android:layout_width="match_parent"
+        android:layout_height="64dp"
+        android:orientation="horizontal"
+        android:background="@color/paper"
+        android:paddingStart="6dp"
+        android:paddingEnd="6dp">
+
+        <LinearLayout
+            android:id="@+id/toolSquare"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:background="?attr/selectableItemBackground">
+
+            <ImageView
+                android:id="@+id/iconSquare"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:src="@drawable/ic_tool_crop"
+                app:tint="@color/text_mid"
+                android:contentDescription="@null" />
+
+            <TextView
+                android:id="@+id/lblSquare"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="1:1"
+                android:textColor="@color/text_mid"
+                android:textSize="10sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/toolEnhance"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:background="?attr/selectableItemBackground">
+
+            <ImageView
+                android:id="@+id/iconEnhance"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:src="@drawable/ic_tool_sharp"
+                app:tint="@color/text_mid"
+                android:contentDescription="@null" />
+
+            <TextView
+                android:id="@+id/lblEnhance"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="Tajam"
+                android:textColor="@color/text_mid"
+                android:textSize="10sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/toolStab"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:background="?attr/selectableItemBackground">
+
+            <ImageView
+                android:id="@+id/iconStab"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:src="@drawable/ic_tool_stab"
+                app:tint="@color/text_mid"
+                android:contentDescription="@null" />
+
+            <TextView
+                android:id="@+id/lblStab"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="Stabil"
+                android:textColor="@color/text_mid"
+                android:textSize="10sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/toolRes"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:background="?attr/selectableItemBackground">
+
+            <ImageView
+                android:id="@+id/iconRes"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:src="@drawable/ic_tool_res"
+                app:tint="@color/ink"
+                android:contentDescription="@null" />
+
+            <TextView
+                android:id="@+id/lblRes"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="1080p"
+                android:textColor="@color/ink"
+                android:textSize="10sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+    </LinearLayout>
 </LinearLayout>

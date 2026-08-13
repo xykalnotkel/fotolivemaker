@@ -16,4 +16,9 @@
     <color name="bad">#FF6E6E76</color>
 
     <color name="on_ink">#FF0B0B0C</color>
+
+    <color name="hero_start">#E6FFFFFF</color>
+    <color name="hero_end">#00000000</color>
+    <color name="hero_sub">#B3000000</color>
+    <color name="hero_line">#59000000</color>
 </resources>

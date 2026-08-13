@@ -5,7 +5,30 @@ Saat rilis, pindahkan ke heading versi + tanggal.
 
 ## Unreleased
 
-_Belum ada perubahan setelah v1.1.0._
+### Export
+- Tombol EXPORT berbingkai kotak
+- Progress siku, nempel di tepi preview, mulai pojok kiri atas
+- Persentase cuma angka + `%`, tanpa latar
+- Preview mulai hitam lalu terang mengikuti proses
+- Estimasi bentuk perkiraan (`sekitar 1m 2s`)
+- Preview diperkecil (gaya CapCut), bukan memenuhi layar
+
+### Editor
+- Tool rail bawah (1:1 / Tajam / Stabil / resolusi) menggantikan toggle
+- Label jujur: tajam bukan AI/HD; stabilizer hanya geser X/Y
+
+### Home & riwayat
+- Kartu Project Baru lebih pendek, gradien luruh ke background (pekat di atas supaya judul kebaca)
+- Hapus per item (ikon tong) + Hapus semua
+- Ikon/ilustrasi pakai vector + tint tema (gelap/terang)
+
+### Settings
+- Kualitas JPEG, splash on/off, hapus semua hasil
+- Catatan jujur soal tajam & stabilizer
+
+### Branding
+- Launcher: simbol Live Photo putih di ubin gelap — bukan gunung galeri
+- Splash singkat (~0,7 dtk), warna ikuti tema, bisa dimatikan
 
 ## [v1.1.0](https://github.com/xykalnotkel/fotolivemaker/releases/tag/v1.1.0) — 2026-08-13
 

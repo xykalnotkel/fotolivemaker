@@ -74,6 +74,9 @@ object ProjectStore {
         context.contentResolver.delete(uri, null, null) > 0
     }.getOrDefault(false)
 
+    fun deleteAll(context: Context): Int =
+        list(context, limit = 10_000).count { delete(context, it.uri) }
+
     // ---------- daftar album video, untuk dropdown di pemilih ----------
 
     data class Album(val id: String, val name: String, val count: Int)

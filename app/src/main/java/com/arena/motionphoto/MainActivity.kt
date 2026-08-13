@@ -4,9 +4,12 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.view.View
+import android.widget.ImageView
+import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import com.arena.motionphoto.databinding.ActivityMainBinding
 import com.google.android.material.slider.Slider
@@ -16,7 +19,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-/** Editor: pilih jendela 3 dtk + frame kunci, lalu export di ProcessActivity. */
+/** Editor: slider potong + tool rail bawah (bukan toggle). */
 class MainActivity : AppCompatActivity() {
     private lateinit var b: ActivityMainBinding
     private var videoUri: Uri? = null
@@ -38,25 +41,27 @@ class MainActivity : AppCompatActivity() {
 
         b.btnBack.setOnClickListener { finish() }
         b.btnExport.setOnClickListener { openExport() }
-        b.swSquare.isChecked = opts.square
-        b.swEnhance.isChecked = opts.enhance
-        b.swStab.isChecked = opts.stabilize
-        b.tvRes.text = opts.res.label
-        b.rowRes.setOnClickListener { pickRes() }
-
-        b.swSquare.setOnCheckedChangeListener { _, on ->
-            opts = opts.copy(square = on); updatePlanText(); refreshPreview()
+        b.toolSquare.setOnClickListener {
+            opts = opts.copy(square = !opts.square)
+            paintTools(); updatePlanText(); refreshPreview()
         }
-        b.swEnhance.setOnCheckedChangeListener { _, on ->
-            opts = opts.copy(enhance = on); updatePlanText(); refreshPreview()
-        }
-        b.swStab.setOnCheckedChangeListener { _, on ->
-            opts = opts.copy(stabilize = on); updatePlanText()
+        b.toolEnhance.setOnClickListener {
+            opts = opts.copy(enhance = !opts.enhance)
+            paintTools(); updatePlanText(); refreshPreview()
             toast(
-                if (on) "Stabilisasi ringan aktif — video akan sedikit di-crop"
+                if (opts.enhance) "Tajam: noise + unsharp. Bukan AI, tidak menambah detail."
+                else "Penajaman dimatikan"
+            )
+        }
+        b.toolStab.setOnClickListener {
+            opts = opts.copy(stabilize = !opts.stabilize)
+            paintTools(); updatePlanText()
+            toast(
+                if (opts.stabilize) "Stabil: geser X/Y, video sedikit di-crop"
                 else "Stabilisasi dimatikan"
             )
         }
+        b.toolRes.setOnClickListener { pickRes() }
 
         b.sliderStart.addOnChangeListener { _, value, fromUser ->
             if (bindingSliders || !fromUser) return@addOnChangeListener
@@ -71,7 +76,24 @@ class MainActivity : AppCompatActivity() {
             refreshPreview()
         }
 
+        paintTools()
         intent?.data?.let(::loadVideo) ?: run { toast("Tidak ada video"); finish() }
+    }
+
+    private fun paintTools() {
+        paintTool(b.iconSquare, b.lblSquare, opts.square)
+        paintTool(b.iconEnhance, b.lblEnhance, opts.enhance)
+        paintTool(b.iconStab, b.lblStab, opts.stabilize)
+        b.lblRes.text = opts.res.label
+        val ink = ContextCompat.getColor(this, R.color.ink)
+        b.iconRes.setColorFilter(ink)
+        b.lblRes.setTextColor(ink)
+    }
+
+    private fun paintTool(icon: ImageView, label: TextView, on: Boolean) {
+        val color = ContextCompat.getColor(this, if (on) R.color.ink else R.color.text_mid)
+        icon.setColorFilter(color)
+        label.setTextColor(color)
     }
 
     private fun pickRes() {
@@ -87,8 +109,7 @@ class MainActivity : AppCompatActivity() {
         AlertDialog.Builder(this).setTitle("Kualitas keluaran")
             .setSingleChoiceItems(labels, items.indexOf(opts.res)) { dialog, which ->
                 opts = opts.copy(res = items[which])
-                b.tvRes.text = opts.res.label
-                updatePlanText(); refreshPreview(); dialog.dismiss()
+                paintTools(); updatePlanText(); refreshPreview(); dialog.dismiss()
             }.show()
     }
 
@@ -160,8 +181,8 @@ class MainActivity : AppCompatActivity() {
         val p = plan ?: return
         val tools = buildList {
             if (opts.square) add("crop 1:1")
-            if (opts.enhance) add("pertajam")
-            if (opts.stabilize) add("stabilisasi ringan")
+            if (opts.enhance) add("tajam")
+            if (opts.stabilize) add("stabil")
         }
         val (w, h) = outDim()
         b.tvStartValue.text = "%.1f dtk".format(p.startMs / 1000f)
@@ -169,7 +190,7 @@ class MainActivity : AppCompatActivity() {
         b.tvClipHint.text = if (p.durationMs < Converter.TARGET_CLIP_MS) {
             "Video pendek — seluruh klip ${"%.1f".format(p.durationMs / 1000f)} dtk dipakai"
         } else {
-            "Durasi dikunci 3,0 dtk · sama seperti Live Photo iPhone"
+            "Durasi dikunci 3,0 dtk"
         }
         b.tvPlan.text = "Sumber   : ${srcW}x${srcH}, %.1f dtk\n".format(p.totalMs / 1000f) +
             "Diambil  : %.1f – %.1f dtk\n".format(

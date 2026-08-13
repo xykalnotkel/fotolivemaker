@@ -5,62 +5,66 @@
     android:orientation="vertical"
     android:gravity="center_horizontal"
     android:background="@color/paper"
-    android:paddingStart="22dp"
-    android:paddingEnd="22dp">
+    android:paddingStart="28dp"
+    android:paddingEnd="28dp">
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="36dp"
-        android:text="MEMBUAT LIVE PHOTO"
+        android:layout_marginTop="28dp"
+        android:text="MENGEKSPOR"
         android:textColor="@color/ink"
-        android:textSize="13sp"
+        android:textSize="11sp"
         android:textStyle="bold"
-        android:letterSpacing="0.1" />
+        android:letterSpacing="0.12" />
 
     <TextView
         android:id="@+id/tvStage"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
+        android:layout_marginTop="8dp"
         android:gravity="center"
-        android:text="Menyiapkan export…"
+        android:text="Menyiapkan…"
         android:textColor="@color/text_mid"
-        android:textSize="14sp" />
+        android:textSize="13sp" />
 
     <TextView
         android:id="@+id/tvEta"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="4dp"
+        android:layout_marginTop="3dp"
         android:gravity="center"
-        android:text="Menghitung waktu…"
+        android:text="sekitar —"
         android:textColor="@color/text_dim"
-        android:textSize="12sp"
-        android:fontFamily="monospace" />
+        android:textSize="12sp" />
 
     <FrameLayout
         android:id="@+id/previewHost"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:layout_marginTop="18dp"
+        android:layout_marginTop="16dp"
         android:layout_marginBottom="8dp">
 
         <FrameLayout
             android:id="@+id/previewBox"
-            android:layout_width="240dp"
-            android:layout_height="320dp"
+            android:layout_width="168dp"
+            android:layout_height="224dp"
             android:layout_gravity="center">
 
             <ImageView
                 android:id="@+id/preview"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_margin="7dp"
-                android:scaleType="fitCenter"
+                android:scaleType="centerCrop"
                 android:background="@android:color/transparent"
                 android:contentDescription="Preview export" />
+
+            <View
+                android:id="@+id/previewShade"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="#FF000000" />
 
             <com.arena.motionphoto.BoxProgressView
                 android:id="@+id/boxProgress"
@@ -72,15 +76,15 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:background="@drawable/bg_pill"
-                android:paddingStart="14dp"
-                android:paddingEnd="14dp"
-                android:paddingTop="6dp"
-                android:paddingBottom="6dp"
+                android:background="@null"
                 android:text="0%"
-                android:textColor="@color/on_ink"
-                android:textSize="22sp"
-                android:textStyle="bold" />
+                android:textColor="#FFFFFFFF"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:shadowColor="#B3000000"
+                android:shadowDx="0"
+                android:shadowDy="1"
+                android:shadowRadius="6" />
         </FrameLayout>
     </FrameLayout>
 
@@ -89,16 +93,17 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
-        android:text="Jangan matikan layar, kembali, atau tutup aplikasi sampai export selesai"
+        android:text="Jangan kunci layar sampai selesai"
         android:textColor="@color/text_dim"
-        android:textSize="12sp" />
+        android:textSize="11sp" />
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btnCancel"
         style="@style/Btn.Ghost"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="18dp"
-        android:layout_marginBottom="24dp"
+        android:layout_marginTop="14dp"
+        android:layout_marginBottom="20dp"
+        android:minHeight="48dp"
         android:text="BATALKAN" />
 </LinearLayout>

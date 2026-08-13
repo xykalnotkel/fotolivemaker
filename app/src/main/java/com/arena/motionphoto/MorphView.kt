@@ -3,12 +3,12 @@ package com.arena.motionphoto
 import android.animation.ValueAnimator
 import android.content.Context
 import android.graphics.Canvas
-import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.RectF
 import android.util.AttributeSet
 import android.view.View
 import android.view.animation.PathInterpolator
+import androidx.core.content.ContextCompat
 import kotlin.math.cos
 import kotlin.math.sin
 

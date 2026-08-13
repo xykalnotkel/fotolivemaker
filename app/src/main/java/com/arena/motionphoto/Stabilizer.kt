@@ -105,8 +105,9 @@ object Stabilizer {
                 val gray = toGray(bmp)
                 bmp.recycle()
 
-                if (prev != null) {
-                    val (dx, dy) = estimateShift(prev!!, gray)
+                val last = prev
+                if (last != null) {
+                    val (dx, dy) = estimateShift(last, gray)
                     times += rel
                     dxs += dx.toFloat()
                     dys += dy.toFloat()

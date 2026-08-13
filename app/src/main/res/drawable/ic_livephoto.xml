@@ -14,51 +14,51 @@
 
     <!-- inti padat -->
     <path
-        android:fillColor="@android:color/white"
+        android:fillColor="#FFFFFFFF"
         android:pathData="M24,24m-5.2,0a5.2,5.2 0 1,1 10.4,0a5.2,5.2 0 1,1 -10.4,0z" />
 
     <!-- cincin dalam -->
     <path
-        android:strokeColor="@android:color/white"
+        android:strokeColor="#FFFFFFFF"
         android:strokeWidth="2.4"
         android:fillColor="@android:color/transparent"
         android:pathData="M24,24m-10.4,0a10.4,10.4 0 1,1 20.8,0a10.4,10.4 0 1,1 -20.8,0z" />
 
     <!-- 12 segmen radial, panjang seragam, ujung membulat -->
-    <path android:strokeColor="@android:color/white" android:strokeWidth="2.6"
+    <path android:strokeColor="#FFFFFFFF" android:strokeWidth="2.6"
         android:strokeLineCap="round" android:fillColor="@android:color/transparent"
         android:pathData="M24,5.6 L24,9.2" />
-    <path android:strokeColor="@android:color/white" android:strokeWidth="2.6"
+    <path android:strokeColor="#FFFFFFFF" android:strokeWidth="2.6"
         android:strokeLineCap="round" android:fillColor="@android:color/transparent"
         android:pathData="M33.2,8.07 L31.4,11.19" />
-    <path android:strokeColor="@android:color/white" android:strokeWidth="2.6"
+    <path android:strokeColor="#FFFFFFFF" android:strokeWidth="2.6"
         android:strokeLineCap="round" android:fillColor="@android:color/transparent"
         android:pathData="M39.93,14.8 L36.81,16.6" />
-    <path android:strokeColor="@android:color/white" android:strokeWidth="2.6"
+    <path android:strokeColor="#FFFFFFFF" android:strokeWidth="2.6"
         android:strokeLineCap="round" android:fillColor="@android:color/transparent"
         android:pathData="M42.4,24 L38.8,24" />
-    <path android:strokeColor="@android:color/white" android:strokeWidth="2.6"
+    <path android:strokeColor="#FFFFFFFF" android:strokeWidth="2.6"
         android:strokeLineCap="round" android:fillColor="@android:color/transparent"
         android:pathData="M39.93,33.2 L36.81,31.4" />
-    <path android:strokeColor="@android:color/white" android:strokeWidth="2.6"
+    <path android:strokeColor="#FFFFFFFF" android:strokeWidth="2.6"
         android:strokeLineCap="round" android:fillColor="@android:color/transparent"
         android:pathData="M33.2,39.93 L31.4,36.81" />
-    <path android:strokeColor="@android:color/white" android:strokeWidth="2.6"
+    <path android:strokeColor="#FFFFFFFF" android:strokeWidth="2.6"
         android:strokeLineCap="round" android:fillColor="@android:color/transparent"
         android:pathData="M24,42.4 L24,38.8" />
-    <path android:strokeColor="@android:color/white" android:strokeWidth="2.6"
+    <path android:strokeColor="#FFFFFFFF" android:strokeWidth="2.6"
         android:strokeLineCap="round" android:fillColor="@android:color/transparent"
         android:pathData="M14.8,39.93 L16.6,36.81" />
-    <path android:strokeColor="@android:color/white" android:strokeWidth="2.6"
+    <path android:strokeColor="#FFFFFFFF" android:strokeWidth="2.6"
         android:strokeLineCap="round" android:fillColor="@android:color/transparent"
         android:pathData="M8.07,33.2 L11.19,31.4" />
-    <path android:strokeColor="@android:color/white" android:strokeWidth="2.6"
+    <path android:strokeColor="#FFFFFFFF" android:strokeWidth="2.6"
         android:strokeLineCap="round" android:fillColor="@android:color/transparent"
         android:pathData="M5.6,24 L9.2,24" />
-    <path android:strokeColor="@android:color/white" android:strokeWidth="2.6"
+    <path android:strokeColor="#FFFFFFFF" android:strokeWidth="2.6"
         android:strokeLineCap="round" android:fillColor="@android:color/transparent"
         android:pathData="M8.07,14.8 L11.19,16.6" />
-    <path android:strokeColor="@android:color/white" android:strokeWidth="2.6"
+    <path android:strokeColor="#FFFFFFFF" android:strokeWidth="2.6"
         android:strokeLineCap="round" android:fillColor="@android:color/transparent"
         android:pathData="M14.8,8.07 L16.6,11.19" />
 </vector>

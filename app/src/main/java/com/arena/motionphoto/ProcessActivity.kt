@@ -105,11 +105,14 @@ class ProcessActivity : AppCompatActivity() {
             val maxW = parent.width
             val maxH = parent.height
             if (maxW <= 0 || maxH <= 0) return@post
+            val density = resources.displayMetrics.density
+            val capW = minOf(maxW, (200 * density).toInt())
+            val capH = minOf(maxH, (268 * density).toInt())
             val aspect = bmp.width.toFloat() / bmp.height.coerceAtLeast(1)
-            var w = maxW
+            var w = capW
             var h = (w / aspect).toInt()
-            if (h > maxH) {
-                h = maxH
+            if (h > capH) {
+                h = capH
                 w = (h * aspect).toInt()
             }
             w = w.coerceAtLeast(120)
