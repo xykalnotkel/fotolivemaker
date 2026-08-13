@@ -1,5 +1,63 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <style name="Theme.MotionPhoto" parent="Theme.Material3.DayNight">
+<resources xmlns:tools="http://schemas.android.com/tools">
+
+    <style name="Theme.MotionPhoto" parent="Theme.Material3.Dark.NoActionBar">
+        <item name="colorPrimary">@color/accent</item>
+        <item name="colorOnPrimary">@color/on_accent</item>
+        <item name="colorSecondary">@color/accent</item>
+        <item name="android:colorBackground">@color/ink</item>
+        <item name="colorSurface">@color/ink_soft</item>
+        <item name="colorOnSurface">@color/text_hi</item>
+        <item name="android:statusBarColor">@color/ink</item>
+        <item name="android:navigationBarColor">@color/ink</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="materialButtonStyle">@style/Btn.Primary</item>
+        <item name="sliderStyle">@style/Slider.Flat</item>
+    </style>
+
+    <!-- Tombol utama: flat, sudut membulat, tanpa gradient -->
+    <style name="Btn.Primary" parent="Widget.Material3.Button">
+        <item name="backgroundTint">@color/accent</item>
+        <item name="android:textColor">@color/on_accent</item>
+        <item name="android:textSize">15sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:letterSpacing">0.01</item>
+        <item name="android:minHeight">54dp</item>
+        <item name="cornerRadius">14dp</item>
+        <item name="elevation">0dp</item>
+        <item name="android:stateListAnimator">@null</item>
+    </style>
+
+    <style name="Btn.Ghost" parent="Widget.Material3.Button.OutlinedButton">
+        <item name="android:textColor">@color/text_hi</item>
+        <item name="strokeColor">@color/ink_line</item>
+        <item name="strokeWidth">1dp</item>
+        <item name="android:textSize">15sp</item>
+        <item name="android:minHeight">54dp</item>
+        <item name="cornerRadius">14dp</item>
+    </style>
+
+    <style name="Slider.Flat" parent="Widget.Material3.Slider">
+        <item name="thumbColor">@color/accent</item>
+        <item name="trackColorActive">@color/accent</item>
+        <item name="trackColorInactive">@color/ink_line</item>
+        <item name="thumbRadius">10dp</item>
+        <item name="trackHeight">4dp</item>
+        <item name="haloRadius">20dp</item>
+        <item name="tickVisible">false</item>
+    </style>
+
+    <style name="Label" parent="">
+        <item name="android:textColor">@color/text_mid</item>
+        <item name="android:textSize">12sp</item>
+        <item name="android:letterSpacing">0.06</item>
+        <item name="android:textAllCaps">true</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="Value" parent="">
+        <item name="android:textColor">@color/accent</item>
+        <item name="android:textSize">13sp</item>
+        <item name="android:fontFamily">monospace</item>
     </style>
 </resources>

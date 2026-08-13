@@ -52,10 +52,15 @@ object Converter {
         val r = MediaMetadataRetriever()
         return try {
             r.setDataSource(context, uri)
-            val bmp = r.getFrameAtTime(atMs * 1000, MediaMetadataRetriever.OPTION_CLOSEST_SYNC)
+            // OPTION_CLOSEST lebih akurat; kalau gagal, mundur ke sync frame
+            val bmp = r.getFrameAtTime(atMs * 1000, MediaMetadataRetriever.OPTION_CLOSEST)
+                ?: r.getFrameAtTime(atMs * 1000, MediaMetadataRetriever.OPTION_CLOSEST_SYNC)
+                ?: r.getFrameAtTime()
                 ?: return null
             processBitmap(bmp, opts)
         } catch (e: Exception) {
+            null
+        } catch (e: OutOfMemoryError) {
             null
         } finally {
             runCatching { r.release() }
@@ -136,7 +141,13 @@ object Converter {
                         exception: ExportException
                     ) {
                         outFile.delete()
-                        cont.resumeWithException(exception)
+                        cont.resumeWithException(
+                            IllegalStateException(
+                                "Video tidak didukung perangkat ini. " +
+                                    "Coba aktifkan 720p atau pilih video lain.",
+                                exception
+                            )
+                        )
                     }
                 })
                 .build()
