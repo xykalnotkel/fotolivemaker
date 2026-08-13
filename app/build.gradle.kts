@@ -12,8 +12,9 @@ android {
         minSdk = 26
         targetSdk = 34
         // Versi diambil dari nomor run GitHub Actions supaya SELALU sinkron
-        // dengan tag Release dan nama file APK. Build lokal jatuh ke 0/1.0.0-dev.
-        versionCode = (System.getenv("BUILD_NUMBER") ?: "0").toInt()
+        // dengan tag Release dan nama file APK. Build lokal jatuh ke 1/1.0.0-dev.
+        // Catatan: versionCode WAJIB bilangan positif, jadi default-nya 1.
+        versionCode = (System.getenv("BUILD_NUMBER")?.toIntOrNull() ?: 1).coerceAtLeast(1)
         versionName = System.getenv("BUILD_NUMBER")?.let { "1.0.$it" } ?: "1.0.0-dev"
     }
 

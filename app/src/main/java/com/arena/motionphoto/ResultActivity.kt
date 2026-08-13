@@ -219,6 +219,66 @@ class ResultActivity : AppCompatActivity() {
     }
 
     private fun share() {
+        androidx.appcompat.app.AlertDialog.Builder(this)
+            .setTitle("Bagikan sebagai apa?")
+            .setItems(
+                arrayOf(
+                    "Video MP4  —  pasti bergerak",
+                    "Motion Photo  —  hanya utuh lewat galeri"
+                )
+            ) { _, which ->
+                if (which == 0) shareAsVideo() else shareAsMotionPhoto()
+            }
+            .show()
+    }
+
+    /**
+     * Bagikan klip MP4-nya saja.
+     *
+     * Ini jalur yang PASTI bergerak di TikTok/Instagram/WhatsApp, karena
+     * yang dikirim memang berkas video biasa. Kalau motion photo dikirim
+     * lewat tombol Bagikan, aplikasi penerima umumnya hanya membaca bagian
+     * JPEG-nya saja sehingga yang sampai cuma foto diam.
+     */
+    private fun shareAsVideo() {
+        val src = clipFile
+        if (src == null || !src.exists()) {
+            Toast.makeText(this, "Klip belum siap, tunggu sebentar", Toast.LENGTH_SHORT).show()
+            return
+        }
+        lifecycleScope.launch {
+            val shared = withContext(Dispatchers.IO) {
+                runCatching {
+                    val dir = File(cacheDir, "share").apply { mkdirs() }
+                    dir.listFiles()?.forEach { it.delete() }
+                    val dst = File(dir, "LivePhoto_${System.currentTimeMillis()}.mp4")
+                    src.copyTo(dst, overwrite = true)
+                    FileProvider.getUriForFile(
+                        this@ResultActivity, "$packageName.fileprovider", dst
+                    )
+                }.getOrNull()
+            }
+            if (shared == null) {
+                Toast.makeText(this@ResultActivity, "Gagal menyiapkan video", Toast.LENGTH_SHORT).show()
+                return@launch
+            }
+            runCatching {
+                startActivity(
+                    Intent.createChooser(
+                        Intent(Intent.ACTION_SEND).apply {
+                            type = "video/mp4"
+                            putExtra(Intent.EXTRA_STREAM, shared)
+                            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                        }, "Bagikan video"
+                    )
+                )
+            }.onFailure {
+                Toast.makeText(this@ResultActivity, "Tidak bisa membagikan", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+    private fun shareAsMotionPhoto() {
         val uri = savedUri ?: return
         runCatching {
             startActivity(
