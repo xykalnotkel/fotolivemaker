@@ -164,7 +164,8 @@ object Converter {
     }
 
     fun extractFrame(
-        context: Context, uri: Uri, atMs: Long, opts: Options, outHeight: Int
+        context: Context, uri: Uri, atMs: Long, opts: Options, outHeight: Int,
+        applyLook: Boolean = true
     ): Bitmap? {
         val r = MediaMetadataRetriever()
         return try {
@@ -173,7 +174,7 @@ object Converter {
                 ?: r.getFrameAtTime(atMs * 1000, MediaMetadataRetriever.OPTION_CLOSEST_SYNC)
                 ?: r.getFrameAtTime()
                 ?: return null
-            processBitmap(bmp, opts, outHeight)
+            processBitmap(bmp, opts, outHeight, applyLook)
         } catch (e: Exception) {
             null
         } catch (e: OutOfMemoryError) {
@@ -183,7 +184,7 @@ object Converter {
         }
     }
 
-    private fun processBitmap(src: Bitmap, opts: Options, targetH: Int): Bitmap {
+    private fun processBitmap(src: Bitmap, opts: Options, targetH: Int, applyLook: Boolean): Bitmap {
         var bmp = src
         if (opts.square) {
             val s = minOf(bmp.width, bmp.height)
@@ -218,11 +219,10 @@ object Converter {
         return bmp
     }
 
-    /**
-     * Cover JPEG memakai denoise yang sama dengan shader video.
-     * Tanpa unsharp — supaya tidak loncat vs klip, dan aman untuk filter TikTok.
-     */
-    private fun enhanceBitmap(src: Bitmap): Bitmap {
+    /** Denoise lebih kuat; tajam cuma buat mengembalikan tepi setelah zoom/encode. */
+    fun restoreSharpen(stabilize: Boolean): Float = if (stabilize) 0.40f else 0.30f
+
+    private fun enhanceBitmap(src: Bitmap, sharpen: Float): Bitmap {
         val w = src.width
         val h = src.height
         if (w < 3 || h < 3) return src
@@ -231,7 +231,7 @@ object Converter {
         val inn = IntArray(w * h)
         val out = IntArray(w * h)
         work.getPixels(inn, 0, w, 0, 0, w, h)
-        val denoise = 0.55f
+        val denoise = 0.68f
         for (y in 0 until h) {
             val y0 = (y - 2).coerceAtLeast(0)
             val y1 = (y + 2).coerceAtMost(h - 1)
@@ -261,13 +261,18 @@ object Converter {
                 val cg = (p ushr 8) and 0xFF
                 val cb = p and 0xFF
                 val a = p ushr 24
-                val br = r / n
-                val bg = g / n
-                val bb = b / n
-                val outR = (cr + ((br - cr) * denoise).toInt()).coerceIn(0, 255)
-                val outG = (cg + ((bg - cg) * denoise).toInt()).coerceIn(0, 255)
-                val outB = (cb + ((bb - cb) * denoise).toInt()).coerceIn(0, 255)
-                out[y * w + x] = (a shl 24) or (outR shl 16) or (outG shl 8) or outB
+                var outR = cr + ((r / n - cr) * denoise).toInt()
+                var outG = cg + ((g / n - cg) * denoise).toInt()
+                var outB = cb + ((b / n - cb) * denoise).toInt()
+                if (sharpen > 0.01f) {
+                    outR += ((outR - r / n) * sharpen).toInt()
+                    outG += ((outG - g / n) * sharpen).toInt()
+                    outB += ((outB - b / n) * sharpen).toInt()
+                }
+                out[y * w + x] = (a shl 24) or
+                    (outR.coerceIn(0, 255) shl 16) or
+                    (outG.coerceIn(0, 255) shl 8) or
+                    outB.coerceIn(0, 255)
             }
         }
         val bmp = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888)
@@ -282,20 +287,23 @@ object Converter {
         return out.toByteArray()
     }
 
-    /** Samakan cover JPEG dengan transform shader stabilizer pada waktu frame kunci. */
+    /** Cover ikut zoom/geser/putar stabilizer — setelah itu baru di-Bersih. */
     private fun applyStabilizationToCover(src: Bitmap, plan: Stabilizer.Plan, timeMs: Long): Bitmap {
-        if (plan.zoom <= 1.001f) return src
         val (ox, oy) = plan.offsetAt(timeMs)
-        val cropW = (src.width / plan.zoom).toInt().coerceIn(2, src.width)
-        val cropH = (src.height / plan.zoom).toInt().coerceIn(2, src.height)
-        val centerX = src.width * (0.5f + ox)
-        val centerY = src.height * (0.5f + oy)
-        val left = (centerX - cropW / 2f).toInt().coerceIn(0, src.width - cropW)
-        val top = (centerY - cropH / 2f).toInt().coerceIn(0, src.height - cropH)
-        val crop = Bitmap.createBitmap(src, left, top, cropW, cropH)
-        val result = Bitmap.createScaledBitmap(crop, src.width, src.height, true)
-        if (crop !== result) crop.recycle()
-        return result
+        val rot = plan.rotAt(timeMs)
+        if (plan.zoom <= 1.001f && ox == 0f && oy == 0f && kotlin.math.abs(rot) < 0.001f) return src
+        val out = Bitmap.createBitmap(src.width, src.height, Bitmap.Config.ARGB_8888)
+        val c = android.graphics.Canvas(out)
+        val m = android.graphics.Matrix()
+        val cx = src.width / 2f
+        val cy = src.height / 2f
+        m.postTranslate(-cx, -cy)
+        m.postRotate(Math.toDegrees(rot.toDouble()).toFloat())
+        m.postScale(plan.zoom, plan.zoom)
+        m.postTranslate(cx - ox * src.width, cy - oy * src.height)
+        c.drawColor(android.graphics.Color.BLACK)
+        c.drawBitmap(src, m, android.graphics.Paint(android.graphics.Paint.FILTER_BITMAP_FLAG))
+        return out
     }
 
     /**
@@ -483,12 +491,18 @@ object Converter {
         log("Mengambil frame kunci…")
         progress(16)
         val rawBmp = withContext(Dispatchers.IO) {
-            extractFrame(context, uri, p.startMs + p.keyframeOffsetMs, opts, outH)
+            extractFrame(context, uri, p.startMs + p.keyframeOffsetMs, opts, outH, applyLook = false)
         } ?: throw IllegalStateException("Gagal mengambil frame dari video")
-        // Cover harus memakai framing stabilizer yang sama dengan frame video.
-        // Tanpa ini thumbnail bisa tampak "loncat" saat Live Photo mulai diputar.
-        val bmp = stab?.let { applyStabilizationToCover(rawBmp, it, p.keyframeOffsetMs) } ?: rawBmp
-        if (bmp !== rawBmp) rawBmp.recycle()
+        val framed = stab?.let { applyStabilizationToCover(rawBmp, it, p.keyframeOffsetMs) } ?: rawBmp
+        if (framed !== rawBmp) rawBmp.recycle()
+        // Bersih sesudah zoom, sama seperti urutan di video.
+        val bmp = if (opts.enhance) {
+            val looked = withContext(Dispatchers.Default) {
+                enhanceBitmap(framed, restoreSharpen(opts.stabilize))
+            }
+            if (looked !== framed) framed.recycle()
+            looked
+        } else framed
         log("Foto: ${bmp.width}x${bmp.height}")
 
         val jpeg = withContext(Dispatchers.Default) { bmp.toJpeg(opts.jpegQuality) }

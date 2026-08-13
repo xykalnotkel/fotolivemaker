@@ -49,7 +49,7 @@ class MainActivity : AppCompatActivity() {
             opts = opts.copy(enhance = !opts.enhance)
             paintTools(); updatePlanText(); refreshPreview()
             toast(
-                if (opts.enhance) "Bersih: meredam noise di video + foto. Bukan HD/AI."
+                if (opts.enhance) "Bersih: redam noise + pulihkan tepi (video & foto)."
                 else "Bersih dimatikan"
             )
         }

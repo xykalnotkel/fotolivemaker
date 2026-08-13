@@ -1,7 +1,6 @@
 #version 100
-// Bersih: meredam bintik di VIDEO (bukan cuma foto).
-// Bilateral 5x5 — tepi dijaga, tidak ada unsharp.
-// Unsharp sengaja tidak dipakai: bentrok dengan filter TikTok.
+// Bersih: redam noise 5x5, lalu unsharp RINGAN untuk mengembalikan
+// tepi yang hilang karena zoom stabilizer / encode. Bukan HD engine.
 
 precision mediump float;
 
