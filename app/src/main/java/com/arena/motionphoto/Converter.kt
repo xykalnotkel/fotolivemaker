@@ -151,6 +151,22 @@ object Converter {
         return out.toByteArray()
     }
 
+    /** Samakan cover JPEG dengan transform shader stabilizer pada waktu frame kunci. */
+    private fun applyStabilizationToCover(src: Bitmap, plan: Stabilizer.Plan, timeMs: Long): Bitmap {
+        if (plan.zoom <= 1.001f) return src
+        val (ox, oy) = plan.offsetAt(timeMs)
+        val cropW = (src.width / plan.zoom).toInt().coerceIn(2, src.width)
+        val cropH = (src.height / plan.zoom).toInt().coerceIn(2, src.height)
+        val centerX = src.width * (0.5f + ox)
+        val centerY = src.height * (0.5f + oy)
+        val left = (centerX - cropW / 2f).toInt().coerceIn(0, src.width - cropW)
+        val top = (centerY - cropH / 2f).toInt().coerceIn(0, src.height - cropH)
+        val crop = Bitmap.createBitmap(src, left, top, cropW, cropH)
+        val result = Bitmap.createScaledBitmap(crop, src.width, src.height, true)
+        if (crop !== result) crop.recycle()
+        return result
+    }
+
     /**
      * Trim + transcode + CROP dengan Media3 Transformer.
      *
@@ -327,12 +343,17 @@ object Converter {
         }
 
         log("Mengambil frame kunci…")
-        val bmp = withContext(Dispatchers.IO) {
+        val rawBmp = withContext(Dispatchers.IO) {
             extractFrame(context, uri, p.startMs + p.keyframeOffsetMs, opts, outH)
         } ?: throw IllegalStateException("Gagal mengambil frame dari video")
+        // Cover harus memakai framing stabilizer yang sama dengan frame video.
+        // Tanpa ini thumbnail bisa tampak "loncat" saat Live Photo mulai diputar.
+        val bmp = stab?.let { applyStabilizationToCover(rawBmp, it, p.keyframeOffsetMs) } ?: rawBmp
+        if (bmp !== rawBmp) rawBmp.recycle()
         log("Foto: ${bmp.width}x${bmp.height}")
 
         val jpeg = withContext(Dispatchers.Default) { bmp.toJpeg(opts.jpegQuality) }
+        if (!bmp.isRecycled) bmp.recycle()
         log("JPEG: ${jpeg.size / 1024} KB")
 
         val mp4 = transcodeClip(context, uri, p, opts, outW, outH, stab, log, progress)
@@ -380,27 +401,30 @@ object Converter {
         val uri = resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values)
             ?: throw IllegalStateException("Tidak bisa membuat berkas di galeri")
 
-        resolver.openOutputStream(uri)?.use { it.write(data) }
-            ?: throw IllegalStateException("Tidak bisa menulis berkas")
+        try {
+            resolver.openOutputStream(uri)?.use { it.write(data) }
+                ?: throw IllegalStateException("Tidak bisa menulis berkas")
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            values.clear()
-            values.put(MediaStore.Images.Media.IS_PENDING, 0)
-            resolver.update(uri, values, null, null)
-        }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                ContentValues().apply {
+                    put(MediaStore.Images.Media.IS_PENDING, 0)
+                    resolver.update(uri, this, null, null)
+                }
+            }
 
-        // Paksa MediaStore memindai berkasnya sekarang juga.
-        // Tanpa ini, di sebagian perangkat berkas baru muncul di galeri
-        // setelah beberapa saat atau setelah HP di-restart.
-        runCatching {
-            val path = resolvePath(context, uri)
-            if (path != null) {
-                android.media.MediaScannerConnection.scanFile(
+            // Paksa MediaStore memindai berkasnya sekarang juga.
+            runCatching {
+                val path = resolvePath(context, uri)
+                if (path != null) android.media.MediaScannerConnection.scanFile(
                     context, arrayOf(path), arrayOf("image/jpeg"), null
                 )
             }
+            return uri
+        } catch (e: Exception) {
+            // Jangan tinggalkan item pending / file setengah jadi di galeri.
+            runCatching { resolver.delete(uri, null, null) }
+            throw e
         }
-        return uri
     }
 
     /** Cari path fisik berkas supaya bisa dipindai MediaScanner. */

@@ -1,7 +1,7 @@
 # Live Photo Maker (Android)
 
 [![Build APK](https://github.com/xykalnotkel/fotolivemaker/actions/workflows/build.yml/badge.svg)](https://github.com/xykalnotkel/fotolivemaker/actions/workflows/build.yml)
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![License: Apache--2.0](https://img.shields.io/badge/License-Apache--2.0-blue.svg)](LICENSE)
 [![Release](https://img.shields.io/github/v/release/xykalnotkel/fotolivemaker?label=APK)](https://github.com/xykalnotkel/fotolivemaker/releases/latest)
 
 Ubah video jadi **Motion Photo** — file yang muncul berlabel **Live** di picker
@@ -119,7 +119,8 @@ di artifact **laporan-tes**.
 
 ## Lisensi & ketentuan
 
-- **[LICENSE](LICENSE)** — MIT, bebas dipakai/dimodifikasi/didistribusikan
+- **[LICENSE](LICENSE)** — Apache License 2.0 · Copyright 2026 XyStudio — Haekal Saputra
+- **[NOTICE](NOTICE)** — pemberitahuan lisensi library pihak ketiga
 - **[TERMS.md](TERMS.md)** — syarat penggunaan & batasan tanggung jawab
 - **[PRIVACY.md](PRIVACY.md)** — kebijakan privasi
 

@@ -21,7 +21,7 @@ diunggah ke server mana pun.
 ## 2. Tanpa jaminan
 
 Aplikasi ini disediakan **"APA ADANYA" (AS IS)**, tanpa jaminan dalam bentuk
-apa pun, sesuai Lisensi MIT yang menyertainya.
+apa pun, sesuai Lisensi Apache License 2.0 yang menyertainya.
 
 Secara khusus, **tidak ada jaminan bahwa:**
 - File hasil konversi akan dikenali sebagai "Live Photo" oleh TikTok, Instagram,
@@ -89,7 +89,7 @@ menyetujui syarat yang baru.
 ## 8. Hukum yang berlaku
 
 Syarat ini tunduk pada hukum yang berlaku di Republik Indonesia, tanpa
-mengesampingkan ketentuan Lisensi MIT.
+mengesampingkan ketentuan Lisensi Apache License 2.0.
 
 ---
 

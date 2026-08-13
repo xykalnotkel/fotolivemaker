@@ -12,6 +12,7 @@ object Settings {
     private const val K_STAB = "stabilize"
     private const val K_QUALITY = "jpeg_quality"
     private const val K_THEME = "theme"
+    private const val K_KEEP_SCREEN_ON = "keep_screen_on"
 
     /** 0 = ikut sistem, 1 = terang, 2 = gelap */
     const val THEME_SYSTEM = 0
@@ -35,6 +36,13 @@ object Settings {
     }
 
     fun theme(c: Context): Int = sp(c).getInt(K_THEME, THEME_SYSTEM)
+
+    /** Default aktif supaya export panjang tidak mudah terganggu layar terkunci. */
+    fun keepScreenOn(c: Context): Boolean = sp(c).getBoolean(K_KEEP_SCREEN_ON, true)
+
+    fun setKeepScreenOn(c: Context, enabled: Boolean) {
+        sp(c).edit().putBoolean(K_KEEP_SCREEN_ON, enabled).apply()
+    }
 
     fun setTheme(c: Context, mode: Int) {
         sp(c).edit().putInt(K_THEME, mode).apply()

@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:gravity="center_horizontal"
+    android:background="@color/paper"
+    android:paddingStart="22dp"
+    android:paddingEnd="22dp">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="42dp"
+        android:text="MEMBUAT LIVE PHOTO"
+        android:textColor="@color/ink"
+        android:textSize="13sp"
+        android:textStyle="bold"
+        android:letterSpacing="0.1" />
+
+    <TextView
+        android:id="@+id/tvStage"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:gravity="center"
+        android:text="Menyiapkan export…"
+        android:textColor="@color/text_mid"
+        android:textSize="14sp" />
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:layout_marginTop="32dp"
+        android:layout_marginBottom="20dp"
+        android:background="@drawable/bg_preview">
+
+        <!-- Muncul saat frame belum siap; digantikan preview video ketika sudah terbaca. -->
+        <ImageView
+            android:layout_width="180dp"
+            android:layout_height="180dp"
+            android:layout_gravity="center"
+            android:alpha="0.28"
+            android:src="@drawable/illus_export_process"
+            android:scaleType="fitCenter"
+            android:contentDescription="@null" />
+
+        <ImageView
+            android:id="@+id/preview"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_margin="1dp"
+            android:scaleType="fitCenter"
+            android:contentDescription="Preview export" />
+
+        <View
+            android:id="@+id/previewShade"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_margin="1dp"
+            android:background="#FF000000" />
+
+        <com.google.android.material.progressindicator.CircularProgressIndicator
+            android:id="@+id/progressRing"
+            android:layout_width="116dp"
+            android:layout_height="116dp"
+            android:layout_gravity="center"
+            app:indicatorColor="@color/on_ink"
+            app:trackColor="#66000000"
+            app:trackThickness="5dp"
+            app:indicatorSize="116dp"
+            app:indicatorDirectionCircular="clockwise"
+            app:indeterminate="false"
+            android:max="100"
+            android:progress="0" />
+
+        <TextView
+            android:id="@+id/tvPercent"
+            android:layout_width="116dp"
+            android:layout_height="116dp"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:text="0%"
+            android:textColor="@color/on_ink"
+            android:textSize="26sp"
+            android:textStyle="bold" />
+    </FrameLayout>
+
+    <TextView
+        android:id="@+id/tvHint"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:text="Jangan matikan layar, kembali, atau tutup aplikasi sampai export selesai"
+        android:textColor="@color/text_dim"
+        android:textSize="12sp" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnCancel"
+        style="@style/Btn.Ghost"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="18dp"
+        android:layout_marginBottom="24dp"
+        android:text="BATALKAN" />
+</LinearLayout>

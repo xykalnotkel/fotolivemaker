@@ -65,10 +65,10 @@ jobs:
           "$ANDROID_HOME/build-tools/$BT/apksigner" verify --print-certs "$APK" \
             | tee /tmp/sig.txt
           if grep -qi "CN=Android Debug" /tmp/sig.txt; then
-            echo "::error::APK masih ditandatangani debug key"
-            exit 1
+            echo "::warning::APK memakai debug key: artifact tetap diunggah, tetapi Release publik dilewati."
+          else
+            echo "APK ditandatangani kunci rilis."
           fi
-          echo "APK ditandatangani kunci rilis."
 
       - name: Siapkan berkas APK
         id: prep
@@ -90,7 +90,8 @@ jobs:
 
       # ---- Release hanya dibuat untuk push ke branch utama ----
       - name: Terbitkan Release
-        if: github.event_name != 'pull_request'
+        # Jangan pernah menerbitkan APK yang masih memakai debug key.
+        if: github.event_name != 'pull_request' && secrets.KEYSTORE_BASE64 != '' && secrets.KEYSTORE_PASSWORD != '' && secrets.KEY_ALIAS != '' && secrets.KEY_PASSWORD != ''
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ steps.prep.outputs.version }}
@@ -110,8 +111,9 @@ jobs:
             4. Hasil tersimpan di `DCIM/Camera`
 
             ### Catatan penting
-            - APK ditandatangani dengan **debug key**, jadi langsung bisa
-              di-install, tapi **jangan** diunggah ke Play Store apa adanya.
+            - APK ini ditandatangani dengan **kunci rilis**. Jangan unggah ke
+              Play Store tanpa menyiapkan identitas aplikasi, kebijakan, dan
+              signing key milikmu sendiri.
             - Dukungan label Live **berbeda-beda tiap perangkat dan versi TikTok**.
               Paling andal di Samsung (One UI) dan Google Pixel.
             - Tes dulu di **Galeri bawaan**: kalau di sana sudah bergerak,

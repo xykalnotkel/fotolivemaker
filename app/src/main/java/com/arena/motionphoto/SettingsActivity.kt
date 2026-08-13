@@ -28,6 +28,7 @@ class SettingsActivity : AppCompatActivity() {
         b.swEnhance.isChecked = o.enhance
         b.swStab.isChecked = o.stabilize
         b.tvRes.text = o.res.label
+        b.swKeepScreenOn.isChecked = Settings.keepScreenOn(this)
         b.tvTheme.text = themeLabel(Settings.theme(this))
 
         b.rowRes.setOnClickListener { pickRes() }
@@ -43,6 +44,10 @@ class SettingsActivity : AppCompatActivity() {
         }
         b.swStab.setOnCheckedChangeListener { _, v ->
             persist(); notify(if (v) "Stabilizer aktif" else "Stabilizer dimatikan")
+        }
+        b.swKeepScreenOn.setOnCheckedChangeListener { _, enabled ->
+            Settings.setKeepScreenOn(this, enabled)
+            notify(if (enabled) "Layar dijaga tetap menyala saat export" else "Layar boleh mati saat export")
         }
 
         b.tvVersion.text = "v${BuildConfig.VERSION_NAME}  ·  build ${BuildConfig.VERSION_CODE}"
@@ -75,10 +80,11 @@ class SettingsActivity : AppCompatActivity() {
             b.statProjectCount.text = "${s.projectCount} hasil"
             b.statFree.text = Stats.human(s.freeBytes)
             b.statCache.text = Stats.human(s.cacheBytes)
-            b.statData.text = Stats.human(s.appDataBytes)
+            // Pisahkan pemakaian aplikasi dari pemakaian seluruh perangkat agar tidak menyesatkan.
+            b.statData.text = Stats.human(s.appDataBytes + s.cacheBytes)
             b.barStorage.progress = s.usedPercent
             b.statStorageLine.text =
-                "${Stats.human(s.usedBytes)} terpakai dari ${Stats.human(s.totalBytes)}" +
+                "Perangkat: ${Stats.human(s.usedBytes)} / ${Stats.human(s.totalBytes)}" +
                 "  ·  ${s.usedPercent}%"
         }
     }

@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <uses-permission android:name="android.permission.READ_MEDIA_VIDEO"
-        android:maxSdkVersion="34" />
+    <!-- Android 13+; jangan diberi maxSdk agar pemilih video tetap bekerja di Android 15+. -->
+    <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
         android:maxSdkVersion="32" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
@@ -56,6 +56,11 @@
             android:name=".MainActivity"
             android:exported="false"
             android:parentActivityName=".HomeActivity" />
+
+        <activity
+            android:name=".ProcessActivity"
+            android:exported="false"
+            android:parentActivityName=".MainActivity" />
 
         <activity
             android:name=".ResultActivity"

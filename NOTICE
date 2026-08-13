@@ -1,0 +1,21 @@
+Live Photo Maker
+Copyright 2026 XyStudio — Haekal Saputra
+
+This product includes software developed by third parties. The following direct
+runtime dependencies are distributed under the Apache License, Version 2.0:
+
+- AndroidX Core KTX (androidx.core:core-ktx)
+- AndroidX AppCompat (androidx.appcompat:appcompat)
+- Material Components for Android (com.google.android.material:material)
+- AndroidX ConstraintLayout (androidx.constraintlayout:constraintlayout)
+- AndroidX RecyclerView (androidx.recyclerview:recyclerview)
+- AndroidX Activity KTX (androidx.activity:activity-ktx)
+- AndroidX Lifecycle Runtime KTX (androidx.lifecycle:lifecycle-runtime-ktx)
+- Kotlin Coroutines Android (org.jetbrains.kotlinx:kotlinx-coroutines-android)
+- AndroidX Media3 Transformer, Effect, Common, ExoPlayer, and UI
+  (androidx.media3:media3-*)
+
+Full dependency metadata and version pins are in app/build.gradle.kts. The
+Apache License, Version 2.0 for this application and the listed dependencies
+is provided in LICENSE. Android, Kotlin, and Media3 names are trademarks of
+their respective owners.
