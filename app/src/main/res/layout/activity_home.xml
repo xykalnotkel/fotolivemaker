@@ -248,12 +248,11 @@
 
         <ImageView
             android:id="@+id/imgUpdate"
-            android:layout_width="68dp"
-            android:layout_height="68dp"
+            android:layout_width="96dp"
+            android:layout_height="72dp"
             android:layout_gravity="center"
             android:src="@drawable/illus_update_ring"
             android:scaleType="fitCenter"
-            app:tint="@color/ink"
             android:contentDescription="@null" />
 
         <TextView
