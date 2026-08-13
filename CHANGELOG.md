@@ -7,7 +7,7 @@ Saat rilis, pindahkan ke heading versi + tanggal.
 
 ### Home
 - Banner update tipis di bawah: muncul otomatis kalau GitHub Releases lebih baru
-- Cincin Live Photo di tengah, keluar dari bar
+- Cincin 3D krom morphing (kotak→lingkaran) di tengah, keluar dari bar
 - Ketuk banner membuka halaman rilis
 - Izin `INTERNET` ditambah **hanya** untuk cek tag GitHub — PRIVACY/README disesuaikan
 
