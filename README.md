@@ -9,6 +9,8 @@ galeri TikTok saat mau posting.
 
 Berjalan **sepenuhnya offline**. Tanpa iklan, tanpa akun, tanpa pelacak.
 
+Catatan perubahan lengkap ada di **[CHANGELOG.md](CHANGELOG.md)**.
+
 ## 📥 Download APK
 
 **[⬇️ Ambil versi terbaru di halaman Releases](https://github.com/xykalnotkel/fotolivemaker/releases/latest)**

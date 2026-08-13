@@ -1,6 +1,15 @@
 # Changelog
 
-## Unreleased → tag `v1.1.0` (setelah kamu push)
+Setiap update wajib menambah entri di sini. Yang belum dirilis masuk **Unreleased**.
+Saat rilis, pindahkan ke heading versi + tanggal.
+
+## Unreleased
+
+_Belum ada perubahan setelah v1.1.0._
+
+## [v1.1.0](https://github.com/xykalnotkel/fotolivemaker/releases/tag/v1.1.0) — 2026-08-13
+
+Commit `c23ac54`.
 
 ### Layar export
 - Preview di tengah, tanpa background / shade hitam
