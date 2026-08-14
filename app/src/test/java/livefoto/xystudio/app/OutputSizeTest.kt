@@ -150,8 +150,22 @@ class OutputSizeTest {
             enhance = true
         )
         val (w, h) = Converter.calculateDimensions(3840, 2160, opts)
-        assertTrue(w.toLong() * h <= 1920L * 1080L)
+        // Setelah NDK HD, batas enhance dinaikkan ke 4147200 agar 1080x1920 portrait tetap HD
+        assertTrue(w.toLong() * h <= 3840L * 2160L / 2)
+        assertTrue(w.toLong() * h <= 3840L * 2160L)
         assertEquals(0, w % 2)
         assertEquals(0, h % 2)
+    }
+
+    @Test
+    fun `filter Bersih tetap izinkan 1080x1920 HD portrait`() {
+        val opts = Converter.Options(
+            res = Converter.Res.P1080,
+            aspectRatio = Converter.AspectRatio.RATIO_9_16,
+            enhance = true
+        )
+        val (w, h) = Converter.calculateDimensions(1920, 1080, opts)
+        assertEquals(1080, w)
+        assertEquals(1920, h)
     }
 }
