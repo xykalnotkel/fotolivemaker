@@ -48,10 +48,9 @@
             android:id="@+id/btnSettings"
             android:layout_width="44dp"
             android:layout_height="44dp"
-            android:padding="10dp"
-            android:src="@drawable/ic_gear"
+            android:padding="8dp"
+            android:src="@drawable/ic_gear_3d"
             android:background="?attr/selectableItemBackgroundBorderless"
-            app:tint="@color/icon_tint"
             android:contentDescription="Pengaturan" />
     </LinearLayout>
 
@@ -85,9 +84,8 @@
                     android:layout_gravity="end|bottom"
                     android:layout_marginEnd="8dp"
                     android:layout_marginBottom="4dp"
-                    android:alpha="0.18"
-                    android:src="@drawable/ic_livephoto"
-                    app:tint="@color/accent_primary"
+                    android:alpha="0.25"
+                    android:src="@drawable/ic_livephoto_3d"
                     android:contentDescription="@null" />
 
                 <LinearLayout
@@ -197,8 +195,7 @@
                     android:layout_width="56dp"
                     android:layout_height="56dp"
                     android:alpha="0.30"
-                    android:src="@drawable/ic_livephoto"
-                    app:tint="@color/text_dim"
+                    android:src="@drawable/ic_livephoto_3d"
                     android:contentDescription="@null" />
 
                 <TextView

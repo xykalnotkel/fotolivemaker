@@ -24,7 +24,7 @@
             android:padding="10dp"
             android:src="@drawable/ic_back"
             android:background="?attr/selectableItemBackgroundBorderless"
-            app:tint="@color/ink"
+            app:tint="@color/icon_tint"
             android:contentDescription="Kembali" />
 
         <TextView
@@ -59,11 +59,25 @@
             android:paddingBottom="28dp">
 
             <!-- ====== PENYIMPANAN ====== -->
-            <TextView
-                style="@style/Label"
-                android:layout_width="wrap_content"
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Penyimpanan" />
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+
+                <ImageView
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"
+                    android:src="@drawable/ic_stats_asset"
+                    android:contentDescription="@null" />
+
+                <TextView
+                    style="@style/Label"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:text="Penyimpanan" />
+            </LinearLayout>
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -129,6 +143,7 @@
                             android:letterSpacing="-0.03" />
 
                         <TextView
+                            android:id="@+id/statFreeLabel"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="1dp"
@@ -173,10 +188,17 @@
                     android:gravity="center_vertical"
                     android:background="?attr/selectableItemBackground">
 
+                    <ImageView
+                        android:layout_width="18dp"
+                        android:layout_height="18dp"
+                        android:src="@drawable/ic_trash_asset"
+                        android:contentDescription="@null" />
+
                     <TextView
                         android:layout_width="0dp"
                         android:layout_weight="1"
                         android:layout_height="wrap_content"
+                        android:layout_marginStart="10dp"
                         android:text="Bersihkan cache sementara"
                         android:textColor="@color/text_hi"
                         android:textSize="13sp" />
@@ -199,10 +221,17 @@
                     android:gravity="center_vertical"
                     android:background="?attr/selectableItemBackground">
 
+                    <ImageView
+                        android:layout_width="18dp"
+                        android:layout_height="18dp"
+                        android:src="@drawable/ic_trash_asset"
+                        android:contentDescription="@null" />
+
                     <TextView
                         android:layout_width="0dp"
                         android:layout_weight="1"
                         android:layout_height="wrap_content"
+                        android:layout_marginStart="10dp"
                         android:text="Hapus seluruh hasil Live Photo"
                         android:textColor="@color/bad"
                         android:textSize="13sp"
@@ -235,10 +264,17 @@
                     android:gravity="center_vertical"
                     android:background="?attr/selectableItemBackground">
 
+                    <ImageView
+                        android:layout_width="18dp"
+                        android:layout_height="18dp"
+                        android:src="@drawable/ic_tool_res_3d"
+                        android:contentDescription="@null" />
+
                     <TextView
                         android:layout_width="0dp"
                         android:layout_weight="1"
                         android:layout_height="wrap_content"
+                        android:layout_marginStart="10dp"
                         android:text="Resolusi Bawaan"
                         android:textColor="@color/text_hi"
                         android:textSize="14sp" />
@@ -262,10 +298,17 @@
                     android:gravity="center_vertical"
                     android:background="?attr/selectableItemBackground">
 
+                    <ImageView
+                        android:layout_width="18dp"
+                        android:layout_height="18dp"
+                        android:src="@drawable/ic_tool_sharp_3d"
+                        android:contentDescription="@null" />
+
                     <TextView
                         android:layout_width="0dp"
                         android:layout_weight="1"
                         android:layout_height="wrap_content"
+                        android:layout_marginStart="10dp"
                         android:text="Kualitas Cover JPEG"
                         android:textColor="@color/text_hi"
                         android:textSize="14sp" />
@@ -465,10 +508,17 @@
                     android:gravity="center_vertical"
                     android:background="?attr/selectableItemBackground">
 
+                    <ImageView
+                        android:layout_width="18dp"
+                        android:layout_height="18dp"
+                        android:src="@drawable/ic_theme_asset"
+                        android:contentDescription="@null" />
+
                     <TextView
                         android:layout_width="0dp"
                         android:layout_weight="1"
                         android:layout_height="wrap_content"
+                        android:layout_marginStart="10dp"
                         android:text="Tema Warna"
                         android:textColor="@color/text_hi"
                         android:textSize="14sp" />
@@ -544,9 +594,16 @@
                     android:gravity="center_vertical"
                     android:background="?attr/selectableItemBackground">
 
+                    <ImageView
+                        android:layout_width="18dp"
+                        android:layout_height="18dp"
+                        android:src="@drawable/ic_info_asset"
+                        android:contentDescription="@null" />
+
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:layout_marginStart="10dp"
                         android:text="Lisensi &amp; Privasi Data"
                         android:textColor="@color/text_hi"
                         android:textSize="14sp" />
@@ -562,9 +619,16 @@
                     android:gravity="center_vertical"
                     android:background="?attr/selectableItemBackground">
 
+                    <ImageView
+                        android:layout_width="18dp"
+                        android:layout_height="18dp"
+                        android:src="@drawable/ic_info_asset"
+                        android:contentDescription="@null" />
+
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:layout_marginStart="10dp"
                         android:text="Kode Sumber di GitHub"
                         android:textColor="@color/text_hi"
                         android:textSize="14sp" />
