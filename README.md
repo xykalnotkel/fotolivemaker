@@ -49,20 +49,19 @@ Kalau lolos langkah 1 tapi gagal di langkah 2, masalahnya di sisi TikTok
 
 ## Rilis publik
 
-Push ke `main` hanya menjalankan tes + mengunggah artifact APK.
+Setiap push ke `main` atau `master` menjalankan test, build, pemeriksaan tanda
+tangan, lalu langsung membuat GitHub Release jika seluruh tahap sukses.
 
-Release GitHub dibuat jika:
+- Nomor patch dinaikkan otomatis dari tag semver terbaru.
+- Bagian `Unreleased` dari `CHANGELOG.md` menjadi deskripsi release.
+- `CHANGELOG.md` lengkap ikut dilampirkan sebagai asset.
+- Pull request hanya divalidasi dan tidak membuat release.
+- Push tag `v*` tetap dapat dipakai untuk menentukan versi secara manual.
+- Workflow manual juga membuat release baru.
 
-- kamu push **tag** baru, misalnya `v1.2.2` (nama versi diambil dari tag), atau
-- kamu tekan **Actions → Build APK → Run workflow** (pakai kunci rilis)
-
-```
-git tag v1.2.2
-git push origin v1.2.2
-```
-
-APK rilis ditandatangani **kunci rilis** dari GitHub Secrets. Jangan unggah
-ke Play Store tanpa identitas, kebijakan, dan keystore milikmu sendiri.
+APK publik hanya diterbitkan bila ditandatangani kunci rilis dari GitHub
+Secrets. Build dengan debug key tetap menjadi artifact internal dan tidak
+pernah dipublikasikan sebagai release.
 
 ---
 
@@ -89,7 +88,7 @@ Di halaman repo → **Add file** → **Upload files** → pilih semua isi folder
 
 ### 4. Download APK
 - Klik run yang sudah selesai
-- **Artifacts** → **LivePhotoMaker-APK**
+- **Artifacts** → **FotoLive-APK**
 - Extract, install. HP akan minta izin "Install unknown apps"
 
 ---

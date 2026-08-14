@@ -1,7 +1,7 @@
 name: Build APK
 
-# Push/PR: tes + build artifact.
-# Release publik hanya dari tag v* atau tombol Run workflow.
+# Setiap push main/master yang lolos validasi langsung menjadi GitHub Release.
+# Pull request hanya menjalankan tes dan build artifact, tanpa publikasi.
 on:
   push:
     branches: [ main, master ]
@@ -10,15 +10,22 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write   # dibutuhkan untuk membuat Release
+  contents: write
+
+# Push beruntun diproses bergiliran agar nomor patch otomatis tidak tabrakan.
+concurrency:
+  group: publish-${{ github.ref }}
+  cancel-in-progress: false
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Ambil kode
+      - name: Ambil kode dan riwayat tag
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Siapkan JDK 17
         uses: actions/setup-java@v4
@@ -57,11 +64,22 @@ jobs:
 
       - name: Tentukan nomor versi
         id: ver
+        shell: bash
         run: |
           if [[ "${GITHUB_REF}" == refs/tags/v* ]]; then
             NAME="${GITHUB_REF#refs/tags/v}"
+          elif [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            NAME="0.0.${{ github.run_number }}-pr"
           else
-            NAME="1.0.${{ github.run_number }}-ci"
+            LATEST=$(git tag --list 'v[0-9]*.[0-9]*.[0-9]*' --sort=-v:refname | head -n 1)
+            BASE="${LATEST#v}"
+            IFS='.' read -r MAJOR MINOR PATCH <<< "$BASE"
+            if ! [[ "$MAJOR" =~ ^[0-9]+$ && "$MINOR" =~ ^[0-9]+$ && "$PATCH" =~ ^[0-9]+$ ]]; then
+              MAJOR=1
+              MINOR=3
+              PATCH=0
+            fi
+            NAME="${MAJOR}.${MINOR}.$((PATCH + 1))"
           fi
           echo "name=${NAME}" >> "$GITHUB_OUTPUT"
           echo "Versi: ${NAME}"
@@ -96,61 +114,77 @@ jobs:
             echo "APK ditandatangani kunci rilis."
           fi
 
-      - name: Siapkan berkas APK
+      - name: Siapkan APK dan catatan rilis
         id: prep
+        shell: bash
         run: |
           mkdir -p out
           VER="v${{ steps.ver.outputs.name }}"
-          cp app/build/outputs/apk/release/app-release.apk \
-             "out/LivePhotoMaker-${VER}.apk"
+          cp app/build/outputs/apk/release/app-release.apk "out/FotoLive-${VER}.apk"
+
+          awk '
+            /^## Unreleased/ { capture=1; next }
+            capture && /^## / { exit }
+            capture { print }
+          ' CHANGELOG.md > "$RUNNER_TEMP/unreleased.md"
+
+          cat > out/RELEASE_NOTES.md <<EOF
+          # Foto Live ${VER}
+
+          Ubah video menjadi Motion Photo portrait dengan timeline editor.
+
+          ## Cara memasang
+
+          1. Unduh berkas APK pada bagian Assets.
+          2. Buka APK dan izinkan Install unknown apps bila diminta.
+          3. Buka Foto Live, pilih video, atur timeline, lalu tekan Export.
+
+          ## Changelog
+
+          EOF
+          if [ -s "$RUNNER_TEMP/unreleased.md" ]; then
+            cat "$RUNNER_TEMP/unreleased.md" >> out/RELEASE_NOTES.md
+          else
+            echo "- Build otomatis dari commit ${GITHUB_SHA}." >> out/RELEASE_NOTES.md
+          fi
+          cat >> out/RELEASE_NOTES.md <<EOF
+
+          ## Kompatibilitas
+
+          - Android 7 sampai Android 17.
+          - Output default portrait 9:16.
+          - Google Motion Photo dan Samsung SEF.
+          - Video diproses lokal di perangkat.
+
+          Lisensi Apache 2.0. Lihat TERMS.md dan PRIVACY.md untuk detail.
+          EOF
+
           echo "version=${VER}" >> "$GITHUB_OUTPUT"
           ls -la out
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: LivePhotoMaker-APK
+          name: FotoLive-APK
           path: out/*.apk
           if-no-files-found: error
           retention-days: 90
 
-      - name: Terbitkan Release
+      - name: Terbitkan GitHub Release
         if: >
           steps.sign.outputs.release_signed == 'true' &&
-          (startsWith(github.ref, 'refs/tags/v') || github.event_name == 'workflow_dispatch')
+          github.event_name != 'pull_request'
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ steps.prep.outputs.version }}
-          name: Live Photo Maker ${{ steps.prep.outputs.version }}
-          files: out/*.apk
-          generate_release_notes: true
-          body: |
-            ## Live Photo Maker ${{ steps.prep.outputs.version }}
-
-            Ubah video jadi **Motion Photo** — file yang muncul berlabel
-            **Live** di picker galeri TikTok saat mau posting.
-
-            ### Cara pasang
-            1. Download berkas `.apk` di bagian **Assets** di bawah
-            2. Buka berkasnya, izinkan **Install unknown apps** kalau diminta
-            3. Buka app → Pilih Video → geser jendela 3 dtk → **Buat Live Photo**
-            4. Hasil tersimpan di `DCIM/Camera`
-
-            ### Catatan penting
-            - APK ini ditandatangani dengan **kunci rilis**. Jangan unggah ke
-              Play Store tanpa menyiapkan identitas aplikasi, kebijakan, dan
-              signing key milikmu sendiri.
-            - Dukungan label Live **berbeda-beda tiap perangkat dan versi TikTok**.
-              Paling andal di Samsung (One UI) dan Google Pixel.
-            - Tes dulu di **Galeri bawaan**: kalau di sana sudah bergerak,
-              berarti format file sudah benar. Kalau galeri OK tapi TikTok tidak
-              mengenali, itu batasan di sisi TikTok.
-
-            ### Privasi
-            Video diproses di perangkat. Banner update offline. Internet
-            hanya saat pengguna mengetuk update (GitHub Releases).
-
-            Lisensi Apache 2.0 · Tanpa jaminan — lihat [TERMS.md](TERMS.md)
+          target_commitish: ${{ github.sha }}
+          name: Foto Live ${{ steps.prep.outputs.version }}
+          files: |
+            out/*.apk
+            CHANGELOG.md
+          body_path: out/RELEASE_NOTES.md
+          generate_release_notes: false
+          fail_on_unmatched_files: true
 
       - name: Hapus keystore dari runner
         if: always()

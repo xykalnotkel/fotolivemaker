@@ -23,6 +23,11 @@ Saat rilis, pindahkan ke heading versi + tanggal.
 - Insets edge-to-edge dan display cutout ditangani untuk Android modern.
 - Banner update disembunyikan secara default dan hanya tampil jika versi GitHub lebih baru; cek dibatasi sekali per 24 jam saat beranda aktif.
 
+### Distribusi
+- Setiap push ke main/master yang lolos test, build, dan verifikasi signing otomatis diterbitkan sebagai GitHub Release.
+- Patch version dinaikkan dari tag semver terbaru; pull request tidak membuat release.
+- Isi bagian Unreleased ini otomatis menjadi release notes dan CHANGELOG.md ikut dilampirkan.
+
 ## [v1.2.1](https://github.com/xykalnotkel/fotolivemaker/releases/tag/v1.2.1) — 2026-08-14
 
 ### Perbaikan inti
