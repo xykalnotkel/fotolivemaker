@@ -62,14 +62,32 @@ class ResultActivity : AppCompatActivity() {
 
         b.btnClose.setOnClickListener { finish() }
         b.btnAgain.setOnClickListener { finish() }
-        b.btnShare.setOnClickListener { shareVideoGeneric() }
-        b.btnTikTok.setOnClickListener { shareVideoToPackage(
-            listOf("com.zhiliaoapp.musically", "com.ss.android.ugc.trill"), "TikTok"
-        ) }
+        b.btnShare.setOnClickListener { showShareChoice() }
+        b.btnTikTok.setOnClickListener {
+            // TikTok Android 2026 sudah bisa baca JPG Motion Photo sebagai Live
+            shareJpgToPackage(
+                listOf("com.zhiliaoapp.musically", "com.ss.android.ugc.trill"), "TikTok"
+            )
+        }
+        b.btnTikTok.setOnLongClickListener {
+            shareVideoToPackage(
+                listOf("com.zhiliaoapp.musically", "com.ss.android.ugc.trill"), "TikTok"
+            )
+            true
+        }
         b.btnInstagram.setOnClickListener { shareToInstagramStory() }
-        b.btnWhatsApp.setOnClickListener { shareVideoToPackage(
-            listOf("com.whatsapp", "com.whatsapp.w4b"), "WhatsApp"
-        ) }
+        b.btnWhatsApp.setOnClickListener {
+            // WhatsApp 2025+ support Motion Photo JPG native dengan icon play
+            shareJpgToPackage(
+                listOf("com.whatsapp", "com.whatsapp.w4b"), "WhatsApp"
+            )
+        }
+        b.btnWhatsApp.setOnLongClickListener {
+            shareVideoToPackage(
+                listOf("com.whatsapp", "com.whatsapp.w4b"), "WhatsApp"
+            )
+            true
+        }
         b.btnGallery.setOnClickListener { openInGallery() }
         b.btnRecheck.setOnClickListener { runVerification() }
 
@@ -320,7 +338,7 @@ class ResultActivity : AppCompatActivity() {
         }
     }
 
-    /** Media sosial menerima MP4 agar gerak tidak hilang saat aplikasi tujuan re-encode. */
+    /** MP4 ekstraksi untuk platform yang masih butuh video murni. */
     private fun shareVideoUri(): Uri? {
         val file = clipFile
         if (file == null || !file.exists()) {
@@ -330,6 +348,16 @@ class ResultActivity : AppCompatActivity() {
         return FileProvider.getUriForFile(this, "$packageName.files", file)
     }
 
+    /** JPG Motion Photo asli - format yang sekarang dibaca Live di Android 2026. */
+    private fun shareJpgUri(): Uri? {
+        val uri = savedUri
+        if (uri == null) {
+            Toast.makeText(this, "File Motion Photo belum siap", Toast.LENGTH_SHORT).show()
+            return null
+        }
+        return uri
+    }
+
     private fun installedPackage(candidates: List<String>): String? =
         candidates.firstOrNull { packageManager.getLaunchIntentForPackage(it) != null }
 
@@ -337,6 +365,13 @@ class ResultActivity : AppCompatActivity() {
         type = "video/mp4"
         putExtra(Intent.EXTRA_STREAM, uri)
         clipData = android.content.ClipData.newRawUri("Foto Live video", uri)
+        addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+    }
+
+    private fun baseJpgShare(uri: Uri) = Intent(Intent.ACTION_SEND).apply {
+        type = "image/jpeg"
+        putExtra(Intent.EXTRA_STREAM, uri)
+        clipData = android.content.ClipData.newRawUri("Foto Live JPG", uri)
         addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
     }
 
@@ -353,6 +388,31 @@ class ResultActivity : AppCompatActivity() {
             startActivity(baseVideoShare(uri).setPackage(target))
         }.onFailure {
             Toast.makeText(this, "Tidak bisa membuka $label", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun shareJpgToPackage(candidates: List<String>, label: String) {
+        val uri = shareJpgUri() ?: return
+        val target = installedPackage(candidates)
+        if (target == null) {
+            Toast.makeText(this, "$label belum terpasang", Toast.LENGTH_SHORT).show()
+            shareJpgGeneric()
+            return
+        }
+        grantUriPermission(target, uri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        runCatching {
+            startActivity(baseJpgShare(uri).setPackage(target))
+        }.onFailure {
+            // Fallback ke video bila app versi lama tidak handle Motion Photo JPG
+            val vUri = shareVideoUri()
+            if (vUri != null) {
+                runCatching {
+                    grantUriPermission(target, vUri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                    startActivity(baseVideoShare(vUri).setPackage(target))
+                }
+            } else {
+                Toast.makeText(this, "Tidak bisa membuka $label", Toast.LENGTH_SHORT).show()
+            }
         }
     }
 
@@ -381,9 +441,39 @@ class ResultActivity : AppCompatActivity() {
     private fun shareVideoGeneric() {
         val uri = shareVideoUri() ?: return
         runCatching {
-            startActivity(Intent.createChooser(baseVideoShare(uri), "Bagikan video"))
+            startActivity(Intent.createChooser(baseVideoShare(uri), "Bagikan video MP4"))
         }.onFailure {
             Toast.makeText(this, "Tidak ada aplikasi untuk membagikan video", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun shareJpgGeneric() {
+        val uri = shareJpgUri() ?: return
+        runCatching {
+            startActivity(Intent.createChooser(baseJpgShare(uri), "Bagikan Foto Live JPG"))
+        }.onFailure {
+            Toast.makeText(this, "Tidak ada aplikasi untuk membagikan Foto Live", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun showShareChoice() {
+        CustomDialogs.showChoiceDialog(
+            context = this,
+            title = "Bagikan Foto Live",
+            subtitle = "Pilih format. JPG Motion Photo sekarang kebaca Live di WhatsApp & TikTok Android 2026. MP4 tetap untuk IG Story & editor.",
+            choices = listOf(
+                CustomDialogs.ChoiceItem(
+                    "Foto Live JPG (Motion)",
+                    "Label Live/Motion muncul di WA & TikTok 2026, file asli tetap JPG"
+                ),
+                CustomDialogs.ChoiceItem(
+                    "Video MP4 murni",
+                    "Gerak tetap terlihat di semua aplikasi, cocok untuk IG Story & Status"
+                )
+            ),
+            selectedIndex = 0
+        ) { idx ->
+            if (idx == 0) shareJpgGeneric() else shareVideoGeneric()
         }
     }
 

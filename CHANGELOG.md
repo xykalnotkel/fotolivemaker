@@ -5,6 +5,14 @@ Saat rilis, pindahkan ke heading versi + tanggal.
 
 ## Unreleased
 
+### Share Android 2026 (patch v1.2.4)
+- TikTok dan WhatsApp Android 2026 sekarang membaca JPG Motion Photo asli dengan label Live/Motion, tidak butuh MP4 lagi (verifikasi lapangan).
+- Tombol TikTok dan WhatsApp di ResultActivity sekarang share JPG Motion Photo (`image/jpeg`) via FileProvider/MediaStore, dengan fallback otomatis ke MP4 untuk app versi lama.
+- Tombol Aplikasi lain diubah jadi dialog pilihan: Foto Live JPG (Motion) untuk platform yang sudah support Live label, dan Video MP4 murni untuk IG Story & editor.
+- Tahan lama (long-press) pada TikTok/WA untuk paksa kirim MP4 bila dibutuhkan.
+- Deskripsi layar hasil diperbarui: jelaskan bahwa WA & TikTok baru baca JPG sebagai Live, IG tetap MP4.
+
+
 ### Engine dan kompatibilitas
 - Default output diubah ke portrait 9:16; preset 1080p portrait kini benar-benar 1080x1920.
 - Rotasi cover dibuat vendor-safe: frame yang sudah diputar oleh MediaMetadataRetriever tidak diputar dua kali.

@@ -332,7 +332,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="12dp"
-                    android:text="Untuk label LIVE, pilih file Motion Photo langsung dari galeri aplikasi tujuan. Tombol sosial di bawah membagikan versi MP4 agar geraknya tetap terlihat di Story atau Status."
+                    android:text="Untuk label LIVE di WA & TikTok Android 2026, kirim JPG Motion Photo langsung. WhatsApp & TikTok baru sudah baca JPG sebagai Live/Motion. IG Story tetap pakai MP4 agar gerak tidak hilang. Tahan lama tombol TikTok/WA untuk kirim versi MP4."
                     android:textColor="?attr/appTextMid"
                     android:textSize="13sp"
                     android:lineSpacingExtra="6dp" />
@@ -343,7 +343,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="20dp"
-                android:text="Bagikan sebagai video" />
+                android:text="Bagikan Foto Live (JPG) &amp; Video" />
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -363,7 +363,7 @@
                     android:background="@drawable/bg_social_button"
                     android:clickable="true"
                     android:focusable="true"
-                    android:contentDescription="Bagikan video ke TikTok">
+                    android:contentDescription="Bagikan Foto Live JPG ke TikTok, tahan lama untuk MP4">
                     <ImageView android:layout_width="26dp" android:layout_height="26dp" android:src="@drawable/logo_tiktok" android:contentDescription="@null" />
                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="6dp" android:text="TikTok" android:textColor="#FF111827" android:textSize="11sp" android:textStyle="bold" />
                 </LinearLayout>
@@ -396,7 +396,7 @@
                     android:background="@drawable/bg_social_button"
                     android:clickable="true"
                     android:focusable="true"
-                    android:contentDescription="Bagikan video ke Status WhatsApp">
+                    android:contentDescription="Bagikan Foto Live JPG ke WhatsApp, tahan lama untuk MP4">
                     <ImageView android:layout_width="26dp" android:layout_height="26dp" android:src="@drawable/logo_whatsapp" android:contentDescription="@null" />
                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="6dp" android:text="WA Status" android:textColor="#FF111827" android:textSize="11sp" android:textStyle="bold" />
                 </LinearLayout>
@@ -452,7 +452,7 @@
                 android:layout_width="0dp"
                 android:layout_weight="1"
                 android:layout_height="wrap_content"
-                android:text="Aplikasi lain"
+                android:text="Foto Live / Video"
                 app:icon="@drawable/ic_share"
                 app:iconTint="?attr/appOnInk"
                 app:iconGravity="textStart"
