@@ -50,12 +50,12 @@ Push ke `main` hanya menjalankan tes + mengunggah artifact APK.
 
 Release GitHub dibuat jika:
 
-- kamu push **tag** `v1.1.0` (nama versi diambil dari tag), atau
+- kamu push **tag** baru, misalnya `v1.2.2` (nama versi diambil dari tag), atau
 - kamu tekan **Actions → Build APK → Run workflow** (pakai kunci rilis)
 
 ```
-git tag v1.1.0
-git push origin v1.1.0
+git tag v1.2.2
+git push origin v1.2.2
 ```
 
 APK rilis ditandatangani **kunci rilis** dari GitHub Secrets. Jangan unggah

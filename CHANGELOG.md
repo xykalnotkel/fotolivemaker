@@ -5,6 +5,10 @@ Saat rilis, pindahkan ke heading versi + tanggal.
 
 ## Unreleased
 
+Belum ada perubahan.
+
+## [v1.2.1](https://github.com/xykalnotkel/fotolivemaker/releases/tag/v1.2.1) — 2026-08-14
+
 ### Perbaikan inti
 - Output non-Samsung sekarang mengikuti tata letak Google Motion Photo 1.0 strict: MP4 tepat di EOF, `Item:Length` dan `Item:Padding` diverifikasi.
 - Output Samsung memakai mode hybrid SEF terpisah dan tidak lagi diklaim sebagai strict Google.
@@ -18,6 +22,7 @@ Saat rilis, pindahkan ke heading versi + tanggal.
 - Seluruh ikon antarmuka dan launcher digambar ulang sebagai VectorDrawable custom dengan sudut serta ujung garis rounded.
 - Seluruh aset ikon 3D/bitmap lama dihapus; ikon adaptif otomatis mengikuti light/dark theme.
 - Ikon aksi diperjelas: tutup, cache, source code, update, hold, dan status selesai.
+- Radius kartu, dialog, badge, dan tombol diperkecil agar layout lebih tegas; ikon tetap memakai bahasa visual Roundline.
 - High Contrast, Reduce Motion, dan haptic slider kini benar-benar diterapkan.
 
 ## [v1.2.0](https://github.com/xykalnotkel/fotolivemaker/releases/tag/v1.2.0) — 2026-08-14
