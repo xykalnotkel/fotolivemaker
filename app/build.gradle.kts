@@ -1,11 +1,10 @@
 plugins {
     id("com.android.application")
-    id("org.jetbrains.kotlin.android")
 }
 
 android {
     namespace = "livefoto.xystudio.app"
-    compileSdk = 34
+    compileSdk = 37
 
     // Keystore rilis diambil dari GitHub Secrets saat build di CI.
     // Kalau tidak ada (build lokal), jatuh ke debug key supaya tetap jalan.
@@ -30,8 +29,8 @@ android {
 
     defaultConfig {
         applicationId = "livefoto.xystudio.app"
-        minSdk = 26
-        targetSdk = 34
+        minSdk = 24
+        targetSdk = 37
         // Versi diambil dari nomor run GitHub Actions supaya SELALU sinkron
         // dengan tag Release dan nama file APK. Build lokal jatuh ke 1/1.0.0-dev.
         // Catatan: versionCode WAJIB bilangan positif, jadi default-nya 1.
@@ -55,33 +54,37 @@ android {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
-    kotlinOptions {
-        jvmTarget = "17"
-    }
     buildFeatures {
         viewBinding = true
         buildConfig = true
     }
 }
 
+kotlin {
+    compilerOptions {
+        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
+    }
+}
+
 dependencies {
-    implementation("androidx.core:core-ktx:1.13.1")
-    implementation("androidx.appcompat:appcompat:1.7.0")
-    implementation("com.google.android.material:material:1.12.0")
-    implementation("androidx.constraintlayout:constraintlayout:2.1.4")
-    implementation("androidx.recyclerview:recyclerview:1.3.2")
-    implementation("androidx.activity:activity-ktx:1.9.0")
-    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.3")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.1")
+    implementation("androidx.core:core-ktx:1.19.0")
+    implementation("androidx.core:core-splashscreen:1.2.0")
+    implementation("androidx.appcompat:appcompat:1.8.0")
+    implementation("com.google.android.material:material:1.14.0")
+    implementation("androidx.constraintlayout:constraintlayout:2.2.2")
+    implementation("androidx.recyclerview:recyclerview:1.4.0")
+    implementation("androidx.activity:activity-ktx:1.13.0")
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.11.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.11.0")
 
     // Media3 Transformer: trim + transcode, hardware accelerated
-    implementation("androidx.media3:media3-transformer:1.3.1")
-    implementation("androidx.media3:media3-effect:1.3.1")
-    implementation("androidx.media3:media3-common:1.3.1")
+    implementation("androidx.media3:media3-transformer:1.11.0")
+    implementation("androidx.media3:media3-effect:1.11.0")
+    implementation("androidx.media3:media3-common:1.11.0")
     // ExoPlayer: pemutar preview yang andal (VideoView sering gagal prepare
     // saat view-nya belum terlihat)
-    implementation("androidx.media3:media3-exoplayer:1.3.1")
-    implementation("androidx.media3:media3-ui:1.3.1")
+    implementation("androidx.media3:media3-exoplayer:1.11.0")
+    implementation("androidx.media3:media3-ui:1.11.0")
 
     testImplementation("junit:junit:4.13.2")
 }

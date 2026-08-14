@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Gelap + glif putih: kebaca di wallpaper terang maupun gelap. -->
-    <color name="ic_launcher_background">#FF111111</color>
+    <color name="ic_launcher_background">#FF0B2A4A</color>
 </resources>

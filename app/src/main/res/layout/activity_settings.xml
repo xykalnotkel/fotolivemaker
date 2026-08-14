@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
+    tools:ignore="UseCompoundDrawables,TooManyViews"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:background="@color/paper">
+    android:orientation="vertical">
 
     <!-- Top Header -->
     <LinearLayout
@@ -24,7 +25,7 @@
             android:padding="10dp"
             android:src="@drawable/ic_back"
             android:background="?attr/selectableItemBackgroundBorderless"
-            app:tint="@color/icon_tint"
+            app:tint="?attr/appIconTint"
             android:contentDescription="Kembali" />
 
         <TextView
@@ -32,7 +33,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="6dp"
             android:text="Pengaturan"
-            android:textColor="@color/text_hi"
+            android:textColor="?attr/appTextHigh"
             android:textSize="18sp"
             android:textStyle="bold"
             android:letterSpacing="-0.02" />
@@ -41,7 +42,7 @@
     <View
         android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:background="@color/line" />
+        android:background="?attr/appLine" />
 
     <ScrollView
         android:layout_width="match_parent"
@@ -104,7 +105,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="—"
-                            android:textColor="@color/ink"
+                            android:textColor="?attr/appInk"
                             android:textSize="24sp"
                             android:textStyle="bold"
                             android:letterSpacing="-0.03" />
@@ -115,7 +116,7 @@
                             android:layout_height="wrap_content"
                             android:layout_marginTop="1dp"
                             android:text="hasil dibuat"
-                            android:textColor="@color/text_dim"
+                            android:textColor="?attr/appTextDim"
                             android:textSize="11sp" />
                     </LinearLayout>
 
@@ -124,7 +125,7 @@
                         android:layout_height="match_parent"
                         android:layout_marginStart="16dp"
                         android:layout_marginEnd="16dp"
-                        android:background="@color/line" />
+                        android:background="?attr/appLine" />
 
                     <LinearLayout
                         android:layout_width="0dp"
@@ -137,7 +138,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="—"
-                            android:textColor="@color/ink"
+                            android:textColor="?attr/appInk"
                             android:textSize="24sp"
                             android:textStyle="bold"
                             android:letterSpacing="-0.03" />
@@ -148,7 +149,7 @@
                             android:layout_height="wrap_content"
                             android:layout_marginTop="1dp"
                             android:text="sisa memori"
-                            android:textColor="@color/text_dim"
+                            android:textColor="?attr/appTextDim"
                             android:textSize="11sp" />
                     </LinearLayout>
                 </LinearLayout>
@@ -160,15 +161,15 @@
                     android:layout_height="6dp"
                     android:layout_marginTop="16dp"
                     android:max="100"
-                    android:progressTint="@color/accent_primary"
-                    android:progressBackgroundTint="@color/line" />
+                    android:progressTint="?attr/appAccent"
+                    android:progressBackgroundTint="?attr/appLine" />
 
                 <TextView
                     android:id="@+id/statStorageLine"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
-                    android:textColor="@color/text_dim"
+                    android:textColor="?attr/appTextDim"
                     android:textSize="11sp"
                     android:fontFamily="monospace" />
 
@@ -177,7 +178,7 @@
                     android:layout_height="1dp"
                     android:layout_marginTop="16dp"
                     android:layout_marginBottom="4dp"
-                    android:background="@color/line" />
+                    android:background="?attr/appLine" />
 
                 <LinearLayout
                     android:id="@+id/rowCache"
@@ -200,14 +201,14 @@
                         android:layout_height="wrap_content"
                         android:layout_marginStart="10dp"
                         android:text="Bersihkan cache sementara"
-                        android:textColor="@color/text_hi"
+                        android:textColor="?attr/appTextHigh"
                         android:textSize="13sp" />
 
                     <TextView
                         android:id="@+id/statCache"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:textColor="@color/text_dim"
+                        android:textColor="?attr/appTextDim"
                         android:textSize="12sp"
                         android:fontFamily="monospace" />
                 </LinearLayout>
@@ -233,7 +234,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginStart="10dp"
                         android:text="Hapus seluruh hasil Live Photo"
-                        android:textColor="@color/bad"
+                        android:textColor="?attr/appBad"
                         android:textSize="13sp"
                         android:textStyle="bold" />
                 </LinearLayout>
@@ -276,19 +277,19 @@
                         android:layout_height="wrap_content"
                         android:layout_marginStart="10dp"
                         android:text="Resolusi Bawaan"
-                        android:textColor="@color/text_hi"
+                        android:textColor="?attr/appTextHigh"
                         android:textSize="14sp" />
 
                     <TextView
                         android:id="@+id/tvRes"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:textColor="@color/accent_primary"
+                        android:textColor="?attr/appAccent"
                         android:textSize="13sp"
                         android:textStyle="bold" />
                 </LinearLayout>
 
-                <View android:layout_width="match_parent" android:layout_height="1dp" android:background="@color/line" />
+                <View android:layout_width="match_parent" android:layout_height="1dp" android:background="?attr/appLine" />
 
                 <LinearLayout
                     android:id="@+id/rowQuality"
@@ -310,19 +311,19 @@
                         android:layout_height="wrap_content"
                         android:layout_marginStart="10dp"
                         android:text="Kualitas Cover JPEG"
-                        android:textColor="@color/text_hi"
+                        android:textColor="?attr/appTextHigh"
                         android:textSize="14sp" />
 
                     <TextView
                         android:id="@+id/tvQuality"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:textColor="@color/accent_primary"
+                        android:textColor="?attr/appAccent"
                         android:textSize="13sp"
                         android:textStyle="bold" />
                 </LinearLayout>
 
-                <View android:layout_width="match_parent" android:layout_height="1dp" android:background="@color/line" />
+                <View android:layout_width="match_parent" android:layout_height="1dp" android:background="?attr/appLine" />
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -340,7 +341,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="Jaga Layar Tetap Menyala"
-                            android:textColor="@color/text_hi"
+                            android:textColor="?attr/appTextHigh"
                             android:textSize="14sp" />
 
                         <TextView
@@ -348,7 +349,7 @@
                             android:layout_height="wrap_content"
                             android:layout_marginTop="2dp"
                             android:text="Mencegah sleep saat proses ekspor"
-                            android:textColor="@color/text_dim"
+                            android:textColor="?attr/appTextDim"
                             android:textSize="11sp" />
                     </LinearLayout>
 
@@ -392,15 +393,15 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="Mode Kontras Tinggi"
-                            android:textColor="@color/text_hi"
+                            android:textColor="?attr/appTextHigh"
                             android:textSize="14sp" />
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="2dp"
-                            android:text="Tingkatkan ketebalan garis &amp; kepekatan teks"
-                            android:textColor="@color/text_dim"
+                            android:text="Palet tegas, border 2dp, dan target sentuh 48dp"
+                            android:textColor="?attr/appTextDim"
                             android:textSize="11sp" />
                     </LinearLayout>
 
@@ -410,7 +411,7 @@
                         android:layout_height="wrap_content" />
                 </LinearLayout>
 
-                <View android:layout_width="match_parent" android:layout_height="1dp" android:background="@color/line" />
+                <View android:layout_width="match_parent" android:layout_height="1dp" android:background="?attr/appLine" />
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -428,15 +429,15 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="Umpan Balik Getar (Haptics)"
-                            android:textColor="@color/text_hi"
+                            android:textColor="?attr/appTextHigh"
                             android:textSize="14sp" />
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="2dp"
-                            android:text="Getaran mikro saat menggeser slider &amp; tombol"
-                            android:textColor="@color/text_dim"
+                            android:text="Getaran saat melepas timeline dan menekan tombol"
+                            android:textColor="?attr/appTextDim"
                             android:textSize="11sp" />
                     </LinearLayout>
 
@@ -446,7 +447,7 @@
                         android:layout_height="wrap_content" />
                 </LinearLayout>
 
-                <View android:layout_width="match_parent" android:layout_height="1dp" android:background="@color/line" />
+                <View android:layout_width="match_parent" android:layout_height="1dp" android:background="?attr/appLine" />
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -464,7 +465,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="Kurangi Animasi (Reduce Motion)"
-                            android:textColor="@color/text_hi"
+                            android:textColor="?attr/appTextHigh"
                             android:textSize="14sp" />
 
                         <TextView
@@ -472,7 +473,7 @@
                             android:layout_height="wrap_content"
                             android:layout_marginTop="2dp"
                             android:text="Matikan transisi untuk performa instan"
-                            android:textColor="@color/text_dim"
+                            android:textColor="?attr/appTextDim"
                             android:textSize="11sp" />
                     </LinearLayout>
 
@@ -520,19 +521,19 @@
                         android:layout_height="wrap_content"
                         android:layout_marginStart="10dp"
                         android:text="Tema Warna"
-                        android:textColor="@color/text_hi"
+                        android:textColor="?attr/appTextHigh"
                         android:textSize="14sp" />
 
                     <TextView
                         android:id="@+id/tvTheme"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:textColor="@color/accent_primary"
+                        android:textColor="?attr/appAccent"
                         android:textSize="13sp"
                         android:textStyle="bold" />
                 </LinearLayout>
 
-                <View android:layout_width="match_parent" android:layout_height="1dp" android:background="@color/line" />
+                <View android:layout_width="match_parent" android:layout_height="1dp" android:background="?attr/appLine" />
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -550,7 +551,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="Animasi Splash Pembuka"
-                            android:textColor="@color/text_hi"
+                            android:textColor="?attr/appTextHigh"
                             android:textSize="14sp" />
 
                         <TextView
@@ -558,7 +559,7 @@
                             android:layout_height="wrap_content"
                             android:layout_marginTop="2dp"
                             android:text="Tampilkan intro singkat saat membuka app"
-                            android:textColor="@color/text_dim"
+                            android:textColor="?attr/appTextDim"
                             android:textSize="11sp" />
                     </LinearLayout>
 
@@ -605,11 +606,11 @@
                         android:layout_height="wrap_content"
                         android:layout_marginStart="10dp"
                         android:text="Lisensi &amp; Privasi Data"
-                        android:textColor="@color/text_hi"
+                        android:textColor="?attr/appTextHigh"
                         android:textSize="14sp" />
                 </LinearLayout>
 
-                <View android:layout_width="match_parent" android:layout_height="1dp" android:background="@color/line" />
+                <View android:layout_width="match_parent" android:layout_height="1dp" android:background="?attr/appLine" />
 
                 <LinearLayout
                     android:id="@+id/rowSource"
@@ -630,7 +631,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginStart="10dp"
                         android:text="Kode Sumber di GitHub"
-                        android:textColor="@color/text_hi"
+                        android:textColor="?attr/appTextHigh"
                         android:textSize="14sp" />
                 </LinearLayout>
             </LinearLayout>
@@ -641,7 +642,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="24dp"
                 android:gravity="center"
-                android:textColor="@color/text_dim"
+                android:textColor="?attr/appTextDim"
                 android:textSize="11sp"
                 android:fontFamily="monospace" />
         </LinearLayout>

@@ -11,6 +11,8 @@ import android.os.Environment
 import android.os.Handler
 import android.os.Looper
 import android.provider.MediaStore
+import androidx.core.graphics.createBitmap
+import androidx.core.graphics.scale
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.common.Effect
 import androidx.media3.common.MediaItem
@@ -60,7 +62,7 @@ object Converter {
     }
 
     data class Options(
-        val aspectRatio: AspectRatio = AspectRatio.ORIGINAL,
+        val aspectRatio: AspectRatio = AspectRatio.RATIO_9_16,
         val res: Res = Res.P1080,
         val enhance: Boolean = false,
         val stabilize: Boolean = false,
@@ -75,7 +77,7 @@ object Converter {
             stabilize: Boolean = false,
             jpegQuality: Int = 96
         ) : this(
-            aspectRatio = if (square) AspectRatio.RATIO_1_1 else AspectRatio.ORIGINAL,
+            aspectRatio = if (square) AspectRatio.RATIO_1_1 else AspectRatio.RATIO_9_16,
             res = res,
             enhance = enhance,
             stabilize = stabilize,
@@ -174,15 +176,31 @@ object Converter {
      * Filter Bersih memakai batas Full HD karena cover diproses di CPU.
      */
     fun calculateDimensions(srcW: Int, srcH: Int, opts: Options): Pair<Int, Int> {
-        val baseH = opts.heightFor(if (srcH > 0) srcH else 1080)
-        val outH = evenUp(baseH)
-        val outW = if (opts.aspectRatio.isOriginal()) {
-            val ratio = if (srcW > 0 && srcH > 0) srcW.toFloat() / srcH else 9f / 16f
-            evenUp(outH * ratio)
+        val safeW = srcW.takeIf { it > 0 } ?: 1080
+        val safeH = srcH.takeIf { it > 0 } ?: 1920
+        val sourceRatio = safeW.toFloat() / safeH
+        val targetRatio = if (opts.aspectRatio.isOriginal()) sourceRatio
+        else opts.aspectRatio.ratioW.toFloat() / opts.aspectRatio.ratioH
+
+        val (outW, outH) = if (opts.res == Res.SOURCE) {
+            // Resolusi asli berarti crop terbesar yang muat di frame sumber,
+            // tanpa membuat sisi baru yang lebih besar dari sumber.
+            if (sourceRatio > targetRatio) {
+                evenUp(safeH * targetRatio) to evenUp(safeH)
+            } else {
+                evenUp(safeW) to evenUp(safeW / targetRatio)
+            }
         } else {
-            val targetRatio = opts.aspectRatio.ratioW.toFloat() / opts.aspectRatio.ratioH
-            evenUp(outH * targetRatio)
+            // 1080p portrait harus 1080x1920, bukan 608x1080. Nilai preset
+            // mewakili sisi pendek, seperti konvensi editor video.
+            val shortEdge = opts.res.height
+            if (targetRatio < 1f) {
+                evenUp(shortEdge) to evenUp(shortEdge / targetRatio)
+            } else {
+                evenUp(shortEdge * targetRatio) to evenUp(shortEdge)
+            }
         }
+
         val maxPixels = if (opts.enhance) MAX_ENHANCE_PIXELS else MAX_SOURCE_PIXELS
         return capDimensions(outW, outH, maxPixels, MAX_OUTPUT_EDGE)
     }
@@ -248,16 +266,7 @@ object Converter {
                 ?: r.getFrameAtTime()
                 ?: return null
 
-            val rot = r.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_ROTATION)?.toIntOrNull() ?: 0
-            if (rot != 0) {
-                val matrix = Matrix().apply { postRotate(rot.toFloat()) }
-                val rotated = Bitmap.createBitmap(bmp, 0, 0, bmp.width, bmp.height, matrix, true)
-                if (rotated !== bmp) {
-                    bmp.recycle()
-                    bmp = rotated
-                }
-            }
-
+            bmp = orientFrameIfNeeded(r, bmp)
             processBitmap(bmp, opts, targetW, targetH, applyLook)
         } catch (e: Exception) {
             null
@@ -265,6 +274,118 @@ object Converter {
             null
         } finally {
             runCatching { r.release() }
+        }
+    }
+
+    /**
+     * MediaMetadataRetriever tidak konsisten antar-vendor: ada yang memberi
+     * frame mentah, ada yang sudah menerapkan rotation metadata. Rotasi hanya
+     * dilakukan bila orientasi bitmap masih sama dengan dimensi encoded.
+     */
+    fun shouldApplyRotation(
+        rotationRaw: Int,
+        encodedWidth: Int,
+        encodedHeight: Int,
+        bitmapWidth: Int,
+        bitmapHeight: Int
+    ): Boolean {
+        val rotation = ((rotationRaw % 360) + 360) % 360
+        return when (rotation) {
+            0 -> false
+            180 -> true
+            90, 270 -> {
+                if (encodedWidth <= 0 || encodedHeight <= 0 || encodedWidth == encodedHeight) true
+                else {
+                    val encodedPortrait = encodedHeight > encodedWidth
+                    val displayPortrait = encodedWidth > encodedHeight
+                    val bitmapPortrait = bitmapHeight > bitmapWidth
+                    bitmapPortrait == encodedPortrait && bitmapPortrait != displayPortrait
+                }
+            }
+            else -> true
+        }
+    }
+
+    private fun orientFrameIfNeeded(r: MediaMetadataRetriever, source: Bitmap): Bitmap {
+        val rotation = (r.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_ROTATION)
+            ?.toIntOrNull() ?: 0).let { ((it % 360) + 360) % 360 }
+        val rawW = r.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH)
+            ?.toIntOrNull() ?: 0
+        val rawH = r.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT)
+            ?.toIntOrNull() ?: 0
+        if (!shouldApplyRotation(rotation, rawW, rawH, source.width, source.height)) {
+            return source
+        }
+
+        val matrix = Matrix().apply { postRotate(rotation.toFloat()) }
+        val rotated = Bitmap.createBitmap(
+            source, 0, 0, source.width, source.height, matrix, true
+        )
+        if (rotated !== source) source.recycle()
+        return rotated
+    }
+
+    /** Thumbnail strip untuk TimelineEditorView, memakai satu retriever. */
+    fun extractTimelineFrames(
+        context: Context,
+        uri: Uri,
+        totalMs: Long,
+        count: Int = 10
+    ): List<Bitmap> {
+        val retriever = MediaMetadataRetriever()
+        val out = ArrayList<Bitmap>()
+        return try {
+            retriever.setDataSource(context, uri)
+            val rawW = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH)
+                ?.toIntOrNull()?.coerceAtLeast(1) ?: 16
+            val rawH = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT)
+                ?.toIntOrNull()?.coerceAtLeast(1) ?: 9
+            val samples = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
+                count.coerceIn(4, 12)
+            } else {
+                // Decoder Android 7 lebih mahal; enam sync-frame cukup untuk strip.
+                count.coerceIn(4, 6)
+            }
+            val scale = 240f / maxOf(rawW, rawH)
+            val thumbW = evenUp(rawW * scale)
+            val thumbH = evenUp(rawH * scale)
+            for (i in 0 until samples) {
+                val atMs = if (samples <= 1) 0L
+                else ((totalMs.coerceAtLeast(1L) - 1L) * i / (samples - 1))
+                var bitmap = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
+                    retriever.getScaledFrameAtTime(
+                        atMs * 1000,
+                        MediaMetadataRetriever.OPTION_CLOSEST_SYNC,
+                        thumbW,
+                        thumbH
+                    )
+                } else {
+                    retriever.getFrameAtTime(
+                        atMs * 1000,
+                        MediaMetadataRetriever.OPTION_CLOSEST_SYNC
+                    )
+                } ?: continue
+                bitmap = orientFrameIfNeeded(retriever, bitmap)
+                if (maxOf(bitmap.width, bitmap.height) > 320) {
+                    val s = 320f / maxOf(bitmap.width, bitmap.height)
+                    val scaled = bitmap.scale(
+                        (bitmap.width * s).toInt().coerceAtLeast(2),
+                        (bitmap.height * s).toInt().coerceAtLeast(2)
+                    )
+                    if (scaled !== bitmap) bitmap.recycle()
+                    bitmap = scaled
+                }
+                out += bitmap
+            }
+            out
+        } catch (_: Exception) {
+            out.forEach { if (!it.isRecycled) it.recycle() }
+            emptyList()
+        } catch (_: OutOfMemoryError) {
+            out.forEach { if (!it.isRecycled) it.recycle() }
+            emptyList()
+        } finally {
+            runCatching { retriever.release() }
         }
     }
 
@@ -295,7 +416,7 @@ object Converter {
 
         if (bmp.width != targetW || bmp.height != targetH) {
             if (targetW > 0 && targetH > 0) {
-                val scaled = Bitmap.createScaledBitmap(bmp, targetW, targetH, true)
+                val scaled = bmp.scale(targetW, targetH)
                 if (scaled !== bmp) {
                     if (bmp !== src) bmp.recycle()
                     bmp = scaled
@@ -421,7 +542,7 @@ object Converter {
             }
         }
 
-        val resBmp = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888)
+        val resBmp = createBitmap(w, h)
         resBmp.setPixels(out, 0, w, 0, 0, w, h)
         if (work !== src) work.recycle()
         return resBmp

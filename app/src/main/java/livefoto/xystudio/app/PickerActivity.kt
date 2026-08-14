@@ -1,6 +1,7 @@
 package livefoto.xystudio.app
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
@@ -20,6 +21,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import livefoto.xystudio.app.databinding.ActivityPickerBinding
@@ -40,9 +42,14 @@ class PickerActivity : AppCompatActivity() {
     private var currentBucket: String? = null
     private val adapter = VideoAdapter { uri -> pick(uri) }
 
+    @SuppressLint("InlinedApi")
     private val askPerm = registerForActivityResult(
-        ActivityResultContracts.RequestPermission()
-    ) { granted ->
+        ActivityResultContracts.RequestMultiplePermissions()
+    ) { grants ->
+        val granted = grants[Manifest.permission.READ_MEDIA_VIDEO] == true ||
+            (Build.VERSION.SDK_INT >= 34 &&
+                grants[Manifest.permission.READ_MEDIA_VISUAL_USER_SELECTED] == true) ||
+            grants[Manifest.permission.READ_EXTERNAL_STORAGE] == true
         if (granted) loadAlbums() else {
             showEmpty("Izin akses video ditolak")
             openSystemPicker()
@@ -56,6 +63,7 @@ class PickerActivity : AppCompatActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        Settings.prepareActivity(this)
         super.onCreate(savedInstanceState)
         b = ActivityPickerBinding.inflate(layoutInflater)
         setContentView(b.root)
@@ -69,13 +77,18 @@ class PickerActivity : AppCompatActivity() {
         b.grid.layoutManager = GridLayoutManager(this, 3)
         b.grid.adapter = adapter
 
-        val perm = if (Build.VERSION.SDK_INT >= 33)
-            Manifest.permission.READ_MEDIA_VIDEO
-        else Manifest.permission.READ_EXTERNAL_STORAGE
-
-        if (ContextCompat.checkSelfPermission(this, perm) ==
-            PackageManager.PERMISSION_GRANTED
-        ) loadAlbums() else askPerm.launch(perm)
+        val permissions = when {
+            Build.VERSION.SDK_INT >= 34 -> arrayOf(
+                Manifest.permission.READ_MEDIA_VIDEO,
+                Manifest.permission.READ_MEDIA_VISUAL_USER_SELECTED
+            )
+            Build.VERSION.SDK_INT >= 33 -> arrayOf(Manifest.permission.READ_MEDIA_VIDEO)
+            else -> arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE)
+        }
+        val hasAccess = permissions.any {
+            ContextCompat.checkSelfPermission(this, it) == PackageManager.PERMISSION_GRANTED
+        }
+        if (hasAccess) loadAlbums() else askPerm.launch(permissions)
     }
 
     private fun openSystemPicker() {
@@ -154,8 +167,17 @@ class PickerActivity : AppCompatActivity() {
         private val inFlight = Collections.newSetFromMap(ConcurrentHashMap<Long, Boolean>())
 
         fun submit(list: List<ProjectStore.Video>) {
+            val old = items
+            val diff = DiffUtil.calculateDiff(object : DiffUtil.Callback() {
+                override fun getOldListSize() = old.size
+                override fun getNewListSize() = list.size
+                override fun areItemsTheSame(oldPos: Int, newPos: Int) =
+                    old[oldPos].uri == list[newPos].uri
+                override fun areContentsTheSame(oldPos: Int, newPos: Int) =
+                    old[oldPos] == list[newPos]
+            })
             items = list
-            notifyDataSetChanged()
+            diff.dispatchUpdatesTo(this)
         }
 
         inner class VH(v: View) : RecyclerView.ViewHolder(v) {

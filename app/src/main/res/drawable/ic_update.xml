@@ -2,12 +2,12 @@
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="96dp" android:height="96dp"
     android:viewportWidth="96" android:viewportHeight="96">
-    <path android:fillColor="@color/accent_soft"
+    <path android:fillColor="?attr/appAccentSoft"
         android:pathData="M48,6a42,42 0,1 0,0 84a42,42 0,1 0,0 -84" />
     <path android:fillColor="@android:color/transparent"
-        android:strokeColor="@color/accent_primary" android:strokeWidth="6"
+        android:strokeColor="?attr/appAccent" android:strokeWidth="6"
         android:strokeLineCap="round" android:strokeLineJoin="round"
         android:pathData="M25,43 A24,24 0,0 1,68 31 M68,31 L68,18 M68,31 L55,31 M71,53 A24,24 0,0 1,28 65 M28,65 L28,78 M28,65 L41,65" />
-    <path android:fillColor="@color/accent_primary"
+    <path android:fillColor="?attr/appAccent"
         android:pathData="M48,48m-5,0a5,5 0,1 1,10 0a5,5 0,1 1,-10 0" />
 </vector>

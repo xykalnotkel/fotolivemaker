@@ -1,70 +1,108 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <style name="Theme.MotionPhoto.Starting" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">@color/ic_launcher_background</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_launcher_foreground</item>
+        <item name="postSplashScreenTheme">@style/Theme.MotionPhoto</item>
+    </style>
 
     <style name="Theme.MotionPhoto" parent="Theme.Material3.Light.NoActionBar">
-        <item name="colorPrimary">@color/ink</item>
+        <item name="appPaper">@color/paper</item>
+        <item name="appSurface">@color/paper_dim</item>
+        <item name="appInk">@color/ink</item>
+        <item name="appOnInk">@color/on_ink</item>
+        <item name="appTextHigh">@color/text_hi</item>
+        <item name="appTextMid">@color/text_mid</item>
+        <item name="appTextDim">@color/text_dim</item>
+        <item name="appLine">@color/line</item>
+        <item name="appLineStrong">@color/line_strong</item>
+        <item name="appAccent">@color/accent_primary</item>
+        <item name="appAccentSoft">@color/accent_soft</item>
+        <item name="appAccentGlow">@color/accent_glow</item>
+        <item name="appIconTint">@color/icon_tint</item>
+        <item name="appOk">@color/ok</item>
+        <item name="appBad">@color/bad</item>
+        <item name="appHeroSub">@color/hero_sub</item>
+        <item name="appHeroLine">@color/hero_line</item>
+
+        <item name="colorPrimary">?attr/appAccent</item>
         <item name="colorOnPrimary">@color/on_ink</item>
-        <item name="colorSecondary">@color/accent_primary</item>
-        <item name="android:colorBackground">@color/paper</item>
-        <item name="colorSurface">@color/paper</item>
-        <item name="colorOnSurface">@color/ink</item>
-        <item name="android:statusBarColor">@color/paper</item>
-        <item name="android:navigationBarColor">@color/paper</item>
+        <item name="colorSecondary">@color/accent_metal</item>
+        <item name="android:colorBackground">?attr/appPaper</item>
+        <item name="colorSurface">?attr/appSurface</item>
+        <item name="colorOnSurface">?attr/appInk</item>
+        <item name="android:statusBarColor">?attr/appPaper</item>
+        <item name="android:navigationBarColor">?attr/appPaper</item>
         <item name="android:windowLightStatusBar">true</item>
         <item name="materialButtonStyle">@style/Btn.Primary</item>
         <item name="sliderStyle">@style/Slider.Flat</item>
     </style>
 
-    <!-- Tombol modern tegas: radius kecil, bukan full pill. -->
+    <style name="Theme.MotionPhoto.HighContrast" parent="Theme.MotionPhoto">
+        <item name="appPaper">@color/hc_paper</item>
+        <item name="appSurface">@color/hc_surface</item>
+        <item name="appInk">@color/hc_ink</item>
+        <item name="appOnInk">@color/hc_on_ink</item>
+        <item name="appTextHigh">@color/hc_text_hi</item>
+        <item name="appTextMid">@color/hc_text_mid</item>
+        <item name="appTextDim">@color/hc_text_dim</item>
+        <item name="appLine">@color/hc_line</item>
+        <item name="appLineStrong">@color/hc_line</item>
+        <item name="appAccent">@color/hc_accent</item>
+        <item name="appAccentSoft">@color/hc_accent_soft</item>
+        <item name="appAccentGlow">@color/hc_accent_soft</item>
+        <item name="appIconTint">@color/hc_icon</item>
+        <item name="android:colorBackground">?attr/appPaper</item>
+        <item name="colorSurface">?attr/appSurface</item>
+        <item name="colorOnSurface">?attr/appInk</item>
+        <item name="android:statusBarColor">?attr/appPaper</item>
+        <item name="android:navigationBarColor">?attr/appPaper</item>
+        <item name="android:windowLightStatusBar">true</item>
+    </style>
+
     <style name="Btn.Primary" parent="Widget.Material3.Button">
-        <item name="backgroundTint">@color/ink</item>
-        <item name="android:textColor">@color/on_ink</item>
+        <item name="backgroundTint">?attr/appInk</item>
+        <item name="android:textColor">?attr/appOnInk</item>
         <item name="android:textSize">14sp</item>
         <item name="android:textStyle">bold</item>
         <item name="android:letterSpacing">0.03</item>
         <item name="android:minHeight">50dp</item>
-        <item name="cornerRadius">10dp</item>
+        <item name="cornerRadius">8dp</item>
         <item name="elevation">0dp</item>
         <item name="android:stateListAnimator">@null</item>
-        <item name="rippleColor">#33FFFFFF</item>
+        <item name="rippleColor">?attr/appAccentSoft</item>
     </style>
 
     <style name="Btn.Ghost" parent="Widget.Material3.Button.OutlinedButton">
-        <item name="android:textColor">@color/ink</item>
-        <item name="strokeColor">@color/line_strong</item>
+        <item name="android:textColor">?attr/appInk</item>
+        <item name="strokeColor">?attr/appLineStrong</item>
         <item name="strokeWidth">1.5dp</item>
         <item name="android:textSize">14sp</item>
         <item name="android:textStyle">bold</item>
         <item name="android:letterSpacing">0.03</item>
         <item name="android:minHeight">50dp</item>
-        <item name="cornerRadius">10dp</item>
-        <item name="rippleColor">#1A000000</item>
+        <item name="cornerRadius">8dp</item>
+        <item name="rippleColor">?attr/appAccentSoft</item>
     </style>
 
     <style name="Slider.Flat" parent="Widget.Material3.Slider">
-        <item name="thumbColor">@color/accent_primary</item>
-        <item name="trackColorActive">@color/accent_primary</item>
-        <item name="trackColorInactive">@color/line</item>
+        <item name="thumbColor">?attr/appAccent</item>
+        <item name="trackColorActive">?attr/appAccent</item>
+        <item name="trackColorInactive">?attr/appLine</item>
         <item name="thumbRadius">8dp</item>
         <item name="trackHeight">4dp</item>
-        <item name="haloColor">@color/accent_glow</item>
+        <item name="haloColor">?attr/appAccentGlow</item>
         <item name="haloRadius">16dp</item>
         <item name="tickVisible">false</item>
         <item name="thumbElevation">2dp</item>
     </style>
 
     <style name="Label" parent="">
-        <item name="android:textColor">@color/text_dim</item>
+        <item name="android:textColor">?attr/appTextDim</item>
         <item name="android:textSize">11sp</item>
         <item name="android:letterSpacing">0.08</item>
         <item name="android:textAllCaps">true</item>
         <item name="android:textStyle">bold</item>
     </style>
 
-    <style name="Value" parent="">
-        <item name="android:textColor">@color/ink</item>
-        <item name="android:textSize">13sp</item>
-        <item name="android:textStyle">bold</item>
-        <item name="android:fontFamily">monospace</item>
-    </style>
 </resources>

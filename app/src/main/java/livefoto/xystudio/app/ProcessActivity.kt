@@ -53,6 +53,7 @@ class ProcessActivity : AppCompatActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        Settings.prepareActivity(this)
         super.onCreate(savedInstanceState)
         b = ActivityProcessBinding.inflate(layoutInflater)
         setContentView(b.root)
@@ -72,11 +73,11 @@ class ProcessActivity : AppCompatActivity() {
 
         val ratioName = intent.getStringExtra(EXTRA_ASPECT_RATIO)
         val aspectRatio = if (ratioName != null) {
-            runCatching { Converter.AspectRatio.valueOf(ratioName) }.getOrDefault(Converter.AspectRatio.ORIGINAL)
+            runCatching { Converter.AspectRatio.valueOf(ratioName) }.getOrDefault(Converter.AspectRatio.RATIO_9_16)
         } else if (intent.getBooleanExtra(EXTRA_SQUARE, false)) {
             Converter.AspectRatio.RATIO_1_1
         } else {
-            Converter.AspectRatio.ORIGINAL
+            Converter.AspectRatio.RATIO_9_16
         }
 
         val opts = Converter.Options(

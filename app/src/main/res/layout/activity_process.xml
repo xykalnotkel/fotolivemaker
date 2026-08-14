@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:gravity="center_horizontal"
-    android:background="@color/paper"
     android:paddingStart="28dp"
     android:paddingEnd="28dp">
 
@@ -13,7 +13,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="28dp"
         android:text="MENGEKSPOR"
-        android:textColor="@color/ink"
+        android:textColor="?attr/appInk"
         android:textSize="11sp"
         android:textStyle="bold"
         android:letterSpacing="0.12" />
@@ -25,7 +25,7 @@
         android:layout_marginTop="8dp"
         android:gravity="center"
         android:text="Menyiapkan…"
-        android:textColor="@color/text_mid"
+        android:textColor="?attr/appTextMid"
         android:textSize="13sp" />
 
     <TextView
@@ -35,7 +35,7 @@
         android:layout_marginTop="3dp"
         android:gravity="center"
         android:text="sekitar —"
-        android:textColor="@color/text_dim"
+        android:textColor="?attr/appTextDim"
         android:textSize="12sp" />
 
     <FrameLayout
@@ -49,6 +49,7 @@
         <FrameLayout
             android:id="@+id/previewBox"
             android:layout_width="168dp"
+            tools:ignore="UselessParent"
             android:layout_height="224dp"
             android:layout_gravity="center">
 
@@ -94,7 +95,7 @@
         android:layout_height="wrap_content"
         android:gravity="center"
         android:text="Jangan kunci layar sampai selesai"
-        android:textColor="@color/text_dim"
+        android:textColor="?attr/appTextDim"
         android:textSize="11sp" />
 
     <com.google.android.material.button.MaterialButton

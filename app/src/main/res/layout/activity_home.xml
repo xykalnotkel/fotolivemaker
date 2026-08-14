@@ -4,7 +4,6 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="@color/paper"
     android:clipChildren="false"
     android:clipToPadding="false">
 
@@ -29,7 +28,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/app_name"
-                android:textColor="@color/ink"
+                android:textColor="?attr/appInk"
                 android:textSize="26sp"
                 android:textStyle="bold"
                 android:letterSpacing="-0.03" />
@@ -39,7 +38,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="2dp"
-                android:textColor="@color/text_dim"
+                android:textColor="?attr/appTextDim"
                 android:textSize="11sp"
                 android:fontFamily="monospace" />
         </LinearLayout>
@@ -69,7 +68,7 @@
             android:paddingEnd="20dp"
             android:paddingBottom="28dp">
 
-            <!-- Hero Action Card Clean Dark Doff & Metallic Purple -->
+            <!-- Hero Action Card: graphite, cobalt, dan ilustrasi portrait -->
             <FrameLayout
                 android:id="@+id/cardAdd"
                 android:layout_width="match_parent"
@@ -79,14 +78,13 @@
                 android:foreground="?attr/selectableItemBackground">
 
                 <ImageView
-                    android:layout_width="120dp"
-                    android:layout_height="120dp"
-                    android:layout_gravity="end|bottom"
-                    android:layout_marginEnd="8dp"
-                    android:layout_marginBottom="4dp"
-                    android:alpha="0.28"
-                    android:src="@drawable/ic_livephoto"
-                    app:tint="#FFFFFFFF"
+                    android:layout_width="126dp"
+                    android:layout_height="158dp"
+                    android:layout_gravity="end|center_vertical"
+                    android:layout_marginEnd="10dp"
+                    android:alpha="0.92"
+                    android:src="@drawable/illus_live_editor"
+                    android:scaleType="fitCenter"
                     android:contentDescription="@null" />
 
                 <LinearLayout
@@ -95,7 +93,7 @@
                     android:orientation="vertical"
                     android:gravity="center_vertical"
                     android:paddingStart="22dp"
-                    android:paddingEnd="22dp"
+                    android:paddingEnd="138dp"
                     android:paddingTop="18dp"
                     android:paddingBottom="18dp">
 
@@ -109,7 +107,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="12dp"
                         android:text="Project Baru"
-                        android:textColor="@color/on_ink"
+                        android:textColor="?attr/appOnInk"
                         android:textSize="22sp"
                         android:textStyle="bold"
                         android:letterSpacing="-0.02" />
@@ -119,7 +117,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
                         android:text="Pilih video, jadikan Live Photo"
-                        android:textColor="@color/hero_sub"
+                        android:textColor="?attr/appHeroSub"
                         android:textSize="13sp" />
 
                     <TextView
@@ -132,8 +130,8 @@
                         android:paddingTop="4dp"
                         android:paddingBottom="4dp"
                         android:background="@drawable/bg_hero_chip"
-                        android:textColor="@color/hero_sub"
-                        android:textSize="10sp"
+                        android:textColor="?attr/appHeroSub"
+                        android:textSize="11sp"
                         android:textStyle="bold"
                         android:fontFamily="monospace" />
                 </LinearLayout>
@@ -159,7 +157,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginEnd="12dp"
-                    android:textColor="@color/text_dim"
+                    android:textColor="?attr/appTextDim"
                     android:textSize="11sp"
                     android:fontFamily="monospace" />
 
@@ -169,7 +167,7 @@
                     android:layout_height="wrap_content"
                     android:padding="6dp"
                     android:text="Hapus semua"
-                    android:textColor="@color/text_mid"
+                    android:textColor="?attr/appTextMid"
                     android:textSize="11sp"
                     android:textStyle="bold"
                     android:visibility="gone" />
@@ -204,7 +202,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="14dp"
                     android:text="Belum ada Live Photo"
-                    android:textColor="@color/text_mid"
+                    android:textColor="?attr/appTextMid"
                     android:textSize="14sp"
                     android:textStyle="bold" />
 
@@ -213,13 +211,13 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="4dp"
                     android:text="Ketuk Project Baru untuk mulai"
-                    android:textColor="@color/text_dim"
+                    android:textColor="?attr/appTextDim"
                     android:textSize="12sp" />
             </LinearLayout>
         </LinearLayout>
     </ScrollView>
 
-    <!-- Floating Metallic Banner (Radius 4dp, Taller, dengan Tombol X) -->
+    <!-- Hanya ditampilkan jika GitHub memiliki versi yang lebih baru. -->
     <FrameLayout
         android:id="@+id/updateBanner"
         android:layout_width="match_parent"
@@ -229,7 +227,7 @@
         android:layout_marginBottom="14dp"
         android:clipChildren="false"
         android:clipToPadding="false"
-        android:visibility="visible"
+        android:visibility="gone"
         android:contentDescription="Pembaruan Aplikasi">
 
         <View
@@ -261,7 +259,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Cek Pembaruan"
-                    android:textColor="@color/text_hi"
+                    android:textColor="?attr/appTextHigh"
                     android:textSize="14sp"
                     android:textStyle="bold" />
 
@@ -270,7 +268,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="2dp"
-                    android:textColor="@color/accent_primary"
+                    android:textColor="?attr/appAccent"
                     android:textSize="11sp"
                     android:fontFamily="monospace"
                     android:textStyle="bold" />
@@ -297,7 +295,7 @@
             android:src="@drawable/ic_close"
             android:alpha="0.75"
             android:background="?attr/selectableItemBackgroundBorderless"
-            app:tint="@color/icon_tint"
+            app:tint="?attr/appIconTint"
             android:contentDescription="Tutup banner" />
     </FrameLayout>
 </LinearLayout>

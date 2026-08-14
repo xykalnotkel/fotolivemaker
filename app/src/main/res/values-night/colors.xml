@@ -1,38 +1,40 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Palet Clean Dark Doff & Purple Metallic -->
-    <color name="paper">#FF0D0E15</color>
-    <color name="paper_dim">#FF151622</color>
-    <color name="ink">#FFE8EAED</color>
+    <color name="paper">#FF080C14</color>
+    <color name="paper_dim">#FF111827</color>
+    <color name="ink">#FFF8FAFC</color>
+    <color name="on_ink">#FF08101E</color>
 
-    <color name="text_hi">#FFE8EAED</color>
-    <color name="text_mid">#FFA2A6BE</color>
-    <color name="text_dim">#FF666A86</color>
+    <color name="text_hi">#FFF8FAFC</color>
+    <color name="text_mid">#FFCBD5E1</color>
+    <color name="text_dim">#FF94A3B8</color>
+    <color name="line">#FF243044</color>
+    <color name="line_strong">#FF3B4A63</color>
 
-    <color name="line">#FF222538</color>
-    <color name="line_strong">#FF353952</color>
+    <color name="accent_primary">#FF60A5FA</color>
+    <color name="accent_glow">#3860A5FA</color>
+    <color name="accent_soft">#1F60A5FA</color>
+    <color name="accent_metal">#FF22D3EE</color>
+    <color name="icon_tint">#FFD7E0EE</color>
 
-    <!-- Aksen Bright Purple Metal & Violet Glow (Dark Mode) -->
-    <color name="accent_primary">#FF8B5CF6</color>
-    <color name="accent_dark">#FF7C3AED</color>
-    <color name="accent_glow">#338B5CF6</color>
-    <color name="accent_soft">#1E8B5CF6</color>
-    <color name="accent_metal">#FFA78BFA</color>
+    <color name="ok">#FF32D583</color>
+    <color name="bad">#FFFF6B5E</color>
 
-    <!-- Warna Ikon Adaptif (Dark: Putih Abu Titanium) -->
-    <color name="icon_tint">#FFCBD2E1</color>
+    <color name="hero_start">#FF07111F</color>
+    <color name="hero_mid">#FF0B2A4A</color>
+    <color name="hero_end">#FF0F3B52</color>
+    <color name="hero_sub">#FFE0F2FE</color>
+    <color name="hero_line">#665DA9FF</color>
 
-    <!-- Status & Feedback -->
-    <color name="ok">#FF34D399</color>
-    <color name="bad">#FFF87171</color>
-    <color name="warn">#FF8B5CF6</color>
-
-    <color name="on_ink">#FF0D0E15</color>
-
-    <!-- Hero Card Seamless Fade Gradient (Dark Mode) -->
-    <color name="hero_start">#FF1D1A33</color>
-    <color name="hero_mid">#80322960</color>
-    <color name="hero_end">#FF0D0E15</color>
-    <color name="hero_sub">#C4B5FD</color>
-    <color name="hero_line">#338B5CF6</color>
+    <color name="hc_paper">#FF000000</color>
+    <color name="hc_surface">#FF000000</color>
+    <color name="hc_ink">#FFFFFFFF</color>
+    <color name="hc_on_ink">#FF000000</color>
+    <color name="hc_text_hi">#FFFFFFFF</color>
+    <color name="hc_text_mid">#FFFFFFFF</color>
+    <color name="hc_text_dim">#FFE5E7EB</color>
+    <color name="hc_line">#FFFFFFFF</color>
+    <color name="hc_accent">#FF54A3FF</color>
+    <color name="hc_accent_soft">#3354A3FF</color>
+    <color name="hc_icon">#FFFFFFFF</color>
 </resources>

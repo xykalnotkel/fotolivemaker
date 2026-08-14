@@ -1,13 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <!-- Izin ada di APK, tapi jaringan HANYA dipakai saat pengguna ketuk update. -->
+    <!-- Cek versi foreground maksimal 1x/24 jam; tidak ada upload/background worker. -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
 
     <!-- Android 13+; jangan diberi maxSdk agar pemilih video tetap bekerja di Android 15+. -->
     <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" />
+    <uses-permission android:name="android.permission.READ_MEDIA_VISUAL_USER_SELECTED" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
         android:maxSdkVersion="32" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
@@ -34,9 +35,9 @@
         </provider>
 
         <activity
-            android:name=".SplashActivity"
+            android:name=".LaunchActivity"
             android:exported="true"
-            android:label="@string/app_name">
+            android:theme="@style/Theme.MotionPhoto.Starting">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -46,8 +47,7 @@
         <activity
             android:name=".HomeActivity"
             android:exported="true"
-            android:launchMode="singleTop"
-            android:label="@string/app_name">
+            android:launchMode="singleTop">
 
             <!-- supaya bisa "Bagikan ke" dari galeri -->
             <intent-filter>

@@ -27,9 +27,22 @@ jobs:
           java-version: '17'
 
       - name: Siapkan Gradle
-        uses: gradle/actions/setup-gradle@v3
+        uses: gradle/actions/setup-gradle@v4
         with:
-          gradle-version: '8.7'
+          gradle-version: '9.5.0'
+
+      - name: Siapkan Android SDK 37
+        run: |
+          if [ ! -x "$ANDROID_HOME/cmdline-tools/latest/bin/android" ]; then
+            curl -fsSL -o "$RUNNER_TEMP/cmdtools.zip" \
+              "https://dl.google.com/android/repository/commandlinetools-linux-15859902_latest.zip"
+            rm -rf "$ANDROID_HOME/cmdline-tools/latest" "$RUNNER_TEMP/cmdline-tools"
+            mkdir -p "$RUNNER_TEMP/cmdline-tools"
+            unzip -q "$RUNNER_TEMP/cmdtools.zip" -d "$RUNNER_TEMP/cmdline-tools"
+            mv "$RUNNER_TEMP/cmdline-tools/cmdline-tools" "$ANDROID_HOME/cmdline-tools/latest"
+          fi
+          "$ANDROID_HOME/cmdline-tools/latest/bin/android" --no-metrics sdk install \
+            "platforms;android-37.0" "build-tools;37.0.0" "platform-tools"
 
       - name: Siapkan keystore rilis
         env:

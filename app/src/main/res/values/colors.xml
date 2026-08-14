@@ -1,38 +1,42 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Palet Clean Light Doff & Deep Purple Metal -->
-    <color name="paper">#FFF6F7F9</color>
-    <color name="paper_dim">#FFEBECEF</color>
-    <color name="ink">#FF13141C</color>
-
-    <color name="text_hi">#FF13141C</color>
-    <color name="text_mid">#FF4A4D5E</color>
-    <color name="text_dim">#FF7E8299</color>
-
-    <color name="line">#FFE1E3EB</color>
-    <color name="line_strong">#FFC4C7D6</color>
-
-    <!-- Aksen Deep Purple Metal & Violet Doff -->
-    <color name="accent_primary">#FF6D28D9</color>
-    <color name="accent_dark">#FF5B21B6</color>
-    <color name="accent_glow">#206D28D9</color>
-    <color name="accent_soft">#126D28D9</color>
-    <color name="accent_metal">#FF7C3AED</color>
-
-    <!-- Warna Ikon Adaptif (Light: Hitam Abu Charcoal) -->
-    <color name="icon_tint">#FF2A2C3D</color>
-
-    <!-- Status & Feedback -->
-    <color name="ok">#FF10B981</color>
-    <color name="bad">#FFEF4444</color>
-    <color name="warn">#FF6D28D9</color>
-
+    <!-- Clean Graphite + Cobalt. Netral, tajam, tanpa dominasi ungu. -->
+    <color name="paper">#FFF6F8FC</color>
+    <color name="paper_dim">#FFFFFFFF</color>
+    <color name="ink">#FF0F172A</color>
     <color name="on_ink">#FFFFFFFF</color>
 
-    <!-- Hero Card Seamless Fade Gradient (Light Mode) -->
-    <color name="hero_start">#FF241F42</color>
-    <color name="hero_mid">#994C388A</color>
-    <color name="hero_end">#FFF6F7F9</color>
-    <color name="hero_sub">#DDD6FE</color>
-    <color name="hero_line">#338B5CF6</color>
+    <color name="text_hi">#FF101828</color>
+    <color name="text_mid">#FF475467</color>
+    <color name="text_dim">#FF667085</color>
+    <color name="line">#FFE4E7EC</color>
+    <color name="line_strong">#FFD0D5DD</color>
+
+    <color name="accent_primary">#FF2563EB</color>
+    <color name="accent_glow">#332563EB</color>
+    <color name="accent_soft">#142563EB</color>
+    <color name="accent_metal">#FF38BDF8</color>
+    <color name="icon_tint">#FF344054</color>
+
+    <color name="ok">#FF12B76A</color>
+    <color name="bad">#FFF04438</color>
+
+    <color name="hero_start">#FF081221</color>
+    <color name="hero_mid">#FF123B73</color>
+    <color name="hero_end">#FF155E75</color>
+    <color name="hero_sub">#FFDDEAFE</color>
+    <color name="hero_line">#665B8DEF</color>
+
+    <!-- Palet struktural High Contrast. Bukan sekadar pembesaran teks. -->
+    <color name="hc_paper">#FFFFFFFF</color>
+    <color name="hc_surface">#FFFFFFFF</color>
+    <color name="hc_ink">#FF000000</color>
+    <color name="hc_on_ink">#FFFFFFFF</color>
+    <color name="hc_text_hi">#FF000000</color>
+    <color name="hc_text_mid">#FF111111</color>
+    <color name="hc_text_dim">#FF242424</color>
+    <color name="hc_line">#FF000000</color>
+    <color name="hc_accent">#FF0047FF</color>
+    <color name="hc_accent_soft">#1F0047FF</color>
+    <color name="hc_icon">#FF000000</color>
 </resources>

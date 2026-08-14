@@ -21,4 +21,21 @@ class UpdateCheckTest {
     fun `installed lebih baru tidak muncul banner`() {
         assertFalse(UpdateCheck.isNewer("1.2.0", "v1.1.0"))
     }
+
+    @Test
+    fun `cek otomatis pertama kali langsung jatuh tempo`() {
+        assertTrue(UpdateCheck.isCheckDue(0L, 1_000L))
+    }
+
+    @Test
+    fun `cek otomatis tidak diulang sebelum 24 jam`() {
+        val last = 1_000L
+        assertFalse(UpdateCheck.isCheckDue(last, last + UpdateCheck.AUTO_CHECK_INTERVAL_MS - 1L))
+        assertTrue(UpdateCheck.isCheckDue(last, last + UpdateCheck.AUTO_CHECK_INTERVAL_MS))
+    }
+
+    @Test
+    fun `jam perangkat mundur memicu sinkronisasi ulang`() {
+        assertTrue(UpdateCheck.isCheckDue(lastCheckMs = 10_000L, nowMs = 5_000L))
+    }
 }

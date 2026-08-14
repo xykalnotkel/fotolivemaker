@@ -19,7 +19,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:scaleType="centerCrop"
-            android:background="@color/paper_dim"
+            android:background="?attr/appSurface"
             android:contentDescription="@null" />
 
         <ImageView
@@ -28,7 +28,7 @@
             android:layout_gravity="top|start"
             android:layout_margin="4dp"
             android:src="@drawable/ic_livephoto"
-            app:tint="@color/on_ink"
+            app:tint="?attr/appOnInk"
             android:contentDescription="@null" />
     </FrameLayout>
 
@@ -45,7 +45,7 @@
             android:layout_height="wrap_content"
             android:maxLines="1"
             android:ellipsize="middle"
-            android:textColor="@color/text_hi"
+            android:textColor="?attr/appTextHigh"
             android:textSize="14sp"
             android:textStyle="bold" />
 
@@ -54,7 +54,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="3dp"
-            android:textColor="@color/text_dim"
+            android:textColor="?attr/appTextDim"
             android:textSize="11sp"
             android:fontFamily="monospace" />
     </LinearLayout>
@@ -66,7 +66,7 @@
         android:padding="8dp"
         android:src="@drawable/ic_trash"
         android:background="?attr/selectableItemBackgroundBorderless"
-        app:tint="@color/text_dim"
+        app:tint="?attr/appTextDim"
         android:contentDescription="Hapus" />
 
     <ImageView
@@ -76,6 +76,6 @@
         android:padding="8dp"
         android:src="@drawable/ic_more"
         android:background="?attr/selectableItemBackgroundBorderless"
-        app:tint="@color/text_dim"
+        app:tint="?attr/appTextDim"
         android:contentDescription="Opsi" />
 </LinearLayout>

@@ -36,17 +36,15 @@ class OutputSizeTest {
     @Test
     fun `rasio 9_16 menghasilkan proporsi layar penuh vertikal`() {
         val (w, h) = outSize(1920, 1080, Converter.Res.P1080, Converter.AspectRatio.RATIO_9_16)
-        assertEquals(1080, h)
-        assertEquals(Converter.evenUp(1080 * 9f / 16f), w)
-        assertEquals(608, w)
+        assertEquals(1080, w)
+        assertEquals(1920, h)
     }
 
     @Test
     fun `rasio 3_4 menghasilkan proporsi portrait`() {
         val (w, h) = outSize(1920, 1080, Converter.Res.P1080, Converter.AspectRatio.RATIO_3_4)
-        assertEquals(1080, h)
-        assertEquals(Converter.evenUp(1080 * 3f / 4f), w)
-        assertEquals(810, w)
+        assertEquals(1080, w)
+        assertEquals(1440, h)
     }
 
     @Test
@@ -67,8 +65,8 @@ class OutputSizeTest {
     @Test
     fun `video potret tanpa crop tetap potret`() {
         val (w, h) = outSize(1080, 1920, Converter.Res.P1080, Converter.AspectRatio.ORIGINAL)
-        assertEquals(1080, h)
-        assertEquals(608, w)   // 1080 * (1080/1920) = 607.5 -> genap ke atas
+        assertEquals(1080, w)
+        assertEquals(1920, h)
         assertTrue("harus lebih tinggi daripada lebar", h > w)
     }
 
@@ -128,6 +126,20 @@ class OutputSizeTest {
         assertTrue(w.toLong() * h <= 3840L * 2160L)
         assertEquals(0, w % 2)
         assertEquals(0, h % 2)
+    }
+
+    @Test
+    fun `default export adalah portrait 9_16`() {
+        val opts = Converter.Options()
+        assertEquals(Converter.AspectRatio.RATIO_9_16, opts.aspectRatio)
+        assertEquals(1080 to 1920, Converter.calculateDimensions(1920, 1080, opts))
+    }
+
+    @Test
+    fun `SOURCE landscape dicrop portrait tanpa upscale`() {
+        val (w, h) = outSize(3840, 2160, Converter.Res.SOURCE, Converter.AspectRatio.RATIO_9_16)
+        assertEquals(1216, w)
+        assertEquals(2160, h)
     }
 
     @Test

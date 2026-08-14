@@ -5,9 +5,9 @@
 
 ## Ringkasan singkat
 
-Video diproses **di perangkat**. Banner update **tidak** memakai jaringan.
-Internet hanya dipakai **saat kamu mengetuk** banner (cek rilis / unduh APK).
-Tidak ada analytics, tidak ada unggah file.
+Video diproses **di perangkat**. Saat beranda aktif, aplikasi dapat memeriksa
+versi GitHub maksimal sekali per 24 jam. Banner hanya muncul bila ada versi
+lebih baru. Tidak ada service latar belakang, analytics, atau unggah file.
 
 ---
 
@@ -24,20 +24,21 @@ Aplikasi ini:
 - Tidak membaca kontak, lokasi, mikrofon, atau kamera
 - Tidak menampilkan iklan pihak ketiga
 
-Izin `INTERNET` ada di APK karena Android tidak bisa menambahkannya nanti.
-**Tidak ada permintaan jaringan di latar belakang.** Koneksi terjadi hanya
-kalau kamu ketuk banner update: `GET` rilis GitHub, lalu (kalau kamu pilih)
-unduh berkas `.apk`. Tidak ada data pribadi di permintaan itu.
+Izin `INTERNET` dipakai untuk `GET` metadata rilis GitHub ketika beranda sedang
+aktif, maksimal sekali per 24 jam. Tidak ada background worker atau service.
+Kalau versi baru ditemukan dan kamu mengetuk banner, aplikasi dapat mengunduh
+APK dari GitHub. Tidak ada data pribadi atau video di dalam permintaan itu.
 
 ## Izin yang diminta dan alasannya
 
 | Izin | Kegunaan |
 |---|---|
-| `INTERNET` | Hanya saat ketuk update: cek/unduh APK dari GitHub |
+| `INTERNET` | Cek versi foreground maksimal 1x/24 jam dan unduh APK setelah diketuk |
 | `ACCESS_NETWORK_STATE` | Tahu apakah data/Wi-Fi nyala, tanpa mengirim apa pun |
 | `REQUEST_INSTALL_PACKAGES` | Memasang APK update yang kamu unduh sendiri |
 | `READ_MEDIA_VIDEO` (Android 13+) | Menampilkan kisi video di pemilih internal |
-| `READ_EXTERNAL_STORAGE` (Android ≤12) | Sama seperti di atas, untuk versi Android lama |
+| `READ_MEDIA_VISUAL_USER_SELECTED` (Android 14+) | Mengakses hanya video yang dipilih pengguna |
+| `READ_EXTERNAL_STORAGE` (Android 7–12) | Sama seperti di atas, untuk versi Android lama |
 | `WRITE_EXTERNAL_STORAGE` (Android ≤9) | Menyimpan hasil ke folder DCIM/Camera |
 
 Di Android 10 ke atas, penyimpanan hasil menggunakan **MediaStore**, sehingga

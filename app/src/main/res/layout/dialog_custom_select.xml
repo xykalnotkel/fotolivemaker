@@ -23,7 +23,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Pilihan"
-        android:textColor="@color/text_hi"
+        android:textColor="?attr/appTextHigh"
         android:textSize="18sp"
         android:textStyle="bold"
         android:letterSpacing="-0.02" />
@@ -34,7 +34,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="3dp"
         android:text="Pilih salah satu opsi di bawah"
-        android:textColor="@color/text_dim"
+        android:textColor="?attr/appTextDim"
         android:textSize="12sp" />
 
     <View
@@ -42,7 +42,7 @@
         android:layout_height="1dp"
         android:layout_marginTop="14dp"
         android:layout_marginBottom="8dp"
-        android:background="@color/line" />
+        android:background="?attr/appLine" />
 
     <!-- Container Pilihan -->
     <LinearLayout

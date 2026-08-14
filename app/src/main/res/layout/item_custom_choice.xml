@@ -25,7 +25,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Judul Pilihan"
-            android:textColor="@color/text_hi"
+            android:textColor="?attr/appTextHigh"
             android:textSize="14sp"
             android:textStyle="bold" />
 
@@ -35,7 +35,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="2dp"
             android:text="Deskripsi keterangan pilihan"
-            android:textColor="@color/text_dim"
+            android:textColor="?attr/appTextDim"
             android:textSize="11sp" />
     </LinearLayout>
 
@@ -45,7 +45,7 @@
         android:layout_height="20dp"
         android:layout_marginStart="12dp"
         android:src="@drawable/dot_ok"
-        app:tint="@color/accent_primary"
+        app:tint="?attr/appAccent"
         android:visibility="gone"
         android:contentDescription="Terpilih" />
 </LinearLayout>

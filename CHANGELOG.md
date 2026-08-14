@@ -5,7 +5,23 @@ Saat rilis, pindahkan ke heading versi + tanggal.
 
 ## Unreleased
 
-Belum ada perubahan.
+### Engine dan kompatibilitas
+- Default output diubah ke portrait 9:16; preset 1080p portrait kini benar-benar 1080x1920.
+- Rotasi cover dibuat vendor-safe: frame yang sudah diputar oleh MediaMetadataRetriever tidak diputar dua kali.
+- Crop cover dan video memakai target dimensi yang sama, termasuk SOURCE tanpa upscale.
+- Dukungan diperluas dari Android 7 (API 24) sampai Android 17 (API 37).
+- Toolchain dimutakhirkan ke AGP 9.3, Gradle 9.5, built-in Kotlin, dan dependency stabil terbaru.
+- Permission partial media Android 14+ ditangani bersama Photo Picker fallback.
+
+### Timeline dan visual
+- Material Slider dihapus dari editor dan diganti timeline thumbnail interaktif.
+- Bingkai klip 3 detik dan playhead cover dapat digeser langsung seperti editor video.
+- Palet ungu lama diganti graphite, cobalt, dan cyan untuk light/dark mode.
+- High Contrast sekarang memakai token theme terpisah, border 2dp, ikon tegas, dan target sentuh 48dp.
+- Tiga ilustrasi AI baru ditambahkan untuk editor, instruksi hold, dan status export berhasil.
+- Ikon aksi gallery, add, share, dan export ditambahkan.
+- Insets edge-to-edge dan display cutout ditangani untuk Android modern.
+- Banner update disembunyikan secara default dan hanya tampil jika versi GitHub lebih baru; cek dibatasi sekali per 24 jam saat beranda aktif.
 
 ## [v1.2.1](https://github.com/xykalnotkel/fotolivemaker/releases/tag/v1.2.1) — 2026-08-14
 

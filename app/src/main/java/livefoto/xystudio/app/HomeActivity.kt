@@ -16,7 +16,9 @@ import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.FileProvider
+import androidx.core.net.toUri
 import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import livefoto.xystudio.app.databinding.ActivityHomeBinding
@@ -31,8 +33,10 @@ class HomeActivity : AppCompatActivity() {
 
     private lateinit var b: ActivityHomeBinding
     private val adapter = ProjectAdapter()
+    private var updateCheckRunning = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        Settings.prepareActivity(this)
         super.onCreate(savedInstanceState)
         b = ActivityHomeBinding.inflate(layoutInflater)
         setContentView(b.root)
@@ -48,7 +52,12 @@ class HomeActivity : AppCompatActivity() {
         }
         b.btnHapusSemua.setOnClickListener { confirmDeleteAll() }
         b.btnUpdateClick.setOnClickListener { openUpdate() }
-        b.btnDismissUpdate.setOnClickListener { b.updateBanner.visibility = View.GONE }
+        b.btnDismissUpdate.setOnClickListener {
+            UpdateCheck.cached(this)?.takeIf { it.newer }?.let {
+                UpdateCheck.dismiss(this, it.tag)
+            }
+            b.updateBanner.visibility = View.GONE
+        }
 
         b.list.layoutManager = LinearLayoutManager(this)
         b.list.adapter = adapter
@@ -62,17 +71,30 @@ class HomeActivity : AppCompatActivity() {
         super.onResume()
         refresh()
         paintBanner(UpdateCheck.cached(this))
+        checkForUpdatesSilently()
     }
 
-    /** Tanpa jaringan. Cache cek terakhir yang menandai versi terlewat. */
+    /** Banner benar-benar hilang bila tidak ada versi yang lebih baru. */
     private fun paintBanner(info: UpdateCheck.Info?) {
-        b.updateBanner.visibility = View.VISIBLE
-        if (info != null && info.newer) {
-            b.tvUpdateLabel.text = "Update terbaru"
+        val show = info?.newer == true && !UpdateCheck.isDismissed(this, info.tag)
+        b.updateBanner.visibility = if (show) View.VISIBLE else View.GONE
+        if (show && info != null) {
+            b.tvUpdateLabel.text = "Update tersedia"
             b.tvUpdateVer.text = info.tag.removePrefix("v")
-        } else {
-            b.tvUpdateLabel.text = "Cek update"
-            b.tvUpdateVer.text = "v${BuildConfig.VERSION_NAME}"
+        }
+    }
+
+    /** Cek foreground, maksimal sekali per 24 jam; tidak ada background worker. */
+    private fun checkForUpdatesSilently() {
+        if (updateCheckRunning || !UpdateCheck.online(this) || !UpdateCheck.shouldAutoCheck(this)) {
+            return
+        }
+        updateCheckRunning = true
+        UpdateCheck.markCheckAttempt(this)
+        lifecycleScope.launch {
+            val info = withContext(Dispatchers.IO) { UpdateCheck.fetch(this@HomeActivity) }
+            updateCheckRunning = false
+            paintBanner(info ?: UpdateCheck.cached(this@HomeActivity))
         }
     }
 
@@ -81,8 +103,8 @@ class HomeActivity : AppCompatActivity() {
             AlertDialog.Builder(this)
                 .setTitle("Nyalakan data")
                 .setMessage(
-                    "Banner tidak memakai internet. Jaringan hanya dipakai " +
-                        "saat kamu mau cek atau unduh update.\n\nNyalakan data/Wi-Fi, lalu ketuk lagi."
+                    "Update sudah terdeteksi, tetapi jaringan dibutuhkan untuk " +
+                        "memeriksa ulang dan mengunduh APK.\n\nNyalakan data/Wi-Fi, lalu ketuk lagi."
                 )
                 .setPositiveButton("Mengerti", null)
                 .show()
@@ -110,7 +132,7 @@ class HomeActivity : AppCompatActivity() {
                 .setPositiveButton("Unduh di app") { _, _ -> startDownload(info) }
                 .setNeutralButton("Buka web") { _, _ ->
                     runCatching {
-                        startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(info.pageUrl)))
+                        startActivity(Intent(Intent.ACTION_VIEW, info.pageUrl.toUri()))
                     }
                 }
                 .setNegativeButton("Nanti", null)
@@ -122,7 +144,7 @@ class HomeActivity : AppCompatActivity() {
         val url = info.apkUrl
         if (url.isNullOrBlank()) {
             runCatching {
-                startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(info.pageUrl)))
+                startActivity(Intent(Intent.ACTION_VIEW, info.pageUrl.toUri()))
             }
             return
         }
@@ -158,7 +180,7 @@ class HomeActivity : AppCompatActivity() {
                     startActivity(
                         Intent(
                             SysSettings.ACTION_MANAGE_UNKNOWN_APP_SOURCES,
-                            Uri.parse("package:$packageName")
+                            "package:$packageName".toUri()
                         )
                     )
                 }
@@ -238,12 +260,21 @@ class HomeActivity : AppCompatActivity() {
     private inner class ProjectAdapter : RecyclerView.Adapter<ProjectAdapter.VH>() {
 
         private var items: List<ProjectStore.Item> = emptyList()
-        private val fmt = SimpleDateFormat("d MMM yyyy · HH:mm", Locale("id", "ID"))
+        private val fmt = SimpleDateFormat("d MMM yyyy · HH:mm", Locale.forLanguageTag("id-ID"))
         private val cache = HashMap<String, Bitmap>()
 
         fun submit(list: List<ProjectStore.Item>) {
+            val old = items
+            val diff = DiffUtil.calculateDiff(object : DiffUtil.Callback() {
+                override fun getOldListSize() = old.size
+                override fun getNewListSize() = list.size
+                override fun areItemsTheSame(oldPos: Int, newPos: Int) =
+                    old[oldPos].uri == list[newPos].uri
+                override fun areContentsTheSame(oldPos: Int, newPos: Int) =
+                    old[oldPos] == list[newPos]
+            })
             items = list
-            notifyDataSetChanged()
+            diff.dispatchUpdatesTo(this)
         }
 
         inner class VH(v: View) : RecyclerView.ViewHolder(v) {

@@ -1,10 +1,10 @@
-Live Photo Maker
+Foto Live
 Copyright 2026 XyStudio — Haekal Saputra
 
 This product includes software developed by third parties. The following direct
 runtime dependencies are distributed under the Apache License, Version 2.0:
 
-- AndroidX Core KTX (androidx.core:core-ktx)
+- AndroidX Core KTX and Core SplashScreen (androidx.core:core-*)
 - AndroidX AppCompat (androidx.appcompat:appcompat)
 - Material Components for Android (com.google.android.material:material)
 - AndroidX ConstraintLayout (androidx.constraintlayout:constraintlayout)

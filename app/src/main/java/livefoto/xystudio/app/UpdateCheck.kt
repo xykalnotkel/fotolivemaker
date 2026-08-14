@@ -3,14 +3,15 @@ package livefoto.xystudio.app
 import android.content.Context
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
+import androidx.core.content.edit
 import org.json.JSONObject
 import java.io.File
 import java.net.HttpURLConnection
 import java.net.URL
 
 /**
- * Banner tidak butuh jaringan. Internet dipakai HANYA saat pengguna
- * mengetuk update (cek tag + unduh APK). Video tidak pernah diunggah.
+ * Pemeriksaan versi dilakukan saat beranda sedang aktif, maksimal sekali per
+ * 24 jam. Tidak ada service/background worker dan video tidak pernah diunggah.
  */
 object UpdateCheck {
 
@@ -22,6 +23,8 @@ object UpdateCheck {
     private const val K_URL = "url"
     private const val K_APK = "apk"
     private const val K_AT = "checked_at"
+    private const val K_DISMISSED_TAG = "dismissed_tag"
+    const val AUTO_CHECK_INTERVAL_MS = 24L * 60L * 60L * 1000L
 
     data class Info(
         val tag: String,
@@ -45,6 +48,33 @@ object UpdateCheck {
         val apk = p.getString(K_APK, null)
         return Info(tag, url, apk, isNewer(BuildConfig.VERSION_NAME, tag))
     }
+
+    fun isCheckDue(
+        lastCheckMs: Long,
+        nowMs: Long,
+        intervalMs: Long = AUTO_CHECK_INTERVAL_MS
+    ): Boolean = lastCheckMs <= 0L || nowMs < lastCheckMs || nowMs - lastCheckMs >= intervalMs
+
+    fun shouldAutoCheck(context: Context, nowMs: Long = System.currentTimeMillis()): Boolean {
+        val last = context.getSharedPreferences(PREF, Context.MODE_PRIVATE).getLong(K_AT, 0L)
+        return isCheckDue(last, nowMs)
+    }
+
+    fun markCheckAttempt(context: Context, nowMs: Long = System.currentTimeMillis()) {
+        context.getSharedPreferences(PREF, Context.MODE_PRIVATE).edit {
+            putLong(K_AT, nowMs)
+        }
+    }
+
+    fun dismiss(context: Context, tag: String) {
+        context.getSharedPreferences(PREF, Context.MODE_PRIVATE).edit {
+            putString(K_DISMISSED_TAG, tag)
+        }
+    }
+
+    fun isDismissed(context: Context, tag: String): Boolean =
+        context.getSharedPreferences(PREF, Context.MODE_PRIVATE)
+            .getString(K_DISMISSED_TAG, null) == tag
 
     fun fetch(context: Context): Info? = runCatching {
         val conn = (URL(API).openConnection() as HttpURLConnection).apply {
@@ -77,12 +107,12 @@ object UpdateCheck {
                 }
             }
         }
-        context.getSharedPreferences(PREF, Context.MODE_PRIVATE).edit()
-            .putString(K_TAG, tag)
-            .putString(K_URL, url)
-            .putString(K_APK, apk)
-            .putLong(K_AT, System.currentTimeMillis())
-            .apply()
+        context.getSharedPreferences(PREF, Context.MODE_PRIVATE).edit {
+            putString(K_TAG, tag)
+            putString(K_URL, url)
+            putString(K_APK, apk)
+            putLong(K_AT, System.currentTimeMillis())
+        }
         Info(tag, url, apk, isNewer(BuildConfig.VERSION_NAME, tag))
     }.getOrNull()
 

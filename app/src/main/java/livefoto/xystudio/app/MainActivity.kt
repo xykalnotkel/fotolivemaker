@@ -8,18 +8,14 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.view.Gravity
-import android.view.View
 import android.view.WindowManager
 import android.widget.FrameLayout
-import android.widget.ImageView
-import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import livefoto.xystudio.app.databinding.ActivityMainBinding
-import com.google.android.material.slider.Slider
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -37,7 +33,8 @@ class MainActivity : AppCompatActivity() {
     private var startSec = 0f
     private var keySec = 1.5f
     private var previewJob: Job? = null
-    private var bindingSliders = false
+    private var timelineJob: Job? = null
+    private var previewBitmap: Bitmap? = null
     private var opts = Converter.Options()
 
     private val requestLegacyWrite = registerForActivityResult(
@@ -48,6 +45,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        Settings.prepareActivity(this)
         super.onCreate(savedInstanceState)
         b = ActivityMainBinding.inflate(layoutInflater)
         setContentView(b.root)
@@ -90,55 +88,30 @@ class MainActivity : AppCompatActivity() {
             pickRes()
         }
 
-        b.sliderStart.addOnChangeListener { _, value, fromUser ->
-            if (bindingSliders || !fromUser) return@addOnChangeListener
-            startSec = value
-            rebuildPlan()
+        b.timeline.setListener { startMs, keyOffsetMs, finished ->
+            startSec = startMs / 1000f
+            keySec = keyOffsetMs / 1000f
+            rebuildPlan(updateTimeline = false)
             refreshPreview()
+            if (finished) Settings.triggerHaptic(b.timeline)
         }
-        b.sliderKey.addOnChangeListener { _, value, fromUser ->
-            if (bindingSliders || !fromUser) return@addOnChangeListener
-            keySec = value
-            rebuildPlan()
-            refreshPreview()
-        }
-        val hapticOnRelease = object : Slider.OnSliderTouchListener {
-            override fun onStartTrackingTouch(slider: Slider) = Unit
-            override fun onStopTrackingTouch(slider: Slider) = Settings.triggerHaptic(slider)
-        }
-        b.sliderStart.addOnSliderTouchListener(hapticOnRelease)
-        b.sliderKey.addOnSliderTouchListener(hapticOnRelease)
 
         paintTools()
         intent?.data?.let(::loadVideo) ?: run { toast("Tidak ada video"); finish() }
     }
 
     private fun paintTools() {
-        val isRatioActive = opts.aspectRatio != Converter.AspectRatio.ORIGINAL
-        b.lblRatio.setTextColor(
-            ContextCompat.getColor(
-                this,
-                if (isRatioActive) R.color.accent_primary else R.color.text_mid
-            )
-        )
+        val accent = Settings.color(this, R.attr.appAccent)
+        val muted = Settings.color(this, R.attr.appTextMid)
+        val high = Settings.color(this, R.attr.appTextHigh)
+        val isRatioActive = opts.aspectRatio != Converter.AspectRatio.RATIO_9_16
+
+        b.lblRatio.setTextColor(if (isRatioActive) accent else high)
         b.lblRatio.text = opts.aspectRatio.label
-
-        b.lblEnhance.setTextColor(
-            ContextCompat.getColor(
-                this,
-                if (opts.enhance) R.color.accent_primary else R.color.text_mid
-            )
-        )
-
-        b.lblStab.setTextColor(
-            ContextCompat.getColor(
-                this,
-                if (opts.stabilize) R.color.accent_primary else R.color.text_mid
-            )
-        )
-
+        b.lblEnhance.setTextColor(if (opts.enhance) accent else muted)
+        b.lblStab.setTextColor(if (opts.stabilize) accent else muted)
         b.lblRes.text = opts.res.label
-        b.lblRes.setTextColor(ContextCompat.getColor(this, R.color.text_hi))
+        b.lblRes.setTextColor(high)
     }
 
     private fun pickRatio() {
@@ -212,44 +185,38 @@ class MainActivity : AppCompatActivity() {
         val auto = Converter.plan(duration)
         startSec = auto.startMs / 1000f
         keySec = auto.keyframeOffsetMs / 1000f
-        applySliders()
+        rebuildPlan(updateTimeline = true)
+        loadTimelineFrames(uri)
         refreshPreview()
     }
 
-    private fun applySliders() {
-        val sl = Converter.clipSliders(totalMs, startSec, keySec)
-        bindingSliders = true
-        setSlider(b.sliderStart, sl.start)
-        setSlider(b.sliderKey, sl.key)
-        startSec = sl.start.third
-        keySec = sl.key.third
-        b.rowStart.visibility = if (sl.showStart) View.VISIBLE else View.GONE
-        bindingSliders = false
-        rebuildPlan()
-    }
-
-    private fun setSlider(slider: Slider, range: Triple<Float, Float, Float>) {
-        val (from, to, value) = range
-        slider.stepSize = 0f
-        slider.valueFrom = 0f
-        slider.valueTo = 100f
-        slider.value = 0f
-        slider.valueFrom = from
-        slider.valueTo = to
-        slider.stepSize = 0.1f
-        slider.value = value
-    }
-
-    private fun rebuildPlan() {
+    private fun rebuildPlan(updateTimeline: Boolean = true) {
         if (totalMs <= 0) return
-        val sl = Converter.clipSliders(totalMs, startSec, keySec)
+        val clipMs = minOf(Converter.TARGET_CLIP_MS, totalMs.coerceAtLeast(1L))
         plan = Converter.sanitize(
             totalMs,
-            (sl.start.third * 1000f).toLong(),
-            (sl.clipSec * 1000f).toLong(),
-            (sl.key.third * 1000f).toLong()
+            (startSec * 1000f).toLong(),
+            clipMs,
+            (keySec * 1000f).toLong()
         )
+        plan?.let {
+            startSec = it.startMs / 1000f
+            keySec = it.keyframeOffsetMs / 1000f
+            if (updateTimeline) {
+                b.timeline.configure(it.totalMs, it.startMs, it.durationMs, it.keyframeOffsetMs)
+            }
+        }
         updatePlanText()
+    }
+
+    private fun loadTimelineFrames(uri: Uri) {
+        timelineJob?.cancel()
+        timelineJob = lifecycleScope.launch {
+            val frames = withContext(Dispatchers.IO) {
+                Converter.extractTimelineFrames(this@MainActivity, uri, totalMs, count = 10)
+            }
+            b.timeline.setFrames(frames)
+        }
     }
 
     private fun updatePlanText() {
@@ -295,8 +262,11 @@ class MainActivity : AppCompatActivity() {
                 )
             }
             if (bmp != null) {
+                val old = previewBitmap
+                previewBitmap = bmp
                 fitPreviewBox(bmp)
                 b.preview.setImageBitmap(bmp)
+                if (old != null && old !== bmp && !old.isRecycled) old.recycle()
             }
         }
     }
@@ -350,6 +320,15 @@ class MainActivity : AppCompatActivity() {
                 putExtra(ProcessActivity.EXTRA_KEY_MS, p.keyframeOffsetMs)
             }
         )
+    }
+
+    override fun onDestroy() {
+        previewJob?.cancel()
+        timelineJob?.cancel()
+        b.timeline.release()
+        previewBitmap?.takeIf { !it.isRecycled }?.recycle()
+        previewBitmap = null
+        super.onDestroy()
     }
 
     private fun toast(message: String) =

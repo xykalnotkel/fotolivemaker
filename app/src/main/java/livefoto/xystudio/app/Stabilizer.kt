@@ -4,6 +4,7 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.media.MediaMetadataRetriever
 import android.net.Uri
+import androidx.core.graphics.scale
 import kotlin.math.abs
 import kotlin.math.atan2
 
@@ -268,7 +269,7 @@ object Stabilizer {
     }
 
     private fun toGray(src: Bitmap): IntArray {
-        val small = Bitmap.createScaledBitmap(src, ANALYZE_W, ANALYZE_H, true)
+        val small = src.scale(ANALYZE_W, ANALYZE_H)
         val px = IntArray(ANALYZE_W * ANALYZE_H)
         small.getPixels(px, 0, ANALYZE_W, 0, 0, ANALYZE_W, ANALYZE_H)
         if (small != src) small.recycle()

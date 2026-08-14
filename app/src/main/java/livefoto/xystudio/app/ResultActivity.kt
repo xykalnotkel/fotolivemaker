@@ -1,5 +1,6 @@
 package livefoto.xystudio.app
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
@@ -50,6 +51,7 @@ class ResultActivity : AppCompatActivity() {
     private var mode = Mode.LIVE
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        Settings.prepareActivity(this)
         super.onCreate(savedInstanceState)
         b = ActivityResultBinding.inflate(layoutInflater)
         setContentView(b.root)
@@ -105,7 +107,7 @@ class ResultActivity : AppCompatActivity() {
                 when (rep.level) {
                     MotionPhotoVerifier.Level.CONFIRMED -> {
                         b.statusDot.setBackgroundResource(R.drawable.dot_ok)
-                        b.illusResult.setImageResource(R.drawable.ic_done)
+                        b.illusResult.setImageResource(R.drawable.illus_export_success)
                         b.statusSub.text = "Android mengenali berkas ini sebagai motion photo"
                         b.badgeText.text = "LIVE"
                         b.badgeIcon.alpha = 1f
@@ -141,8 +143,8 @@ class ResultActivity : AppCompatActivity() {
     private fun setMode(m: Mode) {
         mode = m
         // tandai yang aktif dengan tebal + hitam, sisanya redup
-        val on = androidx.core.content.ContextCompat.getColor(this, R.color.ink)
-        val off = androidx.core.content.ContextCompat.getColor(this, R.color.text_dim)
+        val on = Settings.color(this, R.attr.appInk)
+        val off = Settings.color(this, R.attr.appTextDim)
         b.modeStatic.setTextColor(if (m == Mode.STATIC) on else off)
         b.modeLive.setTextColor(if (m == Mode.LIVE) on else off)
         b.modeLoop.setTextColor(if (m == Mode.LOOP) on else off)
@@ -246,6 +248,7 @@ class ResultActivity : AppCompatActivity() {
         }
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     private fun setupHoldToPlay() {
         b.holdArea.setOnTouchListener { v, ev ->
             when (ev.action) {

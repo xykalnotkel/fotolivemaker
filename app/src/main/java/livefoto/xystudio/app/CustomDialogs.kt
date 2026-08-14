@@ -3,15 +3,15 @@ package livefoto.xystudio.app
 import android.app.Dialog
 import android.content.Context
 import android.graphics.Color
-import android.graphics.drawable.ColorDrawable
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.Window
+import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
-import androidx.core.content.ContextCompat
+import androidx.core.graphics.drawable.toDrawable
 import com.google.android.material.button.MaterialButton
 
 object CustomDialogs {
@@ -29,10 +29,11 @@ object CustomDialogs {
         val dialog = Dialog(context)
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
         val inflater = LayoutInflater.from(context)
-        val view = inflater.inflate(R.layout.dialog_custom_select, null)
+        val parent = FrameLayout(context)
+        val view = inflater.inflate(R.layout.dialog_custom_select, parent, false)
         dialog.setContentView(view)
 
-        dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+        dialog.window?.setBackgroundDrawable(Color.TRANSPARENT.toDrawable())
         dialog.window?.setLayout(
             (context.resources.displayMetrics.widthPixels * 0.90).toInt(),
             ViewGroup.LayoutParams.WRAP_CONTENT
@@ -68,11 +69,11 @@ object CustomDialogs {
             val isSelected = i == selectedIndex
             if (isSelected) {
                 itemView.setBackgroundResource(R.drawable.bg_tool_selected)
-                tvTitle.setTextColor(ContextCompat.getColor(context, R.color.accent_primary))
+                tvTitle.setTextColor(Settings.color(context, R.attr.appAccent))
                 imgCheck.visibility = View.VISIBLE
             } else {
                 itemView.setBackgroundResource(R.drawable.bg_tool_off)
-                tvTitle.setTextColor(ContextCompat.getColor(context, R.color.text_hi))
+                tvTitle.setTextColor(Settings.color(context, R.attr.appTextHigh))
                 imgCheck.visibility = View.GONE
             }
 

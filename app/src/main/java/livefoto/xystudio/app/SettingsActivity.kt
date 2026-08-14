@@ -1,12 +1,12 @@
 package livefoto.xystudio.app
 
 import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
 import android.view.WindowManager
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.net.toUri
 import androidx.lifecycle.lifecycleScope
 import livefoto.xystudio.app.databinding.ActivitySettingsBinding
 import kotlinx.coroutines.Dispatchers
@@ -18,6 +18,7 @@ class SettingsActivity : AppCompatActivity() {
     private lateinit var b: ActivitySettingsBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        Settings.prepareActivity(this)
         super.onCreate(savedInstanceState)
         b = ActivitySettingsBinding.inflate(layoutInflater)
         setContentView(b.root)
@@ -106,7 +107,7 @@ class SettingsActivity : AppCompatActivity() {
                 startActivity(
                     Intent(
                         Intent.ACTION_VIEW,
-                        Uri.parse("https://github.com/xykalnotkel/fotolivemaker")
+                        "https://github.com/xykalnotkel/fotolivemaker".toUri()
                     )
                 )
             }

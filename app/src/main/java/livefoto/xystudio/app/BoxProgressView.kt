@@ -8,7 +8,6 @@ import android.graphics.PathMeasure
 import android.graphics.RectF
 import android.util.AttributeSet
 import android.view.View
-import androidx.core.content.ContextCompat
 
 /**
  * Progress nempel di tepi preview, sudut siku, mulai pojok kiri atas
@@ -28,14 +27,14 @@ class BoxProgressView @JvmOverloads constructor(
         strokeWidth = stroke
         strokeCap = Paint.Cap.SQUARE
         strokeJoin = Paint.Join.MITER
-        color = ContextCompat.getColor(context, R.color.line)
+        color = Settings.color(context, R.attr.appLine)
     }
     private val progressPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         style = Paint.Style.STROKE
         strokeWidth = stroke
         strokeCap = Paint.Cap.SQUARE
         strokeJoin = Paint.Join.MITER
-        color = ContextCompat.getColor(context, R.color.ink)
+        color = Settings.color(context, R.attr.appInk)
     }
 
     var progress: Int = 0

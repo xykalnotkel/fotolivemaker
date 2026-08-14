@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <attr name="appPaper" format="color" />
+    <attr name="appSurface" format="color" />
+    <attr name="appInk" format="color" />
+    <attr name="appOnInk" format="color" />
+    <attr name="appTextHigh" format="color" />
+    <attr name="appTextMid" format="color" />
+    <attr name="appTextDim" format="color" />
+    <attr name="appLine" format="color" />
+    <attr name="appLineStrong" format="color" />
+    <attr name="appAccent" format="color" />
+    <attr name="appAccentSoft" format="color" />
+    <attr name="appAccentGlow" format="color" />
+    <attr name="appIconTint" format="color" />
+    <attr name="appOk" format="color" />
+    <attr name="appBad" format="color" />
+    <attr name="appHeroSub" format="color" />
+    <attr name="appHeroLine" format="color" />
+</resources>
