@@ -332,7 +332,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="12dp"
-                    android:text="Untuk label LIVE di WA & TikTok Android 2026, kirim JPG Motion Photo langsung. WhatsApp & TikTok baru sudah baca JPG sebagai Live/Motion. IG Story tetap pakai MP4 agar gerak tidak hilang. Tahan lama tombol TikTok/WA untuk kirim versi MP4."
+                    android:text="Untuk label LIVE di WA &amp; TikTok Android 2026, kirim JPG Motion Photo langsung. WhatsApp &amp; TikTok baru sudah baca JPG sebagai Live/Motion. IG Story tetap pakai MP4 agar gerak tidak hilang. Tahan lama tombol TikTok/WA untuk kirim versi MP4."
                     android:textColor="?attr/appTextMid"
                     android:textSize="13sp"
                     android:lineSpacingExtra="6dp" />
