@@ -31,6 +31,10 @@ android {
         applicationId = "livefoto.xystudio.app"
         minSdk = 24
         targetSdk = 37
+        // NDK untuk HD+ - membersihkan MP4 + JPG via C++
+        ndk {
+            abiFilters += listOf("arm64-v8a", "armeabi-v7a", "x86_64")
+        }
         // Versi diambil dari nomor run GitHub Actions supaya SELALU sinkron
         // dengan tag Release dan nama file APK. Build lokal jatuh ke 1/1.0.0-dev.
         // Catatan: versionCode WAJIB bilangan positif, jadi default-nya 1.
@@ -39,6 +43,15 @@ android {
             ?: System.getenv("BUILD_NUMBER")?.let { "1.0.$it" }
             ?: "1.0.0-dev"
     }
+
+    externalNativeBuild {
+        cmake {
+            path = file("src/main/cpp/CMakeLists.txt")
+            version = "3.22.1"
+        }
+    }
+
+    ndkVersion = "27.0.12077973"
 
     buildTypes {
         release {

@@ -1,26 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="paper">#FF090E0D</color>
-    <color name="paper_dim">#FF121918</color>
-    <color name="ink">#FFF2F7F5</color>
-    <color name="on_ink">#FF08110F</color>
-    <color name="text_hi">#FFF2F7F5</color>
-    <color name="text_mid">#FFC7D3D0</color>
-    <color name="text_dim">#FF91A39F</color>
-    <color name="line">#FF263431</color>
-    <color name="line_strong">#FF40534F</color>
-    <color name="accent_primary">#FF42D6C2</color>
-    <color name="accent_glow">#3842D6C2</color>
-    <color name="accent_soft">#1F42D6C2</color>
-    <color name="accent_metal">#FF67E8F9</color>
-    <color name="icon_tint">#FFD4E1DE</color>
+    <color name="paper">#FF00033D</color>
+    <color name="paper_dim">#FF0600AB</color>
+    <color name="ink">#FFF2E6EE</color>
+    <color name="on_ink">#FF00033D</color>
+    <color name="text_hi">#FFF2E6EE</color>
+    <color name="text_mid">#FFD8C5FF</color>
+    <color name="text_dim">#FF9A8CC0</color>
+    <color name="line">#FF1A0F4D</color>
+    <color name="line_strong">#FF2D1E7A</color>
+    <color name="accent_primary">#FF977DFF</color>
+    <color name="accent_glow">#4D977DFF</color>
+    <color name="accent_soft">#26977DFF</color>
+    <color name="accent_metal">#FFB8A6FF</color>
+    <color name="icon_tint">#FFF2E6EE</color>
     <color name="ok">#FF4ADE9A</color>
     <color name="bad">#FFFF6B6B</color>
-    <color name="hero_start">#FF07110F</color>
-    <color name="hero_mid">#FF103C37</color>
-    <color name="hero_end">#FF0F5C53</color>
-    <color name="hero_sub">#FFD9FFF7</color>
-    <color name="hero_line">#6642D6C2</color>
+    <color name="hero_start">#FF00033D</color>
+    <color name="hero_mid">#FF0600AB</color>
+    <color name="hero_end">#FF0033FF</color>
+    <color name="hero_sub">#FFF2E6EE</color>
+    <color name="hero_line">#80977DFF</color>
 
     <color name="hc_paper">#FF000000</color>
     <color name="hc_surface">#FF000000</color>
@@ -30,7 +30,7 @@
     <color name="hc_text_mid">#FFFFFFFF</color>
     <color name="hc_text_dim">#FFE5E7EB</color>
     <color name="hc_line">#FFFFFFFF</color>
-    <color name="hc_accent">#FF54F2D9</color>
-    <color name="hc_accent_soft">#3354F2D9</color>
+    <color name="hc_accent">#FF977DFF</color>
+    <color name="hc_accent_soft">#33977DFF</color>
     <color name="hc_icon">#FFFFFFFF</color>
 </resources>

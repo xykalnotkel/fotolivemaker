@@ -141,8 +141,9 @@ object Stabilizer {
                 sumDev += e
             }
 
-            val zoom = (1f + (maxDev / ANALYZE_W) * 2.2f + maxRot * 0.8f)
-                .coerceIn(1.03f, 1.25f)
+            // Dibuat lebih agresif agar efek stabilizer kelihatan jelas di preview
+            val zoom = (1f + (maxDev / ANALYZE_W) * 3.6f + maxRot * 1.4f + (sumDev / n / ANALYZE_W) * 1.2f)
+                .coerceIn(1.08f, 1.42f)
             val limit = (1f - 1f / zoom) * 0.5f
             val offX = FloatArray(n)
             val offY = FloatArray(n)
@@ -152,8 +153,8 @@ object Stabilizer {
             }
 
             log(
-                "Stabilizer: goyang %.1f px, putar %.1f°, zoom %.0f%%, %d titik"
-                    .format(sumDev / n, Math.toDegrees(maxRot.toDouble()), (zoom - 1f) * 100, n)
+                "Stabilizer aktif: goyang %.1f px, putar %.1f°, zoom %.0f%%, %d titik, maxDev %.1f px (efek HD+)"
+                    .format(sumDev / n, Math.toDegrees(maxRot.toDouble()), (zoom - 1f) * 100, n, maxDev)
             )
             Plan(zoom, sumDev / n, n, times.toLongArray(), offX, offY, corrR)
         } catch (e: Exception) {

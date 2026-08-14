@@ -168,7 +168,7 @@ object Converter {
 
     private const val MAX_OUTPUT_EDGE = 4096
     private const val MAX_SOURCE_PIXELS = 3840L * 2160L
-    private const val MAX_ENHANCE_PIXELS = 1920L * 1080L
+    private const val MAX_ENHANCE_PIXELS = 3840L * 2160L / 2  // 4147200, izinkan 1080x1920 dengan Bersih
 
     /**
      * Hitung dimensi keluaran berdasarkan rasio aspek dan resolusi pilihan.
@@ -443,6 +443,20 @@ object Converter {
      * dan hanya mempertajam tepi kontras nyata tanpa artefak.
      */
     private fun enhanceBitmap(src: Bitmap, sharpen: Float): Bitmap {
+        // Coba pakai NDK C++ dulu kalau ada - lebih cepat untuk HD 1080p
+        if (NativeHD.isAvailable()) {
+            try {
+                val mutable = src.copy(Bitmap.Config.ARGB_8888, true)
+                val denoise = 0.82f
+                if (NativeHD.enhance(mutable, denoise, sharpen)) {
+                    return mutable
+                } else {
+                    mutable.recycle()
+                }
+            } catch (_: Throwable) {
+                // fallback ke Kotlin
+            }
+        }
         val w = src.width
         val h = src.height
         if (w < 3 || h < 3) return src
@@ -634,9 +648,9 @@ object Converter {
 
         if (opts.enhance) {
             effects += GlEffect { ctx, useHdr ->
-                EnhanceShader(ctx, useHdr, denoise = 0.55f, sharpen = 0.28f)
+                EnhanceShader(ctx, useHdr, denoise = 0.82f, sharpen = 0.46f)
             }
-            log("Efek: bersih noise (bilateral + coring)")
+            log("Efek: HD bersih noise kuat (bilateral HD + coring)")
         }
 
         if (stab != null && stab.zoom > 1.001f) {
@@ -653,7 +667,12 @@ object Converter {
             .setEffects(Effects(emptyList(), effects))
             .build()
 
-        val bitrate = (outW.toLong() * outH * 12).toInt().coerceIn(3_000_000, 40_000_000)
+        val pixelCount = outW.toLong() * outH
+        val bitrate = when {
+            pixelCount >= 1920L * 1080L -> (pixelCount * 6).toInt().coerceIn(8_000_000, 25_000_000)
+            pixelCount >= 1280L * 720L -> (pixelCount * 7).toInt().coerceIn(6_000_000, 16_000_000)
+            else -> (pixelCount * 8).toInt().coerceIn(3_000_000, 12_000_000)
+        }
 
         return suspendCancellableCoroutine { cont ->
             val handler = Handler(Looper.getMainLooper())
@@ -805,8 +824,25 @@ object Converter {
         if (!bmp.isRecycled) bmp.recycle()
         log("JPEG: ${jpeg.size / 1024} KB")
 
-        val mp4 = transcodeClip(context, uri, p, opts, outW, outH, stab, log) { enc ->
-            progress(18 + enc.coerceIn(0, 100) * 76 / 100)
+        val mp4 = try {
+            transcodeClip(context, uri, p, opts, outW, outH, stab, log) { enc ->
+                progress(18 + enc.coerceIn(0, 100) * 76 / 100)
+            }
+        } catch (e: Exception) {
+            // Fallback otomatis kalau 1080p gagal - coba 720p dengan bitrate lebih rendah
+            if (opts.res == Res.P1080 && (outW > 1280 || outH > 1280)) {
+                log("1080p gagal (${e.message}), coba fallback 720p...")
+                val (fallbackW, fallbackH) = calculateDimensions(srcW, srcH, opts.copy(res = Res.P720))
+                try {
+                    transcodeClip(context, uri, p, opts.copy(res = Res.P720), fallbackW, fallbackH, stab, log) { enc ->
+                        progress(18 + enc.coerceIn(0, 100) * 76 / 100)
+                    }
+                } catch (e2: Exception) {
+                    throw IllegalStateException("Encoder 1080p & 720p gagal: ${e2.message}", e2)
+                }
+            } else {
+                throw e
+            }
         }
 
         val writerLayout = if (

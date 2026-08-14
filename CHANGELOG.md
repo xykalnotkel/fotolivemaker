@@ -5,6 +5,22 @@ Saat rilis, pindahkan ke heading versi + tanggal.
 
 ## Unreleased
 
+### UI/UX Rounded Full Gradient 1 + HD Stabilizer NDK (patch v1.2.5)
+- Warna diganti total ke Gradient 1 #F2E6EE (light) -> #977DFF (purple): paper #F2E6EE, accent #977DFF, dark #00033D, line #E9DDFF. Light & dark theme diperbarui.
+- Seluruh UI jadi rounded full: bg_card 24dp, bg_card_hero 28dp, bg_preview 28dp, bg_social 20dp, bg_pill 999dp, button cornerRadius 24dp (pill penuh untuk 50dp height).
+- Launcher background ganti #977DFF, splash card modern morphing blob gradient 1 dengan kartu live putih.
+- Ilustrasi diregenerate 5 buah style 3D morphing minimal organic fluid blob background putih murni agar rembg presisi: illus_live_editor, illus_hold_preview, illus_export_success, illus_picker, illus_settings - semua WebP lossless RGBA.
+- Share ke sosial dipindah ke atas tepat di bawah preview (jangan taruh paling bawah) dengan label Live Label, tap JPG Motion Photo, long-press MP4 fallback.
+- Icon-icon interior tetap Material Symbols Rounded tapi tint baru #3A2A5A (dark purple) biar enak dilihat, kontras diperjelas.
+- Kontras tinggi diperbaiki deskripsi dan palet hc jadi lebih jelas (#6A4DFF accent).
+- HD+Stabilizer diperkuat: Enhance shader denoise 0.82 sharpen 0.46 (sebelumnya 0.55/0.28), bitrate adaptif 8-25 Mbps untuk 1080p, fallback otomatis 1080 -> 720 jika encoder gagal (bug reso 1080 gagal).
+- Stabilizer zoom agresif 1.08-1.42 (sebelumnya 1.03-1.25) dan formula maxDev*3.6 agar efek stabilisasi kelihatan jelas di preview.
+- MAX_ENHANCE_PIXELS naik dari 2073600 ke 4147200 agar 1080x1920 tetap boleh dengan Bersih aktif.
+- Tambah modul NDK C++ `fotolive_hd` (CMake 3.22.1, NDK 27.0.12077973): `NativeHD.enhanceBitmap` bilateral 5x5 + coring sharpen native cepat untuk cover HD, `calcBitrate` native.
+- Converter sekarang coba pakai NativeHD dulu kalau tersedia, fallback ke Kotlin bila gagal.
+- Build CI install NDK 27.0.12077973 otomatis.
+
+
 ### Share Android 2026 (patch v1.2.4)
 - TikTok dan WhatsApp Android 2026 sekarang membaca JPG Motion Photo asli dengan label Live/Motion, tidak butuh MP4 lagi (verifikasi lapangan).
 - Tombol TikTok dan WhatsApp di ResultActivity sekarang share JPG Motion Photo (`image/jpeg`) via FileProvider/MediaStore, dengan fallback otomatis ke MP4 untuk app versi lama.
