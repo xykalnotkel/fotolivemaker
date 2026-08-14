@@ -1,35 +1,38 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Palet Modern Light: Royal Indigo & Deep Violet -->
-    <color name="paper">#FFF8FAFC</color>
-    <color name="paper_dim">#FFF1F5F9</color>
-    <color name="ink">#FF0F172A</color>
+    <!-- Palet Clean Light Doff & Deep Purple Metal -->
+    <color name="paper">#FFF6F7F9</color>
+    <color name="paper_dim">#FFEBECEF</color>
+    <color name="ink">#FF13141C</color>
 
-    <color name="text_hi">#FF0F172A</color>
-    <color name="text_mid">#FF475569</color>
-    <color name="text_dim">#FF94A3B8</color>
+    <color name="text_hi">#FF13141C</color>
+    <color name="text_mid">#FF4A4D5E</color>
+    <color name="text_dim">#FF7E8299</color>
 
-    <color name="line">#FFE2E8F0</color>
-    <color name="line_strong">#FFCBD5E1</color>
+    <color name="line">#FFE1E3EB</color>
+    <color name="line_strong">#FFC4C7D6</color>
 
-    <!-- Aksen Royal Indigo & Electric Violet -->
-    <color name="accent_primary">#FF6366F1</color>
-    <color name="accent_dark">#FF4F46E5</color>
-    <color name="accent_glow">#266366F1</color>
-    <color name="accent_soft">#146366F1</color>
-    <color name="accent_purple">#FF8B5CF6</color>
+    <!-- Aksen Deep Purple Metal & Violet Doff -->
+    <color name="accent_primary">#FF6D28D9</color>
+    <color name="accent_dark">#FF5B21B6</color>
+    <color name="accent_glow">#206D28D9</color>
+    <color name="accent_soft">#126D28D9</color>
+    <color name="accent_metal">#FF7C3AED</color>
+
+    <!-- Warna Ikon Adaptif (Light: Hitam Abu Charcoal) -->
+    <color name="icon_tint">#FF2A2C3D</color>
 
     <!-- Status & Feedback -->
     <color name="ok">#FF10B981</color>
     <color name="bad">#FFEF4444</color>
-    <color name="warn">#FF6366F1</color>
+    <color name="warn">#FF6D28D9</color>
 
     <color name="on_ink">#FFFFFFFF</color>
 
     <!-- Hero Card Seamless Fade Gradient (Light Mode) -->
-    <color name="hero_start">#FF312E81</color>
-    <color name="hero_mid">#994338CA</color>
-    <color name="hero_end">#FFF8FAFC</color>
-    <color name="hero_sub">#E0E7FF</color>
-    <color name="hero_line">#33A5B4FC</color>
+    <color name="hero_start">#FF241F42</color>
+    <color name="hero_mid">#994C388A</color>
+    <color name="hero_end">#FFF6F7F9</color>
+    <color name="hero_sub">#DDD6FE</color>
+    <color name="hero_line">#338B5CF6</color>
 </resources>

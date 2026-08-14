@@ -51,7 +51,7 @@
             android:padding="10dp"
             android:src="@drawable/ic_gear"
             android:background="?attr/selectableItemBackgroundBorderless"
-            app:tint="@color/ink"
+            app:tint="@color/icon_tint"
             android:contentDescription="Pengaturan" />
     </LinearLayout>
 
@@ -70,7 +70,7 @@
             android:paddingEnd="20dp"
             android:paddingBottom="28dp">
 
-            <!-- Hero Action Card dengan Gradasi Luruh Menyatu Mulus ke Background -->
+            <!-- Hero Action Card Clean Dark Doff & Metallic Purple -->
             <FrameLayout
                 android:id="@+id/cardAdd"
                 android:layout_width="match_parent"
@@ -80,12 +80,12 @@
                 android:foreground="?attr/selectableItemBackground">
 
                 <ImageView
-                    android:layout_width="110dp"
-                    android:layout_height="110dp"
+                    android:layout_width="120dp"
+                    android:layout_height="120dp"
                     android:layout_gravity="end|bottom"
                     android:layout_marginEnd="8dp"
                     android:layout_marginBottom="4dp"
-                    android:alpha="0.16"
+                    android:alpha="0.18"
                     android:src="@drawable/ic_livephoto"
                     app:tint="@color/accent_primary"
                     android:contentDescription="@null" />
@@ -221,55 +221,85 @@
         </LinearLayout>
     </ScrollView>
 
-    <!-- Floating Update Banner -->
+    <!-- Floating Metallic Banner (Radius 4dp, Taller, dengan Tombol X) -->
     <FrameLayout
         android:id="@+id/updateBanner"
         android:layout_width="match_parent"
-        android:layout_height="74dp"
-        android:layout_marginStart="20dp"
-        android:layout_marginEnd="20dp"
+        android:layout_height="96dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
         android:layout_marginBottom="14dp"
         android:clipChildren="false"
         android:clipToPadding="false"
         android:visibility="visible"
-        android:foreground="?attr/selectableItemBackground"
-        android:contentDescription="Cek update">
+        android:contentDescription="Pembaruan Aplikasi">
 
         <View
             android:layout_width="match_parent"
-            android:layout_height="48dp"
+            android:layout_height="72dp"
             android:layout_gravity="center_vertical"
             android:background="@drawable/bg_update_bar" />
 
-        <TextView
-            android:id="@+id/tvUpdateLabel"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical|start"
-            android:layout_marginStart="18dp"
-            android:text="Cek update"
-            android:textColor="@color/text_hi"
-            android:textSize="13sp"
-            android:textStyle="bold" />
-
-        <ImageView
-            android:id="@+id/imgUpdate"
-            android:layout_width="96dp"
+        <!-- Area Klik Update -->
+        <LinearLayout
+            android:id="@+id/btnUpdateClick"
+            android:layout_width="match_parent"
             android:layout_height="72dp"
-            android:layout_gravity="center"
-            android:src="@drawable/illus_update_ring"
-            android:scaleType="fitCenter"
-            android:contentDescription="@null" />
+            android:layout_gravity="center_vertical"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:paddingStart="18dp"
+            android:paddingEnd="46dp"
+            android:foreground="?attr/selectableItemBackground">
 
-        <TextView
-            android:id="@+id/tvUpdateVer"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical|end"
-            android:layout_marginEnd="18dp"
-            android:textColor="@color/accent_primary"
-            android:textSize="12sp"
-            android:textStyle="bold"
-            android:fontFamily="monospace" />
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/tvUpdateLabel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Cek Pembaruan"
+                    android:textColor="@color/text_hi"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/tvUpdateVer"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:textColor="@color/accent_primary"
+                    android:textSize="11sp"
+                    android:fontFamily="monospace"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <ImageView
+                android:id="@+id/imgUpdate"
+                android:layout_width="104dp"
+                android:layout_height="88dp"
+                android:src="@drawable/illus_update_ring"
+                android:scaleType="fitCenter"
+                android:contentDescription="@null" />
+        </LinearLayout>
+
+        <!-- Tombol X Dismiss Banner -->
+        <ImageView
+            android:id="@+id/btnDismissUpdate"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_gravity="top|end"
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="6dp"
+            android:padding="8dp"
+            android:src="@drawable/ic_trash"
+            android:alpha="0.6"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            app:tint="@color/icon_tint"
+            android:contentDescription="Tutup banner" />
     </FrameLayout>
 </LinearLayout>

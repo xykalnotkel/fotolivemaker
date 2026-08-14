@@ -95,18 +95,17 @@ class MainActivity : AppCompatActivity() {
         paintTool(b.iconEnhance, b.lblEnhance, opts.enhance)
         paintTool(b.iconStab, b.lblStab, opts.stabilize)
         b.lblRes.text = opts.res.label
-        val ink = ContextCompat.getColor(this, R.color.ink)
-        b.iconRes.setColorFilter(ink)
-        b.lblRes.setTextColor(ink)
+        val iconTint = ContextCompat.getColor(this, R.color.icon_tint)
+        b.iconRes.setColorFilter(iconTint)
+        b.lblRes.setTextColor(ContextCompat.getColor(this, R.color.text_hi))
     }
 
     private fun paintTool(icon: ImageView, label: TextView, on: Boolean) {
-        val color = ContextCompat.getColor(
-            this,
-            if (on) R.color.accent_primary else R.color.text_mid
-        )
-        icon.setColorFilter(color)
-        label.setTextColor(color)
+        val activeColor = ContextCompat.getColor(this, R.color.accent_primary)
+        val inactiveColor = ContextCompat.getColor(this, R.color.icon_tint)
+        val textInactive = ContextCompat.getColor(this, R.color.text_mid)
+        icon.setColorFilter(if (on) activeColor else inactiveColor)
+        label.setTextColor(if (on) activeColor else textInactive)
     }
 
     private fun pickRatio() {

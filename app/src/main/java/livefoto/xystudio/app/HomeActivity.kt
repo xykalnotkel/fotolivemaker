@@ -46,7 +46,8 @@ class HomeActivity : AppCompatActivity() {
             startActivity(Intent(this, SettingsActivity::class.java))
         }
         b.btnHapusSemua.setOnClickListener { confirmDeleteAll() }
-        b.updateBanner.setOnClickListener { openUpdate() }
+        b.btnUpdateClick.setOnClickListener { openUpdate() }
+        b.btnDismissUpdate.setOnClickListener { b.updateBanner.visibility = View.GONE }
 
         b.list.layoutManager = LinearLayoutManager(this)
         b.list.adapter = adapter
