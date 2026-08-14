@@ -43,8 +43,8 @@
             android:layout_width="wrap_content"
             android:layout_height="38dp"
             android:gravity="center"
-            android:paddingStart="20dp"
-            android:paddingEnd="20dp"
+            android:paddingStart="22dp"
+            android:paddingEnd="22dp"
             android:text="EXPORT"
             android:textColor="@color/on_ink"
             android:textSize="12sp"
@@ -75,51 +75,57 @@
             android:paddingTop="16dp"
             android:paddingBottom="20dp">
 
-            <!-- Frame Preview dengan Rounded Card -->
+            <!-- Frame Preview Container Adaptif -->
             <FrameLayout
+                android:id="@+id/previewHost"
                 android:layout_width="match_parent"
-                android:layout_height="250dp"
+                android:layout_height="270dp"
                 android:background="@drawable/bg_preview">
 
-                <ImageView
-                    android:id="@+id/preview"
+                <FrameLayout
+                    android:id="@+id/previewBox"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:layout_margin="2dp"
-                    android:scaleType="fitCenter"
-                    android:contentDescription="Preview frame kunci" />
-
-                <!-- Badge Live Indikator Modern -->
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="top|start"
-                    android:layout_margin="12dp"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical"
-                    android:background="@drawable/bg_pill"
-                    android:paddingStart="10dp"
-                    android:paddingEnd="10dp"
-                    android:paddingTop="5dp"
-                    android:paddingBottom="5dp">
+                    android:layout_gravity="center">
 
                     <ImageView
-                        android:layout_width="12dp"
-                        android:layout_height="12dp"
-                        android:src="@drawable/ic_livephoto"
-                        app:tint="@color/accent_primary"
-                        android:contentDescription="@null" />
+                        android:id="@+id/preview"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:scaleType="centerCrop"
+                        android:contentDescription="Preview frame kunci" />
 
-                    <TextView
+                    <!-- Badge Live Indikator Modern -->
+                    <LinearLayout
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="5dp"
-                        android:text="FRAME KUNCI"
-                        android:textColor="@color/on_ink"
-                        android:textSize="10sp"
-                        android:textStyle="bold"
-                        android:letterSpacing="0.08" />
-                </LinearLayout>
+                        android:layout_gravity="top|start"
+                        android:layout_margin="10dp"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:background="@drawable/bg_pill"
+                        android:paddingStart="10dp"
+                        android:paddingEnd="10dp"
+                        android:paddingTop="5dp"
+                        android:paddingBottom="5dp">
+
+                        <ImageView
+                            android:layout_width="14dp"
+                            android:layout_height="14dp"
+                            android:src="@drawable/ic_livephoto_3d"
+                            android:contentDescription="@null" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="5dp"
+                            android:text="COVER LIVE"
+                            android:textColor="@color/on_ink"
+                            android:textSize="10sp"
+                            android:textStyle="bold"
+                            android:letterSpacing="0.08" />
+                    </LinearLayout>
+                </FrameLayout>
             </FrameLayout>
 
             <!-- Card Timeline Frame Editor Visual -->
@@ -148,18 +154,17 @@
                         android:id="@+id/tvClipHint"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:paddingStart="8dp"
-                        android:paddingEnd="8dp"
-                        android:paddingTop="2dp"
-                        android:paddingBottom="2dp"
+                        android:paddingStart="10dp"
+                        android:paddingEnd="10dp"
+                        android:paddingTop="3dp"
+                        android:paddingBottom="3dp"
                         android:background="@drawable/bg_hero_chip"
                         android:textColor="@color/accent_primary"
-                        android:textSize="10sp"
+                        android:textSize="11sp"
                         android:textStyle="bold"
                         android:fontFamily="monospace" />
                 </LinearLayout>
 
-                <!-- Visual Filmstrip Box -->
                 <LinearLayout
                     android:id="@+id/rowStart"
                     android:layout_width="match_parent"
@@ -272,11 +277,11 @@
         android:layout_height="1dp"
         android:background="@color/line" />
 
-    <!-- Bottom Tool Rail -->
+    <!-- Bottom Tool Rail dengan Icon 3D AI -->
     <LinearLayout
         android:id="@+id/toolBar"
         android:layout_width="match_parent"
-        android:layout_height="68dp"
+        android:layout_height="72dp"
         android:orientation="horizontal"
         android:background="@color/paper"
         android:paddingStart="8dp"
@@ -293,10 +298,9 @@
 
             <ImageView
                 android:id="@+id/iconRatio"
-                android:layout_width="22dp"
-                android:layout_height="22dp"
-                android:src="@drawable/ic_tool_crop"
-                app:tint="@color/icon_tint"
+                android:layout_width="26dp"
+                android:layout_height="26dp"
+                android:src="@drawable/ic_tool_crop_3d"
                 android:contentDescription="@null" />
 
             <TextView
@@ -306,7 +310,7 @@
                 android:layout_marginTop="4dp"
                 android:text="Rasio"
                 android:textColor="@color/text_mid"
-                android:textSize="10sp"
+                android:textSize="11sp"
                 android:textStyle="bold" />
         </LinearLayout>
 
@@ -321,10 +325,9 @@
 
             <ImageView
                 android:id="@+id/iconEnhance"
-                android:layout_width="22dp"
-                android:layout_height="22dp"
-                android:src="@drawable/ic_tool_sharp"
-                app:tint="@color/icon_tint"
+                android:layout_width="26dp"
+                android:layout_height="26dp"
+                android:src="@drawable/ic_tool_sharp_3d"
                 android:contentDescription="@null" />
 
             <TextView
@@ -334,7 +337,7 @@
                 android:layout_marginTop="4dp"
                 android:text="Bersih"
                 android:textColor="@color/text_mid"
-                android:textSize="10sp"
+                android:textSize="11sp"
                 android:textStyle="bold" />
         </LinearLayout>
 
@@ -349,10 +352,9 @@
 
             <ImageView
                 android:id="@+id/iconStab"
-                android:layout_width="22dp"
-                android:layout_height="22dp"
-                android:src="@drawable/ic_tool_stab"
-                app:tint="@color/icon_tint"
+                android:layout_width="26dp"
+                android:layout_height="26dp"
+                android:src="@drawable/ic_tool_stab_3d"
                 android:contentDescription="@null" />
 
             <TextView
@@ -362,7 +364,7 @@
                 android:layout_marginTop="4dp"
                 android:text="Stabil"
                 android:textColor="@color/text_mid"
-                android:textSize="10sp"
+                android:textSize="11sp"
                 android:textStyle="bold" />
         </LinearLayout>
 
@@ -377,10 +379,9 @@
 
             <ImageView
                 android:id="@+id/iconRes"
-                android:layout_width="22dp"
-                android:layout_height="22dp"
-                android:src="@drawable/ic_tool_res"
-                app:tint="@color/icon_tint"
+                android:layout_width="26dp"
+                android:layout_height="26dp"
+                android:src="@drawable/ic_tool_res_3d"
                 android:contentDescription="@null" />
 
             <TextView
@@ -390,7 +391,7 @@
                 android:layout_marginTop="4dp"
                 android:text="1080p"
                 android:textColor="@color/text_hi"
-                android:textSize="10sp"
+                android:textSize="11sp"
                 android:textStyle="bold" />
         </LinearLayout>
     </LinearLayout>

@@ -3,6 +3,7 @@ package livefoto.xystudio.app
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.view.WindowManager
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -21,11 +22,15 @@ class SettingsActivity : AppCompatActivity() {
         b = ActivitySettingsBinding.inflate(layoutInflater)
         setContentView(b.root)
 
+        if (Settings.keepScreenOn(this)) {
+            window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        }
+
         b.btnBack.setOnClickListener { finish() }
 
         val o = Settings.load(this)
         b.tvRes.text = o.res.label
-        b.tvQuality.text = "${o.jpegQuality}"
+        b.tvQuality.text = "${o.jpegQuality}%"
         b.tvTheme.text = themeLabel(Settings.theme(this))
 
         b.swKeepScreenOn.isChecked = Settings.keepScreenOn(this)
@@ -58,6 +63,11 @@ class SettingsActivity : AppCompatActivity() {
         b.swKeepScreenOn.setOnCheckedChangeListener { v, enabled ->
             Settings.triggerHaptic(v)
             Settings.setKeepScreenOn(this, enabled)
+            if (enabled) {
+                window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+            } else {
+                window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+            }
             notify(if (enabled) "Layar dijaga tetap menyala saat export" else "Layar boleh mati saat export")
         }
         b.swSplash.setOnCheckedChangeListener { v, enabled ->
@@ -68,7 +78,7 @@ class SettingsActivity : AppCompatActivity() {
         b.swHighContrast.setOnCheckedChangeListener { v, enabled ->
             Settings.triggerHaptic(v)
             Settings.setHighContrast(this, enabled)
-            notify(if (enabled) "Kontras tinggi diaktifkan" else "Kontras standar")
+            notify(if (enabled) "Mode kontras tinggi aktif" else "Kontras standar")
         }
         b.swHaptics.setOnCheckedChangeListener { v, enabled ->
             Settings.setHapticsEnabled(this, enabled)
@@ -200,7 +210,7 @@ class SettingsActivity : AppCompatActivity() {
         ) { which ->
             val q = values[which]
             persist(quality = q)
-            b.tvQuality.text = "$q"
+            b.tvQuality.text = "$q%"
             notify("Kualitas JPEG diatur ke $q%")
         }
     }

@@ -1,9 +1,13 @@
 package livefoto.xystudio.app
 
 import android.content.Intent
+import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Bundle
+import android.view.Gravity
 import android.view.View
+import android.view.WindowManager
+import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
@@ -18,7 +22,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-/** Editor: slider jendela potong + frame kunci + tool rail rasio & kualitas. */
+/** Editor: timeline video + frame cover selector + tool rail rasio & kualitas. */
 class MainActivity : AppCompatActivity() {
     private lateinit var b: ActivityMainBinding
     private var videoUri: Uri? = null
@@ -37,6 +41,10 @@ class MainActivity : AppCompatActivity() {
         b = ActivityMainBinding.inflate(layoutInflater)
         setContentView(b.root)
         opts = Settings.load(this)
+
+        if (Settings.keepScreenOn(this)) {
+            window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        }
 
         b.btnBack.setOnClickListener { finish() }
         b.btnExport.setOnClickListener {
@@ -89,23 +97,30 @@ class MainActivity : AppCompatActivity() {
 
     private fun paintTools() {
         val isRatioActive = opts.aspectRatio != Converter.AspectRatio.ORIGINAL
-        paintTool(b.iconRatio, b.lblRatio, isRatioActive)
+        b.lblRatio.setTextColor(
+            ContextCompat.getColor(
+                this,
+                if (isRatioActive) R.color.accent_primary else R.color.text_mid
+            )
+        )
         b.lblRatio.text = opts.aspectRatio.label
 
-        paintTool(b.iconEnhance, b.lblEnhance, opts.enhance)
-        paintTool(b.iconStab, b.lblStab, opts.stabilize)
-        b.lblRes.text = opts.res.label
-        val iconTint = ContextCompat.getColor(this, R.color.icon_tint)
-        b.iconRes.setColorFilter(iconTint)
-        b.lblRes.setTextColor(ContextCompat.getColor(this, R.color.text_hi))
-    }
+        b.lblEnhance.setTextColor(
+            ContextCompat.getColor(
+                this,
+                if (opts.enhance) R.color.accent_primary else R.color.text_mid
+            )
+        )
 
-    private fun paintTool(icon: ImageView, label: TextView, on: Boolean) {
-        val activeColor = ContextCompat.getColor(this, R.color.accent_primary)
-        val inactiveColor = ContextCompat.getColor(this, R.color.icon_tint)
-        val textInactive = ContextCompat.getColor(this, R.color.text_mid)
-        icon.setColorFilter(if (on) activeColor else inactiveColor)
-        label.setTextColor(if (on) activeColor else textInactive)
+        b.lblStab.setTextColor(
+            ContextCompat.getColor(
+                this,
+                if (opts.stabilize) R.color.accent_primary else R.color.text_mid
+            )
+        )
+
+        b.lblRes.text = opts.res.label
+        b.lblRes.setTextColor(ContextCompat.getColor(this, R.color.text_hi))
     }
 
     private fun pickRatio() {
@@ -232,9 +247,9 @@ class MainActivity : AppCompatActivity() {
         b.tvStartValue.text = "%.1f dtk".format(p.startMs / 1000f)
         b.tvKeyValue.text = "%.1f dtk".format(p.keyframeOffsetMs / 1000f)
         b.tvClipHint.text = if (p.durationMs < Converter.TARGET_CLIP_MS) {
-            "Video pendek — seluruh klip ${"%.1f".format(p.durationMs / 1000f)} dtk dipakai"
+            "%.1f dtk dipakai".format(p.durationMs / 1000f)
         } else {
-            "Durasi klip dikunci 3,0 dtk (standar Live Photo)"
+            "3,0 dtk Live"
         }
         b.tvPlan.text = "Sumber   : ${srcW}x${srcH}, %.1f dtk\n".format(p.totalMs / 1000f) +
             "Diambil  : %.1f – %.1f dtk\n".format(
@@ -250,7 +265,7 @@ class MainActivity : AppCompatActivity() {
         val p = plan ?: return
         previewJob?.cancel()
         previewJob = lifecycleScope.launch {
-            delay(60)
+            delay(50)
             val (targetW, targetH) = Converter.calculateDimensions(srcW, srcH, opts)
             val previewH = 640
             val previewW = (previewH * (targetW.toFloat() / targetH.coerceAtLeast(1))).toInt()
@@ -261,7 +276,30 @@ class MainActivity : AppCompatActivity() {
                     previewW, previewH
                 )
             }
-            if (bmp != null) b.preview.setImageBitmap(bmp)
+            if (bmp != null) {
+                fitPreviewBox(bmp)
+                b.preview.setImageBitmap(bmp)
+            }
+        }
+    }
+
+    private fun fitPreviewBox(bmp: Bitmap) {
+        val parent = b.previewHost
+        parent.post {
+            val maxW = parent.width
+            val maxH = parent.height
+            if (maxW <= 0 || maxH <= 0) return@post
+            val aspect = bmp.width.toFloat() / bmp.height.coerceAtLeast(1)
+            var w = maxW
+            var h = (w / aspect).toInt()
+            if (h > maxH) {
+                h = maxH
+                w = (h * aspect).toInt()
+            }
+            w = w.coerceAtLeast(120)
+            h = h.coerceAtLeast(120)
+            b.previewBox.layoutParams = FrameLayout.LayoutParams(w, h, Gravity.CENTER)
+            b.previewBox.requestLayout()
         }
     }
 
