@@ -49,7 +49,7 @@
             android:layout_width="44dp"
             android:layout_height="44dp"
             android:padding="8dp"
-            android:src="@drawable/ic_gear_3d"
+            android:src="@drawable/ic_gear"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="Pengaturan" />
     </LinearLayout>
@@ -84,8 +84,9 @@
                     android:layout_gravity="end|bottom"
                     android:layout_marginEnd="8dp"
                     android:layout_marginBottom="4dp"
-                    android:alpha="0.25"
-                    android:src="@drawable/ic_livephoto_3d"
+                    android:alpha="0.28"
+                    android:src="@drawable/ic_livephoto"
+                    app:tint="#FFFFFFFF"
                     android:contentDescription="@null" />
 
                 <LinearLayout
@@ -195,7 +196,7 @@
                     android:layout_width="56dp"
                     android:layout_height="56dp"
                     android:alpha="0.30"
-                    android:src="@drawable/ic_livephoto_3d"
+                    android:src="@drawable/ic_livephoto"
                     android:contentDescription="@null" />
 
                 <TextView
@@ -279,7 +280,7 @@
                 android:id="@+id/imgUpdate"
                 android:layout_width="104dp"
                 android:layout_height="88dp"
-                android:src="@drawable/illus_update_ring"
+                android:src="@drawable/ic_update"
                 android:scaleType="fitCenter"
                 android:contentDescription="@null" />
         </LinearLayout>
@@ -293,8 +294,8 @@
             android:layout_marginTop="16dp"
             android:layout_marginEnd="6dp"
             android:padding="8dp"
-            android:src="@drawable/ic_trash"
-            android:alpha="0.6"
+            android:src="@drawable/ic_close"
+            android:alpha="0.75"
             android:background="?attr/selectableItemBackgroundBorderless"
             app:tint="@color/icon_tint"
             android:contentDescription="Tutup banner" />

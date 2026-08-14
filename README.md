@@ -12,9 +12,9 @@ Banner update tampil offline. Internet hanya saat kamu ketuk update.
 
 Catatan perubahan lengkap ada di **[CHANGELOG.md](CHANGELOG.md)**.
 
-## 📥 Download APK
+## Download APK
 
-**[⬇️ Ambil versi terbaru di halaman Releases](https://github.com/xykalnotkel/fotolivemaker/releases/latest)**
+**[Ambil versi terbaru di halaman Releases](https://github.com/xykalnotkel/fotolivemaker/releases/latest)**
 
 Download berkas `.apk` di bagian **Assets**, buka, lalu izinkan
 "Install unknown apps" kalau diminta.
@@ -102,7 +102,7 @@ File itu biner dan susah di-upload dari HP. Workflow memakai
 
 ```
 app/src/main/java/livefoto/xystudio/app/
-  MotionPhotoWriter.kt   # XMP GCamera + trailer Samsung SEF
+  MotionPhotoWriter.kt   # Google Motion Photo 1.0 + mode hybrid Samsung SEF
   Converter.kt           # trim, encode Media3, simpan DCIM/Camera
   Stabilizer.kt          # analisis guncangan + shader
   MainActivity.kt        # editor: slider jendela + frame kunci
@@ -115,9 +115,11 @@ app/src/main/java/livefoto/xystudio/app/
 - **Media3 Transformer** untuk trim/transcode — hardware accelerated
 - Output **H.264 + AAC**, dimensi selalu genap
 - Disimpan lewat **MediaStore** ke `DCIM/Camera`
-- Dual format: XMP Google + trailer Samsung `MotionPhoto_Data`
+- Layout Google Motion Photo 1.0 pada perangkat umum; hybrid SEF pada Samsung
+- Nama hasil mengikuti pola `...MP.jpg` yang disarankan spesifikasi Android
+- Output SOURCE dibatasi maksimal 4K; filter Bersih dibatasi Full HD agar aman dari OOM
 - minSdk 26 (Android 8.0), targetSdk 34
-- Splash animasi hanya di peluncuran pertama
+- Splash animasi dapat dimatikan lewat Pengaturan
 
 ### Kalau build gagal
 Buka run yang merah di tab Actions. Kalau step "Tes unit" gagal, laporan
@@ -134,8 +136,9 @@ ada di artifact **laporan-tes**.
 
 **Ringkasnya:** gratis, open source, disediakan **apa adanya tanpa jaminan**.
 
-Izin `INTERNET` ada di paket (syarat Android), **tidak dipakai** sampai
-kamu ketuk banner update. Video tidak pernah diunggah. Cek `AndroidManifest.xml`.
+Izin `INTERNET` hanya dipakai ketika kamu mengetuk banner update untuk
+mengecek atau mengunduh rilis GitHub. Video tidak pernah diunggah. Cek
+`AndroidManifest.xml`.
 
 **Tidak berafiliasi** dengan TikTok, ByteDance, Apple, Google, maupun Samsung.
 "Live Photo" merek dagang Apple Inc. · "TikTok" merek dagang ByteDance Ltd. ·

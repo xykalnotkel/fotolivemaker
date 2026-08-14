@@ -164,7 +164,15 @@ object Converter {
         return x
     }
 
-    /** Hitung dimensi keluaran berdasarkan rasio aspek dan resolusi pilihan */
+    private const val MAX_OUTPUT_EDGE = 4096
+    private const val MAX_SOURCE_PIXELS = 3840L * 2160L
+    private const val MAX_ENHANCE_PIXELS = 1920L * 1080L
+
+    /**
+     * Hitung dimensi keluaran berdasarkan rasio aspek dan resolusi pilihan.
+     * SOURCE dibatasi 4K agar cover Bitmap dan encoder tidak menghabiskan heap.
+     * Filter Bersih memakai batas Full HD karena cover diproses di CPU.
+     */
     fun calculateDimensions(srcW: Int, srcH: Int, opts: Options): Pair<Int, Int> {
         val baseH = opts.heightFor(if (srcH > 0) srcH else 1080)
         val outH = evenUp(baseH)
@@ -175,7 +183,29 @@ object Converter {
             val targetRatio = opts.aspectRatio.ratioW.toFloat() / opts.aspectRatio.ratioH
             evenUp(outH * targetRatio)
         }
-        return outW to outH
+        val maxPixels = if (opts.enhance) MAX_ENHANCE_PIXELS else MAX_SOURCE_PIXELS
+        return capDimensions(outW, outH, maxPixels, MAX_OUTPUT_EDGE)
+    }
+
+    private fun capDimensions(
+        width: Int,
+        height: Int,
+        maxPixels: Long,
+        maxEdge: Int
+    ): Pair<Int, Int> {
+        val w = width.coerceAtLeast(2)
+        val h = height.coerceAtLeast(2)
+        val edgeScale = minOf(1.0, maxEdge.toDouble() / maxOf(w, h))
+        val pixelScale = minOf(1.0, kotlin.math.sqrt(maxPixels.toDouble() / (w.toLong() * h)))
+        val scale = minOf(edgeScale, pixelScale)
+        if (scale >= 0.999999) return evenUp(w) to evenUp(h)
+
+        fun evenDown(value: Double): Int {
+            var x = value.toInt().coerceAtLeast(2)
+            if (x % 2 != 0) x--
+            return x.coerceAtLeast(2)
+        }
+        return evenDown(w * scale) to evenDown(h * scale)
     }
 
     fun videoDurationMs(context: Context, uri: Uri): Long {
@@ -540,7 +570,7 @@ object Converter {
 
             log("Mulai encode H.264 + AAC…")
             transformer.start(edited, outFile.absolutePath)
-            poll?.let { handler.post(it) }
+            handler.post(poll)
 
             cont.invokeOnCancellation {
                 stopPolling()
@@ -598,11 +628,18 @@ object Converter {
         if (framed !== rawBmp) rawBmp.recycle()
 
         val bmp = if (opts.enhance) {
-            val looked = withContext(Dispatchers.Default) {
-                enhanceBitmap(framed, restoreSharpen(opts.stabilize))
+            try {
+                val looked = withContext(Dispatchers.Default) {
+                    enhanceBitmap(framed, restoreSharpen(opts.stabilize))
+                }
+                if (looked !== framed) framed.recycle()
+                looked
+            } catch (_: OutOfMemoryError) {
+                // Jangan jatuhkan seluruh export hanya karena filter cover.
+                // Dimensi sudah dibatasi Full HD, ini fallback perangkat heap kecil.
+                log("Memori filter cover terbatas; cover dipakai tanpa Bersih")
+                framed
             }
-            if (looked !== framed) framed.recycle()
-            looked
         } else framed
 
         val jpeg = withContext(Dispatchers.Default) { bmp.toJpeg(opts.jpegQuality) }
@@ -613,15 +650,29 @@ object Converter {
             progress(18 + enc.coerceIn(0, 100) * 76 / 100)
         }
 
-        log("Menyisipkan XMP GCamera + trailer Samsung…")
+        val writerLayout = if (
+            Build.MANUFACTURER.equals("samsung", ignoreCase = true) ||
+            Build.BRAND.equals("samsung", ignoreCase = true)
+        ) MotionPhotoWriter.Layout.SAMSUNG_HYBRID
+        else MotionPhotoWriter.Layout.GOOGLE
+
+        log(
+            if (writerLayout == MotionPhotoWriter.Layout.SAMSUNG_HYBRID)
+                "Mengemas XMP + kompatibilitas Samsung SEF…"
+            else
+                "Mengemas Google Motion Photo 1.0…"
+        )
         progress(96)
         val motionPhoto = withContext(Dispatchers.Default) {
-            MotionPhotoWriter.build(jpeg, mp4, p.keyframeOffsetMs * 1000)
+            MotionPhotoWriter.build(
+                jpeg, mp4, p.keyframeOffsetMs * 1000,
+                layout = writerLayout
+            )
         }
         log("Total berkas: ${motionPhoto.size / 1024} KB")
 
         val check = MotionPhotoWriter.verify(motionPhoto)
-        log(if (check.ok) "Struktur: VALID" else "Struktur: BERMASALAH")
+        log(if (check.ok) "Struktur: konsisten" else "Struktur: BERMASALAH")
 
         log("Menyimpan ke DCIM/Camera…")
         progress(98)
@@ -632,7 +683,8 @@ object Converter {
     }
 
     private fun saveToGallery(context: Context, data: ByteArray): Uri {
-        val name = "MP_${System.currentTimeMillis()}.jpg"
+        // Motion Photo Format 1.0: nama harus berakhir "MP" sebelum ekstensi.
+        val name = "MP_${System.currentTimeMillis()}MP.jpg"
         val resolver = context.contentResolver
 
         val values = ContentValues().apply {

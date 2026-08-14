@@ -103,7 +103,8 @@
                         android:id="@+id/badgeIcon"
                         android:layout_width="14dp"
                         android:layout_height="14dp"
-                        android:src="@drawable/ic_livephoto_3d"
+                        android:src="@drawable/ic_livephoto"
+                        app:tint="#FFFFFFFF"
                         android:contentDescription="Live Photo" />
 
                     <TextView
@@ -315,7 +316,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="130dp"
                     android:layout_marginBottom="18dp"
-                    android:src="@drawable/illus_hold"
+                    android:src="@drawable/ic_hold"
                     android:scaleType="fitCenter"
                     android:adjustViewBounds="true"
                     android:contentDescription="Tahan layar" />

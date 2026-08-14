@@ -112,7 +112,8 @@
                         <ImageView
                             android:layout_width="14dp"
                             android:layout_height="14dp"
-                            android:src="@drawable/ic_livephoto_3d"
+                            android:src="@drawable/ic_livephoto"
+                            app:tint="@color/on_ink"
                             android:contentDescription="@null" />
 
                         <TextView
@@ -300,7 +301,7 @@
                 android:id="@+id/iconRatio"
                 android:layout_width="26dp"
                 android:layout_height="26dp"
-                android:src="@drawable/ic_tool_crop_3d"
+                android:src="@drawable/ic_tool_crop"
                 android:contentDescription="@null" />
 
             <TextView
@@ -327,7 +328,7 @@
                 android:id="@+id/iconEnhance"
                 android:layout_width="26dp"
                 android:layout_height="26dp"
-                android:src="@drawable/ic_tool_sharp_3d"
+                android:src="@drawable/ic_tool_sharp"
                 android:contentDescription="@null" />
 
             <TextView
@@ -354,7 +355,7 @@
                 android:id="@+id/iconStab"
                 android:layout_width="26dp"
                 android:layout_height="26dp"
-                android:src="@drawable/ic_tool_stab_3d"
+                android:src="@drawable/ic_tool_stab"
                 android:contentDescription="@null" />
 
             <TextView
@@ -381,7 +382,7 @@
                 android:id="@+id/iconRes"
                 android:layout_width="26dp"
                 android:layout_height="26dp"
-                android:src="@drawable/ic_tool_res_3d"
+                android:src="@drawable/ic_tool_res"
                 android:contentDescription="@null" />
 
             <TextView

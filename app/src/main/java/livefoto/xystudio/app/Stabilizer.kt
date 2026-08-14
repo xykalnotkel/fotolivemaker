@@ -120,9 +120,9 @@ object Stabilizer {
                 trajX[i] = ax; trajY[i] = ay; trajR[i] = ar
             }
 
-            val smX = gaussianSmooth(trajX, 7)
-            val smY = gaussianSmooth(trajY, 7)
-            val smR = gaussianSmooth(trajR, 7)
+            val smX = gaussianSmooth(trajX)
+            val smY = gaussianSmooth(trajY)
+            val smR = gaussianSmooth(trajR)
 
             var maxDev = 0f
             var sumDev = 0f
@@ -282,7 +282,7 @@ object Stabilizer {
         return px
     }
 
-    private fun gaussianSmooth(v: FloatArray, radius: Int): FloatArray {
+    private fun gaussianSmooth(v: FloatArray): FloatArray {
         val out = FloatArray(v.size)
         val weights = floatArrayOf(0.06f, 0.12f, 0.20f, 0.24f, 0.20f, 0.12f, 0.06f)
         val half = weights.size / 2

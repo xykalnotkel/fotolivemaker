@@ -52,10 +52,16 @@ object UpdateCheck {
             readTimeout = 8000
             requestMethod = "GET"
             setRequestProperty("Accept", "application/vnd.github+json")
-            setRequestProperty("User-Agent", "LivePhotoMaker")
+            setRequestProperty("User-Agent", "FotoLive/${BuildConfig.VERSION_NAME}")
         }
-        val body = conn.inputStream.bufferedReader().use { it.readText() }
-        conn.disconnect()
+        val body = try {
+            if (conn.responseCode !in 200..299) {
+                throw IllegalStateException("GitHub HTTP ${conn.responseCode}")
+            }
+            conn.inputStream.bufferedReader().use { it.readText() }
+        } finally {
+            conn.disconnect()
+        }
         val json = JSONObject(body)
         val tag = json.optString("tag_name").ifBlank { return null }
         val url = json.optString("html_url").ifBlank { WEB }
@@ -81,32 +87,67 @@ object UpdateCheck {
     }.getOrNull()
 
     fun downloadApk(apkUrl: String, dest: File, progress: (Int) -> Unit) {
+        val source = URL(apkUrl)
+        require(source.protocol == "https" && isOfficialDownloadHost(source.host)) {
+            "URL update bukan host GitHub resmi"
+        }
+
         dest.parentFile?.mkdirs()
         val tmp = File(dest.absolutePath + ".part")
-        val conn = (URL(apkUrl).openConnection() as HttpURLConnection).apply {
+        tmp.delete()
+        val conn = (source.openConnection() as HttpURLConnection).apply {
             connectTimeout = 15000
             readTimeout = 30000
             instanceFollowRedirects = true
-            setRequestProperty("User-Agent", "LivePhotoMaker")
+            setRequestProperty("User-Agent", "FotoLive/${BuildConfig.VERSION_NAME}")
         }
-        val total = conn.contentLengthLong
-        conn.inputStream.use { input ->
-            tmp.outputStream().use { output ->
-                val buf = ByteArray(16 * 1024)
-                var read = 0L
-                while (true) {
-                    val n = input.read(buf)
-                    if (n < 0) break
-                    output.write(buf, 0, n)
-                    read += n
-                    if (total > 0) progress(((read * 100) / total).toInt().coerceIn(0, 99))
+
+        try {
+            if (conn.responseCode !in 200..299) {
+                throw IllegalStateException("Unduhan HTTP ${conn.responseCode}")
+            }
+            val total = conn.contentLengthLong
+            require(total <= 250L * 1024 * 1024 || total < 0) { "APK terlalu besar" }
+
+            conn.inputStream.use { input ->
+                tmp.outputStream().use { output ->
+                    val buf = ByteArray(16 * 1024)
+                    var read = 0L
+                    while (true) {
+                        val n = input.read(buf)
+                        if (n < 0) break
+                        output.write(buf, 0, n)
+                        read += n
+                        require(read <= 250L * 1024 * 1024) { "APK melewati batas ukuran" }
+                        if (total > 0) {
+                            progress(((read * 100) / total).toInt().coerceIn(0, 99))
+                        }
+                    }
                 }
             }
+
+            val magic = tmp.inputStream().use { input -> ByteArray(4).also { input.read(it) } }
+            require(magic.size >= 2 && magic[0] == 'P'.code.toByte() && magic[1] == 'K'.code.toByte()) {
+                "Hasil unduhan bukan APK/ZIP"
+            }
+            if (dest.exists() && !dest.delete()) throw IllegalStateException("APK lama tidak bisa dihapus")
+            if (!tmp.renameTo(dest)) {
+                tmp.copyTo(dest, overwrite = true)
+                tmp.delete()
+            }
+            progress(100)
+        } catch (e: Exception) {
+            tmp.delete()
+            throw e
+        } finally {
+            conn.disconnect()
         }
-        conn.disconnect()
-        if (dest.exists()) dest.delete()
-        if (!tmp.renameTo(dest)) tmp.copyTo(dest, overwrite = true)
-        progress(100)
+    }
+
+    private fun isOfficialDownloadHost(host: String): Boolean {
+        val h = host.lowercase()
+        return h == "github.com" || h.endsWith(".github.com") ||
+            h == "githubusercontent.com" || h.endsWith(".githubusercontent.com")
     }
 
     fun apkFile(context: Context): File =

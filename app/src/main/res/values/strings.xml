@@ -25,7 +25,7 @@
     <string name="pref_keep_screen">Jaga Layar Menyala</string>
     <string name="pref_keep_screen_desc">Mencegah perangkat terkunci otomatis saat proses encoding sedang berlangsung.</string>
     <string name="pref_splash">Animasi Splash Pembuka</string>
-    <string name="pref_splash_desc">Tampilkan intro logo singkat saat pertama kali membuka aplikasi.</string>
+    <string name="pref_splash_desc">Tampilkan intro logo singkat saat aplikasi dibuka.</string>
 
     <!-- Legal & Info -->
     <string name="legal_notice">Lisensi Apache 2.0 · Disediakan APA ADANYA, tanpa jaminan.\n\nVideo diproses 100% di perangkat Anda. Banner update tidak memakai jaringan latar belakang. Izin INTERNET hanya aktif saat Anda mengetuk update (cek/unduh rilis resmi dari GitHub). Tidak ada pelacak, analitik, dan video tidak pernah diunggah ke server mana pun.\n\nTidak berafiliasi dengan TikTok, Apple, Google, maupun Samsung. \"Live Photo\" adalah merek dagang Apple Inc.; \"TikTok\" merek dagang ByteDance Ltd.; \"Motion Photo\" dan \"Android\" merek dagang Google LLC. Nama-nama tersebut dipakai hanya untuk keperluan deskriptif.\n\nDukungan label Live berbeda-beda tiap perangkat dan versi TikTok, serta bisa berubah sewaktu-waktu di luar kendali pengembang.\n\nSelengkapnya: github.com/xykalnotkel/fotolivemaker</string>

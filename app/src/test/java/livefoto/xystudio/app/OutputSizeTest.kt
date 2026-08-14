@@ -120,4 +120,26 @@ class OutputSizeTest {
         assertEquals(720, Converter.Options(res = Converter.Res.P720).heightFor(4000))
         assertEquals(1080, Converter.Options(res = Converter.Res.P1080).heightFor(240))
     }
+
+    @Test
+    fun `SOURCE 8K dibatasi maksimal 4K dan tetap genap`() {
+        val (w, h) = outSize(7680, 4320, Converter.Res.SOURCE, Converter.AspectRatio.ORIGINAL)
+        assertTrue(maxOf(w, h) <= 4096)
+        assertTrue(w.toLong() * h <= 3840L * 2160L)
+        assertEquals(0, w % 2)
+        assertEquals(0, h % 2)
+    }
+
+    @Test
+    fun `filter Bersih membatasi cover ke Full HD`() {
+        val opts = Converter.Options(
+            res = Converter.Res.SOURCE,
+            aspectRatio = Converter.AspectRatio.ORIGINAL,
+            enhance = true
+        )
+        val (w, h) = Converter.calculateDimensions(3840, 2160, opts)
+        assertTrue(w.toLong() * h <= 1920L * 1080L)
+        assertEquals(0, w % 2)
+        assertEquals(0, h % 2)
+    }
 }

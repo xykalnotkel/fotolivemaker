@@ -3,6 +3,23 @@
 Setiap update wajib menambah entri di sini. Yang belum dirilis masuk **Unreleased**.
 Saat rilis, pindahkan ke heading versi + tanggal.
 
+## Unreleased
+
+### Perbaikan inti
+- Output non-Samsung sekarang mengikuti tata letak Google Motion Photo 1.0 strict: MP4 tepat di EOF, `Item:Length` dan `Item:Padding` diverifikasi.
+- Output Samsung memakai mode hybrid SEF terpisah dan tidak lagi diklaim sebagai strict Google.
+- Nama hasil sekarang berakhir `MP.jpg` sesuai pola filename Motion Photo Android.
+- Runtime permission tulis ditambahkan untuk ekspor ke DCIM pada Android 8–9.
+- Resolusi SOURCE dibatasi 4K dan filter Bersih dibatasi Full HD untuk mencegah kehabisan memori.
+- Cache thumbnail picker diganti LRU 20 MiB dan decode stale antar-album dicegah.
+- Preview hasil di-downsample dan verifikasi dijalankan berurutan agar heap lebih stabil.
+
+### Custom Roundline UI
+- Seluruh ikon antarmuka dan launcher digambar ulang sebagai VectorDrawable custom dengan sudut serta ujung garis rounded.
+- Seluruh aset ikon 3D/bitmap lama dihapus; ikon adaptif otomatis mengikuti light/dark theme.
+- Ikon aksi diperjelas: tutup, cache, source code, update, hold, dan status selesai.
+- High Contrast, Reduce Motion, dan haptic slider kini benar-benar diterapkan.
+
 ## [v1.2.0](https://github.com/xykalnotkel/fotolivemaker/releases/tag/v1.2.0) — 2026-08-14
 
 ### Identitas & Penamaan

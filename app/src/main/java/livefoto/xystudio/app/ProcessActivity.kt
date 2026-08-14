@@ -56,6 +56,7 @@ class ProcessActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         b = ActivityProcessBinding.inflate(layoutInflater)
         setContentView(b.root)
+        Settings.applyAccessibility(this, b.root)
         if (Settings.keepScreenOn(this)) {
             window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         }

@@ -1,6 +1,7 @@
 package livefoto.xystudio.app
 
 import android.content.Intent
+import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Bundle
@@ -16,6 +17,7 @@ import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
 import livefoto.xystudio.app.databinding.ActivityResultBinding
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
@@ -38,6 +40,8 @@ class ResultActivity : AppCompatActivity() {
     private var savedUri: Uri? = null
     private var clipFile: File? = null
     private var player: ExoPlayer? = null
+    private var stillBitmap: Bitmap? = null
+    private var verifyJob: Job? = null
     private var prepared = false
     private var playedOk = false
 
@@ -49,6 +53,7 @@ class ResultActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         b = ActivityResultBinding.inflate(layoutInflater)
         setContentView(b.root)
+        Settings.applyAccessibility(this, b.root)
 
         savedUri = intent.getStringExtra(EXTRA_URI)?.let(Uri::parse)
 
@@ -69,58 +74,64 @@ class ResultActivity : AppCompatActivity() {
         }
 
         loadStill()
+        // Persiapan klip dan verifikasi dijalankan berurutan supaya dua salinan
+        // penuh Motion Photo tidak berada di heap pada waktu yang sama.
         prepareClip()
         setupHoldToPlay()
         setMode(Mode.LIVE)
-        runVerification()
     }
 
     private fun runVerification() {
         val uri = savedUri ?: return
+        verifyJob?.cancel()
         b.badgeText.text = "CEK…"
-        lifecycleScope.launch {
-            val rep = withContext(Dispatchers.IO) {
-                MotionPhotoVerifier.verify(this@ResultActivity, uri)
-            }
-            b.statusTitle.text = rep.headline
-            b.detail.text = rep.detail
-            b.chkStruct.text = mark(rep.lengthOk && rep.xmpOk) + "  Struktur file Motion Photo"
-            b.chkVideo.text = mark(rep.videoPlayable) + "  Video bisa diputar" +
-                if (rep.videoPlayable) "  ·  ${rep.videoDurationMs} ms  ·  ${rep.videoSize}" else ""
-            b.chkSystem.text = when (rep.systemFlag) {
-                true -> mark(true) + "  Ditandai sistem Android"
-                false -> "○  Galeri HP ini tidak menandainya — wajar, TikTok tetap bisa"
-                null -> "–  Penanda sistem tak tersedia di Android ini"
-            }
+        b.btnRecheck.isEnabled = false
+        verifyJob = lifecycleScope.launch {
+            try {
+                val rep = withContext(Dispatchers.IO) {
+                    MotionPhotoVerifier.verify(this@ResultActivity, uri)
+                }
+                b.statusTitle.text = rep.headline
+                b.detail.text = rep.detail
+                b.chkStruct.text = mark(rep.lengthOk && rep.xmpOk) + "  Struktur file Motion Photo"
+                b.chkVideo.text = mark(rep.videoPlayable) + "  Video bisa diputar" +
+                    if (rep.videoPlayable) "  ·  ${rep.videoDurationMs} ms  ·  ${rep.videoSize}" else ""
+                b.chkSystem.text = when (rep.systemFlag) {
+                    true -> mark(true) + "  Ditandai sistem Android"
+                    false -> "○  Galeri HP ini belum menandainya"
+                    null -> "–  Penanda sistem tak tersedia di Android ini"
+                }
 
-            when (rep.level) {
-                MotionPhotoVerifier.Level.CONFIRMED -> {
-                    b.statusDot.setBackgroundResource(R.drawable.dot_ok)
-                    b.illusResult.setImageResource(R.drawable.illus_done)
-                    b.statusSub.text = "Android mengenali berkas ini sebagai motion photo"
-                    b.badgeText.text = "LIVE"
-                    b.badgeIcon.alpha = 1f
-                    b.badgeLive.alpha = 1f
-                    b.btnRecheck.visibility = View.GONE
+                when (rep.level) {
+                    MotionPhotoVerifier.Level.CONFIRMED -> {
+                        b.statusDot.setBackgroundResource(R.drawable.dot_ok)
+                        b.illusResult.setImageResource(R.drawable.ic_done)
+                        b.statusSub.text = "Android mengenali berkas ini sebagai motion photo"
+                        b.badgeText.text = "LIVE"
+                        b.badgeIcon.alpha = 1f
+                        b.badgeLive.alpha = 1f
+                        b.btnRecheck.visibility = View.GONE
+                    }
+                    MotionPhotoVerifier.Level.LIKELY -> {
+                        b.statusDot.setBackgroundResource(R.drawable.dot_accent)
+                        b.statusSub.text =
+                            "Struktur dan video lolos. Coba buka di galeri atau picker tujuan."
+                        b.badgeText.text = "LIVE"
+                        b.badgeIcon.alpha = 1f
+                        b.badgeLive.alpha = 1f
+                        b.btnRecheck.visibility = View.VISIBLE
+                    }
+                    MotionPhotoVerifier.Level.FAILED -> {
+                        b.statusDot.setBackgroundResource(R.drawable.dot_bad)
+                        b.statusSub.text = "Coba ulangi dengan pengaturan lain"
+                        b.badgeText.text = "GAGAL"
+                        b.badgeIcon.alpha = 0.45f
+                        b.badgeLive.alpha = 0.55f
+                        b.btnRecheck.visibility = View.VISIBLE
+                    }
                 }
-                MotionPhotoVerifier.Level.LIKELY -> {
-                    b.statusDot.setBackgroundResource(R.drawable.dot_accent)
-                    b.statusSub.text =
-                        "Struktur benar. Banyak galeri Android tidak bisa " +
-                        "memutarnya, tapi TikTok tetap membacanya — coba upload."
-                    b.badgeText.text = "LIVE"
-                    b.badgeIcon.alpha = 1f
-                    b.badgeLive.alpha = 1f
-                    b.btnRecheck.visibility = View.VISIBLE
-                }
-                MotionPhotoVerifier.Level.FAILED -> {
-                    b.statusDot.setBackgroundResource(R.drawable.dot_bad)
-                    b.statusSub.text = "Coba ulangi dengan pengaturan lain"
-                    b.badgeText.text = "GAGAL"
-                    b.badgeIcon.alpha = 0.45f
-                    b.badgeLive.alpha = 0.55f
-                    b.btnRecheck.visibility = View.VISIBLE
-                }
+            } finally {
+                b.btnRecheck.isEnabled = true
             }
         }
     }
@@ -160,14 +171,34 @@ class ResultActivity : AppCompatActivity() {
     private fun loadStill() {
         val uri = savedUri ?: return
         lifecycleScope.launch {
-            val bmp = withContext(Dispatchers.IO) {
-                runCatching {
-                    contentResolver.openInputStream(uri)?.use { BitmapFactory.decodeStream(it) }
-                }.getOrNull()
+            val bmp = withContext(Dispatchers.IO) { decodeSampledStill(uri, 2048) }
+            if (bmp != null) {
+                stillBitmap?.takeIf { it !== bmp && !it.isRecycled }?.recycle()
+                stillBitmap = bmp
+                b.still.setImageBitmap(bmp)
             }
-            if (bmp != null) b.still.setImageBitmap(bmp)
         }
     }
+
+    private fun decodeSampledStill(uri: Uri, maxSide: Int): Bitmap? = runCatching {
+        val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
+        contentResolver.openInputStream(uri)?.use {
+            BitmapFactory.decodeStream(it, null, bounds)
+        }
+        if (bounds.outWidth <= 0 || bounds.outHeight <= 0) return@runCatching null
+
+        var sample = 1
+        while (maxOf(bounds.outWidth, bounds.outHeight) / sample > maxSide * 2) {
+            sample *= 2
+        }
+        val opts = BitmapFactory.Options().apply {
+            inSampleSize = sample
+            inPreferredConfig = Bitmap.Config.ARGB_8888
+        }
+        contentResolver.openInputStream(uri)?.use {
+            BitmapFactory.decodeStream(it, null, opts)
+        }
+    }.getOrNull()
 
     /** Ambil MP4 dari ekor berkas — cara yang sama dipakai galeri Android. */
     private fun prepareClip() {
@@ -186,6 +217,7 @@ class ResultActivity : AppCompatActivity() {
             }
             if (f == null) {
                 b.hintHold.text = "Video tidak bisa dibaca"
+                runVerification()
                 return@launch
             }
             clipFile = f
@@ -210,6 +242,7 @@ class ResultActivity : AppCompatActivity() {
                 }
             })
             p.prepare()
+            runVerification()
         }
     }
 
@@ -321,8 +354,13 @@ class ResultActivity : AppCompatActivity() {
     }
 
     override fun onDestroy() {
-        super.onDestroy()
         player?.release()
         player = null
+        b.playerView.player = null
+        stillBitmap?.takeIf { !it.isRecycled }?.recycle()
+        stillBitmap = null
+        clipFile?.delete()
+        clipFile = null
+        super.onDestroy()
     }
 }

@@ -21,6 +21,7 @@ class SettingsActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         b = ActivitySettingsBinding.inflate(layoutInflater)
         setContentView(b.root)
+        Settings.applyAccessibility(this, b.root)
 
         if (Settings.keepScreenOn(this)) {
             window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
@@ -78,7 +79,7 @@ class SettingsActivity : AppCompatActivity() {
         b.swHighContrast.setOnCheckedChangeListener { v, enabled ->
             Settings.triggerHaptic(v)
             Settings.setHighContrast(this, enabled)
-            notify(if (enabled) "Mode kontras tinggi aktif" else "Kontras standar")
+            recreate()
         }
         b.swHaptics.setOnCheckedChangeListener { v, enabled ->
             Settings.setHapticsEnabled(this, enabled)
@@ -88,7 +89,7 @@ class SettingsActivity : AppCompatActivity() {
         b.swReduceMotion.setOnCheckedChangeListener { v, enabled ->
             Settings.triggerHaptic(v)
             Settings.setReduceMotion(this, enabled)
-            notify(if (enabled) "Animasi transisi dikurangi" else "Animasi transisi standar")
+            recreate()
         }
 
         b.tvVersion.text = "v${BuildConfig.VERSION_NAME}  ·  build ${BuildConfig.VERSION_CODE}"

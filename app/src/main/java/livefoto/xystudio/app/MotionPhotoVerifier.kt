@@ -89,15 +89,20 @@ object MotionPhotoVerifier {
             runCatching {
                 tmp.writeBytes(mp4)
                 val r = MediaMetadataRetriever()
-                r.setDataSource(tmp.absolutePath)
-                durMs = r.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)
-                    ?.toLongOrNull() ?: 0L
-                val w = r.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH)
-                val h = r.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT)
-                val hasFrame = r.getFrameAtTime() != null
-                r.release()
-                dim = if (w != null && h != null) "${w}x${h}" else "-"
-                playable = durMs > 0 && hasFrame
+                try {
+                    r.setDataSource(tmp.absolutePath)
+                    durMs = r.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)
+                        ?.toLongOrNull() ?: 0L
+                    val w = r.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH)
+                    val h = r.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT)
+                    val frame = r.getFrameAtTime()
+                    val hasFrame = frame != null
+                    frame?.recycle()
+                    dim = if (w != null && h != null) "${w}x${h}" else "-"
+                    playable = durMs > 0 && hasFrame
+                } finally {
+                    runCatching { r.release() }
+                }
             }
             tmp.delete()
         }

@@ -15,13 +15,14 @@ class SplashActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        if (!Settings.showSplash(this)) {
+        if (!Settings.showSplash(this) || Settings.isReduceMotion(this)) {
             goNext(animate = false)
             return
         }
 
         val b = ActivitySplashBinding.inflate(layoutInflater)
         setContentView(b.root)
+        Settings.applyAccessibility(this, b.root)
 
         b.morph.animateMorph(720L) { goNext(animate = true) }
         b.title.alpha = 0f

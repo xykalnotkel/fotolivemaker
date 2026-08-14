@@ -1,6 +1,6 @@
 # Kebijakan Privasi (Privacy Policy)
 
-**Aplikasi:** Live Photo Maker
+**Aplikasi:** Foto Live
 **Berlaku sejak:** 13 Agustus 2026
 
 ## Ringkasan singkat

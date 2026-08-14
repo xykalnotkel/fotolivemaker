@@ -1,9 +1,13 @@
 package livefoto.xystudio.app
 
+import android.app.Activity
 import android.content.Context
 import android.os.Build
 import android.view.HapticFeedbackConstants
 import android.view.View
+import android.view.ViewGroup
+import android.widget.TextView
+import androidx.core.content.ContextCompat
 
 /** Pengaturan yang tersimpan antar sesi. */
 object Settings {
@@ -17,7 +21,6 @@ object Settings {
     private const val K_QUALITY = "jpeg_quality"
     private const val K_THEME = "theme"
     private const val K_KEEP_SCREEN_ON = "keep_screen_on"
-    private const val K_SEEN_SPLASH = "seen_splash"
     private const val K_SHOW_SPLASH = "show_splash"
 
     // Pengaturan Aksesibilitas & Kontras
@@ -61,12 +64,6 @@ object Settings {
 
     fun keepScreenOn(c: Context): Boolean = sp(c).getBoolean(K_KEEP_SCREEN_ON, true)
 
-    fun seenSplash(c: Context): Boolean = sp(c).getBoolean(K_SEEN_SPLASH, false)
-
-    fun markSplashSeen(c: Context) {
-        sp(c).edit().putBoolean(K_SEEN_SPLASH, true).apply()
-    }
-
     fun showSplash(c: Context): Boolean = sp(c).getBoolean(K_SHOW_SPLASH, true)
 
     fun setShowSplash(c: Context, enabled: Boolean) {
@@ -94,6 +91,29 @@ object Settings {
 
     fun setReduceMotion(c: Context, enabled: Boolean) {
         sp(c).edit().putBoolean(K_REDUCE_MOTION, enabled).apply()
+    }
+
+    /** Terapkan preferensi aksesibilitas setelah layout activity dipasang. */
+    fun applyAccessibility(activity: Activity, root: View) {
+        if (isReduceMotion(activity)) {
+            activity.window.setWindowAnimations(0)
+        }
+        if (!isHighContrast(activity)) return
+
+        val dim = ContextCompat.getColor(activity, R.color.text_dim)
+        val mid = ContextCompat.getColor(activity, R.color.text_mid)
+        val high = ContextCompat.getColor(activity, R.color.text_hi)
+
+        fun visit(view: View) {
+            view.alpha = if (view.alpha in 0.55f..0.99f) 1f else view.alpha
+            if (view is TextView && (view.currentTextColor == dim || view.currentTextColor == mid)) {
+                view.setTextColor(high)
+            }
+            if (view is ViewGroup) {
+                for (i in 0 until view.childCount) visit(view.getChildAt(i))
+            }
+        }
+        visit(root)
     }
 
     fun triggerHaptic(view: View) {

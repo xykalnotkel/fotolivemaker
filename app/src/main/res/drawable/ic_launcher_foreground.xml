@@ -1,40 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
-    android:width="108dp"
-    android:height="108dp"
-    android:viewportWidth="108"
-    android:viewportHeight="108">
-    <!-- Live Photo mark only. No mountain, no photo frame. -->
-    <path
-        android:fillColor="#FFFFFFFF"
-        android:pathData="M54,54m-7.2,0a7.2,7.2 0 1,1 14.4,0a7.2,7.2 0 1,1 -14.4,0z" />
-    <path
-        android:fillColor="#00000000"
-        android:strokeColor="#FFFFFFFF"
-        android:strokeWidth="3.2"
-        android:pathData="M54,54m-14.6,0a14.6,14.6 0 1,1 29.2,0a14.6,14.6 0 1,1 -29.2,0z" />
-    <path android:strokeColor="#FFFFFFFF" android:strokeWidth="3.4" android:strokeLineCap="square"
-        android:pathData="M54,28.2 L54,33.4" />
-    <path android:strokeColor="#FFFFFFFF" android:strokeWidth="3.4" android:strokeLineCap="square"
-        android:pathData="M66.9,31.7 L64.3,36.1" />
-    <path android:strokeColor="#FFFFFFFF" android:strokeWidth="3.4" android:strokeLineCap="square"
-        android:pathData="M76.3,41.1 L71.9,43.7" />
-    <path android:strokeColor="#FFFFFFFF" android:strokeWidth="3.4" android:strokeLineCap="square"
-        android:pathData="M79.8,54 L74.6,54" />
-    <path android:strokeColor="#FFFFFFFF" android:strokeWidth="3.4" android:strokeLineCap="square"
-        android:pathData="M76.3,66.9 L71.9,64.3" />
-    <path android:strokeColor="#FFFFFFFF" android:strokeWidth="3.4" android:strokeLineCap="square"
-        android:pathData="M66.9,76.3 L64.3,71.9" />
-    <path android:strokeColor="#FFFFFFFF" android:strokeWidth="3.4" android:strokeLineCap="square"
-        android:pathData="M54,79.8 L54,74.6" />
-    <path android:strokeColor="#FFFFFFFF" android:strokeWidth="3.4" android:strokeLineCap="square"
-        android:pathData="M41.1,76.3 L43.7,71.9" />
-    <path android:strokeColor="#FFFFFFFF" android:strokeWidth="3.4" android:strokeLineCap="square"
-        android:pathData="M31.7,66.9 L36.1,64.3" />
-    <path android:strokeColor="#FFFFFFFF" android:strokeWidth="3.4" android:strokeLineCap="square"
-        android:pathData="M28.2,54 L33.4,54" />
-    <path android:strokeColor="#FFFFFFFF" android:strokeWidth="3.4" android:strokeLineCap="square"
-        android:pathData="M31.7,41.1 L36.1,43.7" />
-    <path android:strokeColor="#FFFFFFFF" android:strokeWidth="3.4" android:strokeLineCap="square"
-        android:pathData="M41.1,31.7 L43.7,36.1" />
+    android:width="108dp" android:height="108dp"
+    android:viewportWidth="108" android:viewportHeight="108">
+    <!-- Custom Roundline Live mark; aman untuk adaptive mask dan monochrome. -->
+    <path android:fillColor="@android:color/transparent"
+        android:strokeColor="#FFFFFFFF" android:strokeWidth="4.8"
+        android:strokeLineCap="round"
+        android:pathData="M54,25 A29,29 0,0 1,83 54 M83,54 A29,29 0,0 1,54 83 M54,83 A29,29 0,0 1,25 54 M25,54 A29,29 0,0 1,54 25" />
+    <path android:fillColor="@android:color/transparent"
+        android:strokeColor="#FFFFFFFF" android:strokeWidth="4.4"
+        android:pathData="M54,37a17,17 0,1 0,0 34a17,17 0,1 0,0 -34" />
+    <path android:fillColor="#FFFFFFFF"
+        android:pathData="M54,54m-8,0a8,8 0,1 1,16 0a8,8 0,1 1,-16 0" />
 </vector>

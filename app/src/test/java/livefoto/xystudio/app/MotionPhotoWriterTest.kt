@@ -45,7 +45,7 @@ class MotionPhotoWriterTest {
     }
 
     @Test
-    fun `Length di XMP mencakup mp4 plus trailer SEF`() {
+    fun `Length di XMP sama dengan panjang mp4 pada layout Google`() {
         val mp4 = fakeMp4(7777)
         val result = MotionPhotoWriter.build(fakeJpeg(), mp4, 0L)
 
@@ -55,8 +55,7 @@ class MotionPhotoWriterTest {
         assertTrue("penanda Length tidak ditemukan", i >= 0)
         val declared = text.substring(i + marker.length).substringBefore('"').toInt()
 
-        // trailer SEF (32 byte) berada SETELAH video, jadi ikut dihitung
-        assertEquals("Length = mp4 + blok SEF", mp4.size + 32, declared)
+        assertEquals("Length harus sama dengan MP4", mp4.size, declared)
     }
 
     @Test
@@ -64,9 +63,9 @@ class MotionPhotoWriterTest {
         val mp4 = fakeMp4(5000)
         val result = MotionPhotoWriter.build(fakeJpeg(), mp4, 0L)
 
-        // hitung mundur dari akhir, lalu buang 32 byte blok SEF di ujung
+        // Layout Google strict: MP4 adalah item terakhir sampai EOF.
         val extracted = result.copyOfRange(
-            result.size - mp4.size - 32, result.size - 32
+            result.size - mp4.size, result.size
         )
         assertTrue("byte mp4 hasil ekstrak harus identik", mp4.contentEquals(extracted))
         assertEquals('f'.code.toByte(), extracted[4])  // awal atom ftyp
@@ -97,7 +96,7 @@ class MotionPhotoWriterTest {
     }
 
     @Test
-    fun `extractMp4 membuang trailer SEF`() {
+    fun `extractMp4 mengambil item video Google sampai EOF`() {
         val mp4 = fakeMp4(5000)
         val result = MotionPhotoWriter.build(fakeJpeg(), mp4, 0L)
         val extracted = MotionPhotoWriter.extractMp4(result)
@@ -106,9 +105,28 @@ class MotionPhotoWriterTest {
     }
 
     @Test
+    fun `layout Google berakhir tepat di MP4 tanpa SEF`() {
+        val mp4 = fakeMp4(4096)
+        val result = MotionPhotoWriter.build(fakeJpeg(), mp4, 0L)
+        assertTrue(result.copyOfRange(result.size - mp4.size, result.size).contentEquals(mp4))
+        assertTrue(!String(result.takeLast(4).toByteArray()).contains("SEFT"))
+        assertEquals(MotionPhotoWriter.Layout.GOOGLE, MotionPhotoWriter.verify(result).layout)
+    }
+
+    @Test
+    fun `Padding hanya ada pada item Primary`() {
+        val result = MotionPhotoWriter.build(fakeJpeg(), fakeMp4(), 0L)
+        val text = String(result, Charsets.ISO_8859_1)
+        val primary = text.substringAfter("Item:Semantic=\"Primary\"").substringBefore("/>")
+        val motion = text.substringAfter("Item:Semantic=\"MotionPhoto\"").substringBefore("/>")
+        assertTrue(primary.contains("Item:Padding=\"0\""))
+        assertTrue(!motion.contains("Item:Padding"))
+    }
+
+    @Test
     fun `verify mendeteksi file rusak`() {
         val good = MotionPhotoWriter.build(fakeJpeg(), fakeMp4(), 0L)
-        // buang 10 byte terakhir -> Length jadi tidak cocok
+        // Potong ekor MP4 sehingga Length tidak lagi menunjuk atom ftyp.
         val broken = good.copyOfRange(0, good.size - 40)
         assertTrue("harus terdeteksi rusak", !MotionPhotoWriter.verify(broken).ok)
     }

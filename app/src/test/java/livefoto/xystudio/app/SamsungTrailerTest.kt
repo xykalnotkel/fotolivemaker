@@ -55,14 +55,14 @@ class SamsungTrailerTest {
 
     @Test
     fun `berkas diakhiri penanda SEFT`() {
-        val f = MotionPhotoWriter.build(fakeJpeg(), fakeMp4(), 0L)
+        val f = MotionPhotoWriter.build(fakeJpeg(), fakeMp4(), 0L, MotionPhotoWriter.Layout.SAMSUNG_HYBRID)
         assertEquals("SEFT", String(f, f.size - 4, 4, Charsets.ISO_8859_1))
     }
 
     @Test
     fun `jalur Samsung - video utuh tepat setelah penanda nama`() {
         val mp4 = fakeMp4(6000)
-        val f = MotionPhotoWriter.build(fakeJpeg(), mp4, 0L)
+        val f = MotionPhotoWriter.build(fakeJpeg(), mp4, 0L, MotionPhotoWriter.Layout.SAMSUNG_HYBRID)
 
         val name = "MotionPhoto_Data".toByteArray(Charsets.US_ASCII)
         val i = indexOf(f, name)
@@ -76,7 +76,7 @@ class SamsungTrailerTest {
     @Test
     fun `jalur Google - hitung mundur Item Length dari akhir berkas`() {
         val mp4 = fakeMp4(7000)
-        val f = MotionPhotoWriter.build(fakeJpeg(), mp4, 0L)
+        val f = MotionPhotoWriter.build(fakeJpeg(), mp4, 0L, MotionPhotoWriter.Layout.SAMSUNG_HYBRID)
 
         val text = String(f, Charsets.ISO_8859_1)
         val marker = "Item:Semantic=\"MotionPhoto\" Item:Length=\""
@@ -96,7 +96,7 @@ class SamsungTrailerTest {
     @Test
     fun `Item Length mencakup video plus blok SEF`() {
         val mp4 = fakeMp4(5000)
-        val f = MotionPhotoWriter.build(fakeJpeg(), mp4, 0L)
+        val f = MotionPhotoWriter.build(fakeJpeg(), mp4, 0L, MotionPhotoWriter.Layout.SAMSUNG_HYBRID)
         val text = String(f, Charsets.ISO_8859_1)
         val marker = "Item:Semantic=\"MotionPhoto\" Item:Length=\""
         val declared = text.substring(text.indexOf(marker) + marker.length)
@@ -107,7 +107,7 @@ class SamsungTrailerTest {
     @Test
     fun `indeks SEF menunjuk balik ke awal field`() {
         val mp4 = fakeMp4(4096)
-        val f = MotionPhotoWriter.build(fakeJpeg(), mp4, 0L)
+        val f = MotionPhotoWriter.build(fakeJpeg(), mp4, 0L, MotionPhotoWriter.Layout.SAMSUNG_HYBRID)
 
         val sefStart = f.size - 32
         assertEquals("SEFH", String(f, sefStart, 4, Charsets.ISO_8859_1))
@@ -128,14 +128,14 @@ class SamsungTrailerTest {
 
     @Test
     fun `sef_size bernilai 24`() {
-        val f = MotionPhotoWriter.build(fakeJpeg(), fakeMp4(), 0L)
+        val f = MotionPhotoWriter.build(fakeJpeg(), fakeMp4(), 0L, MotionPhotoWriter.Layout.SAMSUNG_HYBRID)
         val v = le32(f, f.size - 8)
         assertEquals(24, v)
     }
 
     @Test
     fun `verify menerima berkas yang benar`() {
-        val f = MotionPhotoWriter.build(fakeJpeg(), fakeMp4(), 1_500_000L)
+        val f = MotionPhotoWriter.build(fakeJpeg(), fakeMp4(), 1_500_000L, MotionPhotoWriter.Layout.SAMSUNG_HYBRID)
         val r = MotionPhotoWriter.verify(f)
         assertTrue(r.log, r.ok)
         assertTrue(r.log.contains("Samsung"))
@@ -143,7 +143,7 @@ class SamsungTrailerTest {
 
     @Test
     fun `verify menolak kalau trailer SEF dipotong`() {
-        val good = MotionPhotoWriter.build(fakeJpeg(), fakeMp4(), 0L)
+        val good = MotionPhotoWriter.build(fakeJpeg(), fakeMp4(), 0L, MotionPhotoWriter.Layout.SAMSUNG_HYBRID)
         val broken = good.copyOfRange(0, good.size - 32)   // buang blok SEF
         assertTrue("harus terdeteksi rusak", !MotionPhotoWriter.verify(broken).ok)
     }
@@ -153,7 +153,7 @@ class SamsungTrailerTest {
         val name = "MotionPhoto_Data".toByteArray(Charsets.US_ASCII)
         for (size in intArrayOf(2048, 4096, 10_000, 65_536, 200_000)) {
             val mp4 = fakeMp4(size)
-            val f = MotionPhotoWriter.build(fakeJpeg(), mp4, 0L)
+            val f = MotionPhotoWriter.build(fakeJpeg(), mp4, 0L, MotionPhotoWriter.Layout.SAMSUNG_HYBRID)
 
             val i = indexOf(f, name)
             assertArrayEquals(

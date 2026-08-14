@@ -8,6 +8,7 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.MediaStore
+import android.util.LruCache
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -25,6 +26,7 @@ import livefoto.xystudio.app.databinding.ActivityPickerBinding
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.util.Collections
 import java.util.concurrent.ConcurrentHashMap
 
 /**
@@ -57,6 +59,7 @@ class PickerActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         b = ActivityPickerBinding.inflate(layoutInflater)
         setContentView(b.root)
+        Settings.applyAccessibility(this, b.root)
 
         b.btnBack.setOnClickListener { finish() }
         b.albumBar.setOnClickListener { showAlbumMenu() }
@@ -143,7 +146,12 @@ class PickerActivity : AppCompatActivity() {
     ) : RecyclerView.Adapter<VideoAdapter.VH>() {
 
         private var items: List<ProjectStore.Video> = emptyList()
-        private val thumbs = ConcurrentHashMap<Long, Bitmap>()
+        // Maksimal ±20 MiB; sebelumnya map tanpa batas bisa menahan 500 bitmap.
+        private val thumbs = object : LruCache<Long, Bitmap>(20 * 1024) {
+            override fun sizeOf(key: Long, value: Bitmap): Int =
+                (value.allocationByteCount / 1024).coerceAtLeast(1)
+        }
+        private val inFlight = Collections.newSetFromMap(ConcurrentHashMap<Long, Boolean>())
 
         fun submit(list: List<ProjectStore.Video>) {
             items = list
@@ -163,35 +171,44 @@ class PickerActivity : AppCompatActivity() {
         override fun onBindViewHolder(h: VH, pos: Int) {
             val video = items[pos]
             h.dur.text = fmt(video.durationMs)
+            val key = video.uri.toString()
+            h.img.tag = key
             h.img.setImageDrawable(null)
             h.itemView.setOnClickListener { onPick(video.uri) }
 
             val id = android.content.ContentUris.parseId(video.uri)
-            val cached = thumbs[id]
-            if (cached != null) {
+            val cached = thumbs.get(id)
+            if (cached != null && !cached.isRecycled) {
                 h.img.setImageBitmap(cached)
                 return
             }
+            if (!inFlight.add(id)) return
+
             val uri = video.uri
             lifecycleScope.launch {
-                val bmp = withContext(Dispatchers.IO) {
-                    runCatching {
-                        if (Build.VERSION.SDK_INT >= 29) {
-                            contentResolver.loadThumbnail(
-                                uri, android.util.Size(320, 320), null
-                            )
-                        } else {
-                            @Suppress("DEPRECATION")
-                            MediaStore.Video.Thumbnails.getThumbnail(
-                                contentResolver, id,
-                                MediaStore.Video.Thumbnails.MINI_KIND, null
-                            )
-                        }
-                    }.getOrNull()
+                val bmp = try {
+                    withContext(Dispatchers.IO) {
+                        runCatching {
+                            if (Build.VERSION.SDK_INT >= 29) {
+                                contentResolver.loadThumbnail(
+                                    uri, android.util.Size(256, 256), null
+                                )
+                            } else {
+                                @Suppress("DEPRECATION")
+                                MediaStore.Video.Thumbnails.getThumbnail(
+                                    contentResolver, id,
+                                    MediaStore.Video.Thumbnails.MINI_KIND, null
+                                )
+                            }
+                        }.getOrNull()
+                    }
+                } finally {
+                    inFlight.remove(id)
                 }
                 if (bmp != null) {
-                    thumbs[id] = bmp
-                    if (h.bindingAdapterPosition == pos) h.img.setImageBitmap(bmp)
+                    thumbs.put(id, bmp)
+                    // Bandingkan URI, bukan posisi: album dapat berubah saat decode berjalan.
+                    if (h.img.tag == key) h.img.setImageBitmap(bmp)
                 }
             }
         }

@@ -3,29 +3,19 @@ package livefoto.xystudio.app
 import java.io.ByteArrayOutputStream
 
 /**
- * Menulis berkas Motion Photo yang dikenali DUA sistem sekaligus:
+ * Penulis Motion Photo dengan dua tata letak yang eksplisit:
  *
- *  1. Google / Pixel      -> XMP GCamera + Container di dalam JPEG
- *  2. Samsung (One UI)    -> trailer SEF berisi field "MotionPhoto_Data"
+ *  1. GOOGLE          -> JPEG + MP4, mengikuti Motion Photo Format 1.0.
+ *  2. SAMSUNG_HYBRID  -> JPEG + field SEF + MP4 + indeks SEF.
  *
- * Kenapa dua-duanya: galeri Samsung TIDAK membaca XMP GCamera. Ia mencari
- * trailer SEF di ujung berkas. Berkas yang hanya punya XMP akan tampil
- * sebagai foto biasa di HP Samsung — inilah sebab umum "label Live tidak
- * muncul" padahal strukturnya sudah benar menurut spesifikasi Google.
- *
- * Susunan berkas hasil:
- *
- *   [JPEG + APP1 XMP ... FFD9]
- *   [00 00][marker 0x0A30][len nama][MotionPhoto_Data][ MP4 ]
- *   [SEFH][versi][jumlah][entri...][sef_size][SEFT]
- *
- * Kedua pembaca tetap menemukan videonya:
- *   - Samsung : cari penanda "MotionPhoto_Data", video ada tepat sesudahnya
- *   - Google  : hitung mundur Item:Length byte dari akhir berkas
- * Karena itu Item:Length harus mencakup MP4 + trailer SEF, sebab SEF
- * berada SETELAH video.
+ * Tata letak Samsung sengaja dipisahkan karena indeks SEF wajib berada di
+ * ujung berkas, sementara spesifikasi Google mensyaratkan MP4 sebagai item
+ * terakhir. Jangan menyebut hybrid sebagai strict Google walaupun banyak
+ * parser yang toleran tetap dapat membacanya.
  */
 object MotionPhotoWriter {
+
+    enum class Layout { GOOGLE, SAMSUNG_HYBRID }
 
     private const val XMP_NS = "http://ns.adobe.com/xap/1.0/\u0000"
 
@@ -35,10 +25,10 @@ object MotionPhotoWriter {
     private const val SEF_VERSION = 106
     private const val SEF_HEAD = "SEFH"
     private const val SEF_TAIL = "SEFT"
-    /** Panjang blok SEF: SEFH+ver+count + entri(12) + sef_size + SEFT */
     private const val SEF_BLOCK_SIZE = 32
-    /** Nilai sef_size = seluruh blok tanpa penanda SEFH & SEFT */
     private const val SEF_SIZE_VALUE = 24
+    /** 00 00 + marker + name length + "MotionPhoto_Data". */
+    private const val SEF_FIELD_HEADER_SIZE = 24
 
     private fun le16(v: Int) = byteArrayOf(
         (v and 0xFF).toByte(), ((v shr 8) and 0xFF).toByte()
@@ -51,7 +41,14 @@ object MotionPhotoWriter {
         ((v ushr 24) and 0xFF).toByte()
     )
 
-    fun buildXmp(videoLength: Int, keyframeUs: Long): ByteArray {
+    fun buildXmp(
+        videoLength: Int,
+        keyframeUs: Long,
+        primaryPadding: Int = 0
+    ): ByteArray {
+        require(videoLength > 0) { "Panjang video harus positif" }
+        require(primaryPadding >= 0) { "Padding tidak boleh negatif" }
+
         val xml = buildString {
             append("<?xpacket begin=\"\uFEFF\" id=\"W5M0MpCehiHzreSzNTczkc9d\"?>")
             append("<x:xmpmeta xmlns:x=\"adobe:ns:meta/\">")
@@ -63,17 +60,19 @@ object MotionPhotoWriter {
             append(" GCamera:MotionPhoto=\"1\"")
             append(" GCamera:MotionPhotoVersion=\"1\"")
             append(" GCamera:MotionPhotoPresentationTimestampUs=\"$keyframeUs\"")
-            // MicroVideo: skema lama, sebagian galeri masih memakainya
+            // Tag MicroVideo lama dipertahankan untuk reader lawas. Reader 1.0
+            // wajib mengabaikannya dan memakai Container:Item Length.
             append(" GCamera:MicroVideo=\"1\"")
             append(" GCamera:MicroVideoVersion=\"1\"")
             append(" GCamera:MicroVideoOffset=\"$videoLength\"")
             append(" GCamera:MicroVideoPresentationTimestampUs=\"$keyframeUs\">")
             append("<Container:Directory><rdf:Seq>")
             append("<rdf:li rdf:parseType=\"Resource\">")
-            append("<Container:Item Item:Mime=\"image/jpeg\" Item:Semantic=\"Primary\" Item:Length=\"0\" Item:Padding=\"0\"/>")
+            append("<Container:Item Item:Mime=\"image/jpeg\" Item:Semantic=\"Primary\" Item:Length=\"0\" Item:Padding=\"$primaryPadding\"/>")
             append("</rdf:li>")
             append("<rdf:li rdf:parseType=\"Resource\">")
-            append("<Container:Item Item:Mime=\"video/mp4\" Item:Semantic=\"MotionPhoto\" Item:Length=\"$videoLength\" Item:Padding=\"0\"/>")
+            // Padding hanya sah pada item Primary.
+            append("<Container:Item Item:Mime=\"video/mp4\" Item:Semantic=\"MotionPhoto\" Item:Length=\"$videoLength\"/>")
             append("</rdf:li>")
             append("</rdf:Seq></Container:Directory>")
             append("</rdf:Description></rdf:RDF></x:xmpmeta>")
@@ -83,6 +82,9 @@ object MotionPhotoWriter {
     }
 
     fun injectXmp(jpeg: ByteArray, xmp: ByteArray): ByteArray {
+        require(jpeg.size >= 4 && jpeg[0] == 0xFF.toByte() && jpeg[1] == 0xD8.toByte()) {
+            "Data cover bukan JPEG yang valid"
+        }
         val payload = XMP_NS.toByteArray(Charsets.UTF_8) + xmp
         require(payload.size + 2 <= 0xFFFF) { "XMP terlalu besar untuk satu segment APP1" }
 
@@ -93,15 +95,19 @@ object MotionPhotoWriter {
             (segLen and 0xFF).toByte()
         )
 
+        // Sisipkan setelah APP0/APP1 awal agar JFIF/EXIF tetap utuh.
         var i = 2
-        while (i + 4 <= jpeg.size &&
+        while (
+            i + 4 <= jpeg.size &&
             (jpeg[i].toInt() and 0xFF) == 0xFF &&
-            ((jpeg[i + 1].toInt() and 0xFF) == 0xE0 || (jpeg[i + 1].toInt() and 0xFF) == 0xE1)
+            ((jpeg[i + 1].toInt() and 0xFF) == 0xE0 ||
+                (jpeg[i + 1].toInt() and 0xFF) == 0xE1)
         ) {
-            val l = ((jpeg[i + 2].toInt() and 0xFF) shl 8) or (jpeg[i + 3].toInt() and 0xFF)
-            i += 2 + l
+            val length = ((jpeg[i + 2].toInt() and 0xFF) shl 8) or
+                (jpeg[i + 3].toInt() and 0xFF)
+            if (length < 2 || i + 2 + length > jpeg.size) break
+            i += 2 + length
         }
-        if (i > jpeg.size) i = 2
 
         val out = ByteArrayOutputStream(jpeg.size + payload.size + 4)
         out.write(jpeg, 0, i)
@@ -111,9 +117,9 @@ object MotionPhotoWriter {
         return out.toByteArray()
     }
 
-    /** Field SEF: [00 00][marker][panjang nama][nama][video] */
+    /** Field SEF: [00 00][marker][panjang nama][nama][video]. */
     fun buildSefField(mp4: ByteArray): ByteArray {
-        val out = ByteArrayOutputStream(mp4.size + 32)
+        val out = ByteArrayOutputStream(mp4.size + SEF_FIELD_HEADER_SIZE)
         out.write(byteArrayOf(0, 0))
         out.write(le16(SEF_MARKER))
         out.write(le32(SEF_NAME.size))
@@ -124,110 +130,211 @@ object MotionPhotoWriter {
 
     /** Blok indeks SEF di ujung berkas. */
     fun buildSefIndex(fieldSize: Int): ByteArray {
+        require(fieldSize > SEF_FIELD_HEADER_SIZE) { "Field SEF kosong" }
         val out = ByteArrayOutputStream(SEF_BLOCK_SIZE)
         out.write(SEF_HEAD.toByteArray(Charsets.US_ASCII))
         out.write(le32(SEF_VERSION))
-        out.write(le32(1))                 // jumlah field
+        out.write(le32(1))
         out.write(byteArrayOf(0, 0))
         out.write(le16(SEF_MARKER))
-        out.write(le32(fieldSize))         // offset dihitung mundur dari awal SEF
-        out.write(le32(fieldSize))         // ukuran field
+        out.write(le32(fieldSize))
+        out.write(le32(fieldSize))
         out.write(le32(SEF_SIZE_VALUE))
         out.write(SEF_TAIL.toByteArray(Charsets.US_ASCII))
         return out.toByteArray()
     }
 
-    /**
-     * Gabungkan jadi satu berkas Motion Photo untuk Google DAN Samsung.
-     */
-    fun build(jpegBytes: ByteArray, mp4Bytes: ByteArray, keyframeUs: Long): ByteArray {
-        val field = buildSefField(mp4Bytes)
-        val index = buildSefIndex(field.size)
+    /** Gabungkan JPEG dan MP4 menggunakan tata letak yang dipilih. */
+    fun build(
+        jpegBytes: ByteArray,
+        mp4Bytes: ByteArray,
+        keyframeUs: Long,
+        layout: Layout = Layout.GOOGLE
+    ): ByteArray {
+        require(mp4Bytes.size >= 8 &&
+            String(mp4Bytes, 4, 4, Charsets.US_ASCII) == "ftyp") {
+            "Data video bukan MP4 yang valid"
+        }
 
-        // Google menghitung mundur dari akhir berkas, dan SEF ada setelah
-        // video, jadi panjangnya harus ikut dihitung.
-        val googleLength = mp4Bytes.size + index.size
+        return when (layout) {
+            Layout.GOOGLE -> {
+                val xmp = buildXmp(mp4Bytes.size, keyframeUs, primaryPadding = 0)
+                val jpegWithXmp = injectXmp(jpegBytes, xmp)
+                ByteArrayOutputStream(jpegWithXmp.size + mp4Bytes.size).apply {
+                    write(jpegWithXmp)
+                    write(mp4Bytes)
+                }.toByteArray()
+            }
 
-        val xmp = buildXmp(googleLength, keyframeUs)
-        val jpegWithXmp = injectXmp(jpegBytes, xmp)
-
-        val out = ByteArrayOutputStream(jpegWithXmp.size + field.size + index.size)
-        out.write(jpegWithXmp)
-        out.write(field)
-        out.write(index)
-        return out.toByteArray()
+            Layout.SAMSUNG_HYBRID -> {
+                val field = buildSefField(mp4Bytes)
+                val index = buildSefIndex(field.size)
+                // Reader yang menghitung mundur dari EOF tetap mendarat tepat
+                // di awal MP4. Header field SEF dinyatakan sebagai padding.
+                val googleLength = mp4Bytes.size + index.size
+                val xmp = buildXmp(
+                    googleLength,
+                    keyframeUs,
+                    primaryPadding = SEF_FIELD_HEADER_SIZE
+                )
+                val jpegWithXmp = injectXmp(jpegBytes, xmp)
+                ByteArrayOutputStream(jpegWithXmp.size + field.size + index.size).apply {
+                    write(jpegWithXmp)
+                    write(field)
+                    write(index)
+                }.toByteArray()
+            }
+        }
     }
 
     /** Offset atom `ftyp` (bukan awal box). -1 kalau tidak ada. */
-    fun indexOfFtyp(data: ByteArray): Int =
-        indexOf(data, "ftyp".toByteArray(Charsets.US_ASCII))
+    fun indexOfFtyp(data: ByteArray): Int {
+        // Jalur utama: gunakan Item:Length sehingga string "ftyp" acak di
+        // data JPEG tidak pernah salah dianggap sebagai awal MP4.
+        val declared = declaredVideoLength(data)
+        if (declared in 8..data.size) {
+            val start = data.size - declared
+            if (start + 8 <= data.size && asciiAt(data, start + 4, "ftyp")) {
+                return start + 4
+            }
+        }
 
-    /**
-     * Ambil payload MP4 dari ekor Motion Photo, tanpa trailer SEF.
-     * Dipakai preview / verifikasi decode — bukan spek Google (itu
-     * menghitung mundur Item:Length, yang memang mencakup SEF).
-     */
+        // Fallback untuk berkas lawas/tanpa Length: cari sesudah EOI JPEG.
+        val eoi = jpegEnd(data)
+        return indexOf(
+            data,
+            "ftyp".toByteArray(Charsets.US_ASCII),
+            start = if (eoi >= 0) eoi else 0
+        )
+    }
+
+    /** Ambil MP4 dari Motion Photo. Indeks Samsung dibuang bila ada. */
     fun extractMp4(data: ByteArray): ByteArray? {
         val ftyp = indexOfFtyp(data)
         if (ftyp < 4) return null
         val start = ftyp - 4
-        var end = data.size
-        val tailOk = end >= 4 &&
-            String(data, end - 4, 4, Charsets.ISO_8859_1) == SEF_TAIL
-        if (tailOk) end = (end - SEF_BLOCK_SIZE).coerceAtLeast(start)
+        val hasSamsung = indexOf(data, SEF_NAME) >= 0 &&
+            data.size >= 4 && asciiAt(data, data.size - 4, SEF_TAIL)
+        val end = if (hasSamsung) data.size - SEF_BLOCK_SIZE else data.size
         if (end <= start) return null
         return data.copyOfRange(start, end)
     }
 
-    data class VerifyResult(val ok: Boolean, val log: String)
+    data class VerifyResult(
+        val ok: Boolean,
+        val log: String,
+        val layout: Layout? = null
+    )
 
+    /**
+     * Verifikasi struktur yang kita tulis. Ini tidak menggantikan verifikasi
+     * MediaStore/perangkat nyata, tetapi mendeteksi offset, padding, dan trailer
+     * yang terpotong sebelum berkas disimpan.
+     */
     fun verify(data: ByteArray): VerifyResult {
         val sb = StringBuilder()
         var ok = true
         val text = String(data, 0, minOf(data.size, 65536), Charsets.ISO_8859_1)
 
-        if (text.contains("GCamera:MotionPhoto=\"1\"")) {
-            sb.append("✓ XMP GCamera ada\n")
-        } else {
-            sb.append("✗ XMP GCamera TIDAK ada\n"); ok = false
+        val jpegOk = data.size >= 4 && data[0] == 0xFF.toByte() && data[1] == 0xD8.toByte()
+        if (jpegOk) sb.append("✓ JPEG valid\n")
+        else { sb.append("✗ Awal JPEG tidak valid\n"); ok = false }
+
+        val xmpOk = text.contains("GCamera:MotionPhoto=\"1\"") &&
+            text.contains("GCamera:MotionPhotoVersion=\"1\"")
+        if (xmpOk) sb.append("✓ XMP Motion Photo ada\n")
+        else { sb.append("✗ XMP Motion Photo tidak lengkap\n"); ok = false }
+
+        val hasName = indexOf(data, SEF_NAME) >= 0
+        val hasTail = data.size >= 4 && asciiAt(data, data.size - 4, SEF_TAIL)
+        val layout = when {
+            hasName && hasTail -> Layout.SAMSUNG_HYBRID
+            !hasName && !hasTail -> Layout.GOOGLE
+            else -> null
+        }
+        when (layout) {
+            Layout.GOOGLE -> sb.append("✓ Tata letak Google strict (MP4 di EOF)\n")
+            Layout.SAMSUNG_HYBRID -> sb.append("✓ Trailer Samsung SEF lengkap\n")
+            null -> { sb.append("✗ Trailer Samsung SEF terpotong\n"); ok = false }
         }
 
-        // --- jalur Samsung ---
-        val nameIdx = indexOf(data, SEF_NAME)
-        val tailOk = data.size >= 4 &&
-            String(data, data.size - 4, 4, Charsets.ISO_8859_1) == SEF_TAIL
-        if (nameIdx > 0 && tailOk) {
-            sb.append("✓ Trailer Samsung SEF ada (MotionPhoto_Data)\n")
-        } else {
-            sb.append("✗ Trailer Samsung SEF tidak lengkap\n"); ok = false
-        }
-
-        // --- jalur Google ---
         val ftyp = indexOfFtyp(data)
-        if (ftyp > 0) {
-            val marker = "Item:Semantic=\"MotionPhoto\" Item:Length=\""
-            val mi = text.indexOf(marker)
-            if (mi >= 0) {
-                val declared = text.substring(mi + marker.length)
-                    .substringBefore('"').toIntOrNull() ?: -1
-                val actual = data.size - (ftyp - 4)
-                if (declared == actual) {
-                    sb.append("✓ Item:Length cocok ($declared byte)\n")
-                } else {
-                    sb.append("✗ Item:Length=$declared, nyata=$actual\n"); ok = false
-                }
+        if (ftyp >= 4) {
+            val mp4Start = ftyp - 4
+            val declared = declaredVideoLength(data)
+            val actual = data.size - mp4Start
+            if (declared == actual) {
+                sb.append("✓ Item:Length cocok ($declared byte)\n")
+            } else {
+                sb.append("✗ Item:Length=$declared, nyata=$actual\n")
+                ok = false
             }
-            sb.append("✓ MP4 (ftyp) di offset ${ftyp - 4}\n")
+
+            val endOfJpeg = jpegEnd(data)
+            val actualPadding = if (endOfJpeg >= 0) mp4Start - endOfJpeg else -1
+            val declaredPadding = declaredPrimaryPadding(data)
+            if (actualPadding >= 0 && declaredPadding == actualPadding) {
+                sb.append("✓ Item:Padding cocok ($declaredPadding byte)\n")
+            } else {
+                sb.append("✗ Item:Padding=$declaredPadding, nyata=$actualPadding\n")
+                ok = false
+            }
+            sb.append("✓ MP4 (ftyp) di offset $mp4Start\n")
         } else {
-            sb.append("✗ MP4 tidak ditemukan\n"); ok = false
+            sb.append("✗ MP4 tidak ditemukan\n")
+            ok = false
         }
 
-        sb.append(if (ok) "=> VALID (Google + Samsung)" else "=> BERMASALAH")
-        return VerifyResult(ok, sb.toString())
+        sb.append(
+            when {
+                !ok -> "=> STRUKTUR BERMASALAH"
+                layout == Layout.GOOGLE -> "=> VALID GOOGLE MOTION PHOTO 1.0"
+                else -> "=> HYBRID SAMSUNG KONSISTEN"
+            }
+        )
+        return VerifyResult(ok, sb.toString(), layout)
     }
 
-    private fun indexOf(data: ByteArray, pattern: ByteArray): Int {
-        outer@ for (i in 0..data.size - pattern.size) {
+    private fun declaredVideoLength(data: ByteArray): Int {
+        val text = String(data, 0, minOf(data.size, 65536), Charsets.ISO_8859_1)
+        val marker = "Item:Semantic=\"MotionPhoto\" Item:Length=\""
+        val i = text.indexOf(marker)
+        if (i < 0) return -1
+        return text.substring(i + marker.length).substringBefore('"').toIntOrNull() ?: -1
+    }
+
+    private fun declaredPrimaryPadding(data: ByteArray): Int {
+        val text = String(data, 0, minOf(data.size, 65536), Charsets.ISO_8859_1)
+        val primary = text.indexOf("Item:Semantic=\"Primary\"")
+        if (primary < 0) return -1
+        val end = text.indexOf("/>", primary).let { if (it < 0) text.length else it }
+        val marker = "Item:Padding=\""
+        val i = text.indexOf(marker, primary)
+        if (i < 0 || i > end) return 0
+        return text.substring(i + marker.length).substringBefore('"').toIntOrNull() ?: -1
+    }
+
+    /** Posisi tepat setelah EOI JPEG. */
+    private fun jpegEnd(data: ByteArray): Int {
+        for (i in 2 until data.size - 1) {
+            if (data[i] == 0xFF.toByte() && data[i + 1] == 0xD9.toByte()) return i + 2
+        }
+        return -1
+    }
+
+    private fun asciiAt(data: ByteArray, start: Int, value: String): Boolean {
+        if (start < 0 || start + value.length > data.size) return false
+        for (i in value.indices) {
+            if (data[start + i] != value[i].code.toByte()) return false
+        }
+        return true
+    }
+
+    private fun indexOf(data: ByteArray, pattern: ByteArray, start: Int = 0): Int {
+        if (pattern.isEmpty() || data.size < pattern.size) return -1
+        val from = start.coerceAtLeast(0)
+        val last = data.size - pattern.size
+        outer@ for (i in from..last) {
             for (j in pattern.indices) if (data[i + j] != pattern[j]) continue@outer
             return i
         }

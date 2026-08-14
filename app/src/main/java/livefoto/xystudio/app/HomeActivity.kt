@@ -36,6 +36,7 @@ class HomeActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         b = ActivityHomeBinding.inflate(layoutInflater)
         setContentView(b.root)
+        Settings.applyAccessibility(this, b.root)
 
         b.tvVersion.text = "v${BuildConfig.VERSION_NAME}"
 
@@ -264,13 +265,14 @@ class HomeActivity : AppCompatActivity() {
             h.name.text = item.name
             h.meta.text = "${fmt.format(Date(item.dateMs))}   ·   " +
                 "${item.width}x${item.height}   ·   ${item.sizeBytes / 1024} KB"
+            val key = item.uri.toString()
+            h.thumb.tag = key
             h.thumb.setImageDrawable(null)
 
             h.itemView.setOnClickListener { open(item) }
             h.more.setOnClickListener { v -> menuFor(v, item) }
             h.del.setOnClickListener { confirmDelete(item) }
 
-            val key = item.uri.toString()
             val cached = cache[key]
             if (cached != null) {
                 h.thumb.setImageBitmap(cached)
@@ -296,7 +298,7 @@ class HomeActivity : AppCompatActivity() {
                 }
                 if (bmp != null) {
                     cache[key] = bmp
-                    if (h.bindingAdapterPosition == pos) h.thumb.setImageBitmap(bmp)
+                    if (h.thumb.tag == key) h.thumb.setImageBitmap(bmp)
                 }
             }
         }

@@ -1,8 +1,11 @@
 package livefoto.xystudio.app
 
+import android.Manifest
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.view.Gravity
 import android.view.View
@@ -11,6 +14,7 @@ import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
@@ -36,10 +40,18 @@ class MainActivity : AppCompatActivity() {
     private var bindingSliders = false
     private var opts = Converter.Options()
 
+    private val requestLegacyWrite = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { granted ->
+        if (granted) openExportGranted()
+        else toast("Izin penyimpanan diperlukan di Android 8–9")
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         b = ActivityMainBinding.inflate(layoutInflater)
         setContentView(b.root)
+        Settings.applyAccessibility(this, b.root)
         opts = Settings.load(this)
 
         if (Settings.keepScreenOn(this)) {
@@ -90,6 +102,12 @@ class MainActivity : AppCompatActivity() {
             rebuildPlan()
             refreshPreview()
         }
+        val hapticOnRelease = object : Slider.OnSliderTouchListener {
+            override fun onStartTrackingTouch(slider: Slider) = Unit
+            override fun onStopTrackingTouch(slider: Slider) = Settings.triggerHaptic(slider)
+        }
+        b.sliderStart.addOnSliderTouchListener(hapticOnRelease)
+        b.sliderKey.addOnSliderTouchListener(hapticOnRelease)
 
         paintTools()
         intent?.data?.let(::loadVideo) ?: run { toast("Tidak ada video"); finish() }
@@ -304,6 +322,18 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun openExport() {
+        if (
+            Build.VERSION.SDK_INT <= Build.VERSION_CODES.P &&
+            ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) !=
+            PackageManager.PERMISSION_GRANTED
+        ) {
+            requestLegacyWrite.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+            return
+        }
+        openExportGranted()
+    }
+
+    private fun openExportGranted() {
         val uri = videoUri ?: return
         val p = plan ?: run { toast("Video masih disiapkan"); return }
         Settings.save(this, opts)

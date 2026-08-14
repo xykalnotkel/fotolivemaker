@@ -68,7 +68,7 @@
                 <ImageView
                     android:layout_width="16dp"
                     android:layout_height="16dp"
-                    android:src="@drawable/ic_stats_asset"
+                    android:src="@drawable/ic_storage"
                     android:contentDescription="@null" />
 
                 <TextView
@@ -191,7 +191,7 @@
                     <ImageView
                         android:layout_width="18dp"
                         android:layout_height="18dp"
-                        android:src="@drawable/ic_trash_asset"
+                        android:src="@drawable/ic_cache"
                         android:contentDescription="@null" />
 
                     <TextView
@@ -224,7 +224,7 @@
                     <ImageView
                         android:layout_width="18dp"
                         android:layout_height="18dp"
-                        android:src="@drawable/ic_trash_asset"
+                        android:src="@drawable/ic_trash"
                         android:contentDescription="@null" />
 
                     <TextView
@@ -267,7 +267,7 @@
                     <ImageView
                         android:layout_width="18dp"
                         android:layout_height="18dp"
-                        android:src="@drawable/ic_tool_res_3d"
+                        android:src="@drawable/ic_tool_res"
                         android:contentDescription="@null" />
 
                     <TextView
@@ -301,7 +301,7 @@
                     <ImageView
                         android:layout_width="18dp"
                         android:layout_height="18dp"
-                        android:src="@drawable/ic_tool_sharp_3d"
+                        android:src="@drawable/ic_tool_sharp"
                         android:contentDescription="@null" />
 
                     <TextView
@@ -511,7 +511,7 @@
                     <ImageView
                         android:layout_width="18dp"
                         android:layout_height="18dp"
-                        android:src="@drawable/ic_theme_asset"
+                        android:src="@drawable/ic_theme"
                         android:contentDescription="@null" />
 
                     <TextView
@@ -597,7 +597,7 @@
                     <ImageView
                         android:layout_width="18dp"
                         android:layout_height="18dp"
-                        android:src="@drawable/ic_info_asset"
+                        android:src="@drawable/ic_info"
                         android:contentDescription="@null" />
 
                     <TextView
@@ -622,7 +622,7 @@
                     <ImageView
                         android:layout_width="18dp"
                         android:layout_height="18dp"
-                        android:src="@drawable/ic_info_asset"
+                        android:src="@drawable/ic_code"
                         android:contentDescription="@null" />
 
                     <TextView
