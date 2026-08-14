@@ -326,16 +326,80 @@
                     style="@style/Label"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Cara Unggah ke TikTok" />
+                    android:text="Live Photo atau video" />
 
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="12dp"
-                    android:text="1. Buka TikTok, tekan tombol +\n2. Pilih tab Upload, pilih foto dari galeri\n3. Pastikan muncul label LIVE pada thumbnail\n4. Jangan lewat tombol Bagikan / Share eksternal"
+                    android:text="Untuk label LIVE, pilih file Motion Photo langsung dari galeri aplikasi tujuan. Tombol sosial di bawah membagikan versi MP4 agar geraknya tetap terlihat di Story atau Status."
                     android:textColor="?attr/appTextMid"
                     android:textSize="13sp"
                     android:lineSpacingExtra="6dp" />
+            </LinearLayout>
+
+            <TextView
+                style="@style/Label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:text="Bagikan sebagai video" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:orientation="horizontal"
+                android:baselineAligned="false">
+
+                <LinearLayout
+                    android:id="@+id/btnTikTok"
+                    android:layout_width="0dp"
+                    android:layout_height="76dp"
+                    android:layout_weight="1"
+                    android:layout_marginEnd="6dp"
+                    android:orientation="vertical"
+                    android:gravity="center"
+                    android:background="@drawable/bg_social_button"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:contentDescription="Bagikan video ke TikTok">
+                    <ImageView android:layout_width="26dp" android:layout_height="26dp" android:src="@drawable/logo_tiktok" android:contentDescription="@null" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="6dp" android:text="TikTok" android:textColor="#FF111827" android:textSize="11sp" android:textStyle="bold" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/btnInstagram"
+                    android:layout_width="0dp"
+                    android:layout_height="76dp"
+                    android:layout_weight="1"
+                    android:layout_marginStart="3dp"
+                    android:layout_marginEnd="3dp"
+                    android:orientation="vertical"
+                    android:gravity="center"
+                    android:background="@drawable/bg_social_button"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:contentDescription="Tambahkan video ke Instagram Story">
+                    <ImageView android:layout_width="26dp" android:layout_height="26dp" android:src="@drawable/logo_instagram" android:contentDescription="@null" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="6dp" android:text="IG Story" android:textColor="#FF111827" android:textSize="11sp" android:textStyle="bold" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/btnWhatsApp"
+                    android:layout_width="0dp"
+                    android:layout_height="76dp"
+                    android:layout_weight="1"
+                    android:layout_marginStart="6dp"
+                    android:orientation="vertical"
+                    android:gravity="center"
+                    android:background="@drawable/bg_social_button"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:contentDescription="Bagikan video ke Status WhatsApp">
+                    <ImageView android:layout_width="26dp" android:layout_height="26dp" android:src="@drawable/logo_whatsapp" android:contentDescription="@null" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="6dp" android:text="WA Status" android:textColor="#FF111827" android:textSize="11sp" android:textStyle="bold" />
+                </LinearLayout>
             </LinearLayout>
         </LinearLayout>
     </ScrollView>
@@ -388,7 +452,7 @@
                 android:layout_width="0dp"
                 android:layout_weight="1"
                 android:layout_height="wrap_content"
-                android:text="Bagikan"
+                android:text="Aplikasi lain"
                 app:icon="@drawable/ic_share"
                 app:iconTint="?attr/appOnInk"
                 app:iconGravity="textStart"

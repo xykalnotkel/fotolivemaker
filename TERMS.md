@@ -64,10 +64,11 @@ konten yang kamu proses.
 ## 5. Hubungan dengan pihak ketiga
 
 Aplikasi ini **tidak berafiliasi, tidak disponsori, dan tidak didukung** oleh
-TikTok, ByteDance, Apple, Google, maupun Samsung.
+TikTok, ByteDance, Instagram, WhatsApp, Meta, Apple, Google, maupun Samsung.
 
 - "Live Photo" adalah merek dagang Apple Inc.
 - "TikTok" adalah merek dagang ByteDance Ltd.
+- "Instagram" dan "WhatsApp" adalah merek dagang Meta Platforms, Inc.
 - "Motion Photo" dan "Android" adalah merek dagang Google LLC.
 
 Nama-nama tersebut digunakan **semata-mata untuk keperluan deskriptif**, yaitu

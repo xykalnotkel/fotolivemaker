@@ -78,7 +78,7 @@ class HomeActivity : AppCompatActivity() {
     private fun paintBanner(info: UpdateCheck.Info?) {
         val show = info?.newer == true && !UpdateCheck.isDismissed(this, info.tag)
         b.updateBanner.visibility = if (show) View.VISIBLE else View.GONE
-        if (show && info != null) {
+        if (show) {
             b.tvUpdateLabel.text = "Update tersedia"
             b.tvUpdateVer.text = info.tag.removePrefix("v")
         }

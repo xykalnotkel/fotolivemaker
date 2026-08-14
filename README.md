@@ -38,6 +38,11 @@ Download berkas `.apk` di bagian **Assets**, buka, lalu izinkan
 
 Kamu juga bisa share video dari galeri → pilih **Foto Live**.
 
+Di layar hasil tersedia tombol TikTok, Instagram Story, WhatsApp/WA Business,
+dan aplikasi lain. Jalur ini membagikan MP4 agar geraknya tidak hilang saat
+aplikasi tujuan memproses ulang media. Untuk label LIVE, pilih Motion Photo
+langsung dari picker aplikasi tujuan.
+
 ### Tes hasilnya
 1. Buka **Galeri bawaan** — kalau ada ikon Motion/Live dan bergerak saat ditahan → format sudah benar
 2. Buka **TikTok → + → Upload** → pilih fotonya langsung dari galeri. Jangan lewat tombol Bagikan.
@@ -121,7 +126,10 @@ app/src/main/java/livefoto/xystudio/app/
 - Nama hasil mengikuti pola `...MP.jpg` yang disarankan spesifikasi Android
 - Output SOURCE dibatasi maksimal 4K; filter Bersih dibatasi Full HD agar aman dari OOM
 - minSdk 24 (Android 7.0), compile/targetSdk 37 (Android 17)
-- Splash animasi dapat dimatikan lewat Pengaturan
+- Splash system memakai kartu editor portrait, dapat dimatikan, dan mengikuti Reduce Motion
+- Ikon antarmuka memakai Material Symbols Rounded; logo sosial memakai path brand resmi
+- Ilustrasi transparan diproses dengan rembg AI dan disimpan sebagai WebP
+- Hasil encoder diverifikasi ulang dimensi dan durasinya sebelum disimpan
 
 ### Kalau build gagal
 Buka run yang merah di tab Actions. Kalau step "Tes unit" gagal, laporan
@@ -142,7 +150,8 @@ Izin `INTERNET` dipakai untuk cek versi GitHub saat beranda aktif (maksimal
 sekali per 24 jam) dan mengunduh APK setelah kamu mengetuk banner. Tidak ada
 background worker dan video tidak pernah diunggah. Cek `AndroidManifest.xml`.
 
-**Tidak berafiliasi** dengan TikTok, ByteDance, Apple, Google, maupun Samsung.
+**Tidak berafiliasi** dengan TikTok, ByteDance, Instagram, WhatsApp, Meta,
+Apple, Google, maupun Samsung.
 "Live Photo" merek dagang Apple Inc. · "TikTok" merek dagang ByteDance Ltd. ·
 "Motion Photo" dan "Android" merek dagang Google LLC. Dipakai hanya untuk
 keperluan deskriptif.

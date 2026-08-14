@@ -290,7 +290,7 @@
             android:layout_height="match_parent"
             android:orientation="vertical"
             android:gravity="center"
-            android:background="?attr/selectableItemBackground">
+            android:background="@drawable/bg_tool_state">
 
             <ImageView
                 android:id="@+id/iconRatio"
@@ -317,7 +317,7 @@
             android:layout_height="match_parent"
             android:orientation="vertical"
             android:gravity="center"
-            android:background="?attr/selectableItemBackground">
+            android:background="@drawable/bg_tool_state">
 
             <ImageView
                 android:id="@+id/iconEnhance"
@@ -344,7 +344,7 @@
             android:layout_height="match_parent"
             android:orientation="vertical"
             android:gravity="center"
-            android:background="?attr/selectableItemBackground">
+            android:background="@drawable/bg_tool_state">
 
             <ImageView
                 android:id="@+id/iconStab"
@@ -371,7 +371,7 @@
             android:layout_height="match_parent"
             android:orientation="vertical"
             android:gravity="center"
-            android:background="?attr/selectableItemBackground">
+            android:background="@drawable/bg_tool_state">
 
             <ImageView
                 android:id="@+id/iconRes"

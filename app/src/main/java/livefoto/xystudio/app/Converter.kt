@@ -580,6 +580,32 @@ object Converter {
         return stream.toByteArray()
     }
 
+    private data class EncodedVideoInfo(
+        val width: Int,
+        val height: Int,
+        val durationMs: Long
+    )
+
+    private fun inspectEncodedVideo(file: File): EncodedVideoInfo {
+        val retriever = MediaMetadataRetriever()
+        return try {
+            retriever.setDataSource(file.absolutePath)
+            val rawW = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH)
+                ?.toIntOrNull() ?: 0
+            val rawH = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT)
+                ?.toIntOrNull() ?: 0
+            val rotation = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_ROTATION)
+                ?.toIntOrNull() ?: 0
+            val (width, height) = if (rotation == 90 || rotation == 270) rawH to rawW
+            else rawW to rawH
+            val duration = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)
+                ?.toLongOrNull() ?: 0L
+            EncodedVideoInfo(width, height, duration)
+        } finally {
+            runCatching { retriever.release() }
+        }
+    }
+
     private suspend fun transcodeClip(
         context: Context,
         uri: Uri,
@@ -650,11 +676,23 @@ object Converter {
                     override fun onCompleted(composition: Composition, result: ExportResult) {
                         stopPolling()
                         try {
+                            val info = inspectEncodedVideo(outFile)
+                            check(
+                                kotlin.math.abs(info.width - outW) <= 2 &&
+                                    kotlin.math.abs(info.height - outH) <= 2
+                            ) {
+                                "Resolusi encoder ${info.width}x${info.height}, target ${outW}x${outH}"
+                            }
+                            check(info.durationMs > 0L) { "Durasi hasil encode tidak valid" }
                             val bytes = outFile.readBytes()
-                            log("Encode selesai: ${bytes.size / 1024} KB")
+                            log(
+                                "Encode terverifikasi: ${info.width}x${info.height}, " +
+                                    "${info.durationMs} ms, ${bytes.size / 1024} KB"
+                            )
                             outFile.delete()
                             cont.resume(bytes)
                         } catch (e: Exception) {
+                            outFile.delete()
                             cont.resumeWithException(e)
                         }
                     }

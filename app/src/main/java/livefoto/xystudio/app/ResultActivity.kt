@@ -9,8 +9,9 @@ import android.os.Bundle
 import android.view.MotionEvent
 import android.view.View
 import android.widget.Toast
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.FileProvider
+import androidx.core.net.toUri
 import androidx.lifecycle.lifecycleScope
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.common.MediaItem
@@ -57,11 +58,18 @@ class ResultActivity : AppCompatActivity() {
         setContentView(b.root)
         Settings.applyAccessibility(this, b.root)
 
-        savedUri = intent.getStringExtra(EXTRA_URI)?.let(Uri::parse)
+        savedUri = intent.getStringExtra(EXTRA_URI)?.toUri()
 
         b.btnClose.setOnClickListener { finish() }
         b.btnAgain.setOnClickListener { finish() }
-        b.btnShare.setOnClickListener { share() }
+        b.btnShare.setOnClickListener { shareVideoGeneric() }
+        b.btnTikTok.setOnClickListener { shareVideoToPackage(
+            listOf("com.zhiliaoapp.musically", "com.ss.android.ugc.trill"), "TikTok"
+        ) }
+        b.btnInstagram.setOnClickListener { shareToInstagramStory() }
+        b.btnWhatsApp.setOnClickListener { shareVideoToPackage(
+            listOf("com.whatsapp", "com.whatsapp.w4b"), "WhatsApp"
+        ) }
         b.btnGallery.setOnClickListener { openInGallery() }
         b.btnRecheck.setOnClickListener { runVerification() }
 
@@ -312,42 +320,70 @@ class ResultActivity : AppCompatActivity() {
         }
     }
 
-    /**
-     * Bagikan berkas Motion Photo apa adanya.
-     *
-     * Diberi peringatan lebih dulu, karena banyak aplikasi (termasuk TikTok)
-     * memproses ulang gambar yang diterima lewat share sehingga bagian
-     * videonya terbuang dan hasilnya jadi foto diam.
-     */
-    private fun share() {
-        AlertDialog.Builder(this)
-            .setTitle("Bagikan Live Photo")
-            .setMessage(
-                "Banyak aplikasi memproses ulang gambar yang dikirim lewat " +
-                    "tombol bagikan, sehingga bagian videonya hilang dan yang " +
-                    "sampai cuma foto diam.\n\n" +
-                    "Supaya tetap jadi Live Photo, pilih berkasnya langsung " +
-                    "dari galeri di dalam aplikasi tujuan."
-            )
-            .setPositiveButton("Tetap bagikan") { _, _ -> doShare() }
-            .setNegativeButton("Batal", null)
-            .show()
+    /** Media sosial menerima MP4 agar gerak tidak hilang saat aplikasi tujuan re-encode. */
+    private fun shareVideoUri(): Uri? {
+        val file = clipFile
+        if (file == null || !file.exists()) {
+            Toast.makeText(this, "Video share masih disiapkan", Toast.LENGTH_SHORT).show()
+            return null
+        }
+        return FileProvider.getUriForFile(this, "$packageName.files", file)
     }
 
-    private fun doShare() {
-        val uri = savedUri ?: return
+    private fun installedPackage(candidates: List<String>): String? =
+        candidates.firstOrNull { packageManager.getLaunchIntentForPackage(it) != null }
+
+    private fun baseVideoShare(uri: Uri) = Intent(Intent.ACTION_SEND).apply {
+        type = "video/mp4"
+        putExtra(Intent.EXTRA_STREAM, uri)
+        clipData = android.content.ClipData.newRawUri("Foto Live video", uri)
+        addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+    }
+
+    private fun shareVideoToPackage(candidates: List<String>, label: String) {
+        val uri = shareVideoUri() ?: return
+        val target = installedPackage(candidates)
+        if (target == null) {
+            Toast.makeText(this, "$label belum terpasang", Toast.LENGTH_SHORT).show()
+            shareVideoGeneric()
+            return
+        }
+        grantUriPermission(target, uri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
         runCatching {
-            startActivity(
-                Intent.createChooser(
-                    Intent(Intent.ACTION_SEND).apply {
-                        type = "image/jpeg"
-                        putExtra(Intent.EXTRA_STREAM, uri)
-                        addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                    }, "Bagikan Live Photo"
-                )
-            )
+            startActivity(baseVideoShare(uri).setPackage(target))
         }.onFailure {
-            Toast.makeText(this, "Tidak bisa membagikan", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Tidak bisa membuka $label", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun shareToInstagramStory() {
+        val uri = shareVideoUri() ?: return
+        val target = installedPackage(listOf("com.instagram.android"))
+        if (target == null) {
+            Toast.makeText(this, "Instagram belum terpasang", Toast.LENGTH_SHORT).show()
+            shareVideoGeneric()
+            return
+        }
+        grantUriPermission(target, uri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        val story = Intent("com.instagram.share.ADD_TO_STORY").apply {
+            setDataAndType(uri, "video/mp4")
+            setPackage(target)
+            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        }
+        runCatching {
+            if (story.resolveActivity(packageManager) != null) startActivity(story)
+            else startActivity(baseVideoShare(uri).setPackage(target))
+        }.onFailure {
+            Toast.makeText(this, "Tidak bisa membuka Instagram Story", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun shareVideoGeneric() {
+        val uri = shareVideoUri() ?: return
+        runCatching {
+            startActivity(Intent.createChooser(baseVideoShare(uri), "Bagikan video"))
+        }.onFailure {
+            Toast.makeText(this, "Tidak ada aplikasi untuk membagikan video", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -362,7 +398,8 @@ class ResultActivity : AppCompatActivity() {
         b.playerView.player = null
         stillBitmap?.takeIf { !it.isRecycled }?.recycle()
         stillBitmap = null
-        clipFile?.delete()
+        // File share dipertahankan di cache sampai sesi berikutnya agar aplikasi
+        // tujuan sempat membaca URI walaupun activity ini dihancurkan.
         clipFile = null
         super.onDestroy()
     }

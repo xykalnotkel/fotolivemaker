@@ -32,8 +32,11 @@ class SettingsActivity : AppCompatActivity() {
 
         val o = Settings.load(this)
         b.tvRes.text = o.res.label
+        b.tvRatio.text = o.aspectRatio.label
         b.tvQuality.text = "${o.jpegQuality}%"
         b.tvTheme.text = themeLabel(Settings.theme(this))
+        b.swDefaultEnhance.isChecked = o.enhance
+        b.swDefaultStabilize.isChecked = o.stabilize
 
         b.swKeepScreenOn.isChecked = Settings.keepScreenOn(this)
         b.swSplash.isChecked = Settings.showSplash(this)
@@ -44,6 +47,10 @@ class SettingsActivity : AppCompatActivity() {
         b.rowRes.setOnClickListener {
             Settings.triggerHaptic(it)
             pickRes()
+        }
+        b.rowRatio.setOnClickListener {
+            Settings.triggerHaptic(it)
+            pickRatio()
         }
         b.rowQuality.setOnClickListener {
             Settings.triggerHaptic(it)
@@ -62,6 +69,16 @@ class SettingsActivity : AppCompatActivity() {
             deleteAllResults()
         }
 
+        b.swDefaultEnhance.setOnCheckedChangeListener { v, enabled ->
+            Settings.triggerHaptic(v)
+            persist(enhance = enabled)
+            notify(if (enabled) "Bersih aktif secara bawaan" else "Bersih bawaan dimatikan")
+        }
+        b.swDefaultStabilize.setOnCheckedChangeListener { v, enabled ->
+            Settings.triggerHaptic(v)
+            persist(stabilize = enabled)
+            notify(if (enabled) "Stabilizer aktif secara bawaan" else "Stabilizer bawaan dimatikan")
+        }
         b.swKeepScreenOn.setOnCheckedChangeListener { v, enabled ->
             Settings.triggerHaptic(v)
             Settings.setKeepScreenOn(this, enabled)
@@ -168,6 +185,33 @@ class SettingsActivity : AppCompatActivity() {
         }
     }
 
+    private fun pickRatio() {
+        val items = Converter.AspectRatio.entries.toTypedArray()
+        val choices = items.map {
+            val description = when (it) {
+                Converter.AspectRatio.ORIGINAL -> "Ikuti rasio video sumber"
+                Converter.AspectRatio.RATIO_9_16 -> "Portrait penuh untuk TikTok, Reels, dan Status"
+                Converter.AspectRatio.RATIO_3_4 -> "Portrait klasik"
+                Converter.AspectRatio.RATIO_1_1 -> "Persegi untuk feed"
+                Converter.AspectRatio.RATIO_4_3 -> "Landscape klasik"
+                Converter.AspectRatio.RATIO_16_9 -> "Landscape layar lebar"
+            }
+            CustomDialogs.ChoiceItem(it.label, description)
+        }
+        CustomDialogs.showChoiceDialog(
+            this,
+            title = "Rasio Bawaan",
+            subtitle = "Dipakai ketika editor dibuka",
+            choices = choices,
+            selectedIndex = items.indexOf(Settings.load(this).aspectRatio)
+        ) { which ->
+            val ratio = items[which]
+            b.tvRatio.text = ratio.label
+            persist(ratio = ratio)
+            notify("Rasio bawaan: ${ratio.label}")
+        }
+    }
+
     private fun pickRes() {
         val items = Converter.Res.entries.toTypedArray()
         val choices = items.map {
@@ -234,13 +278,22 @@ class SettingsActivity : AppCompatActivity() {
         }
     }
 
-    private fun persist(res: Converter.Res? = null, quality: Int? = null) {
+    private fun persist(
+        res: Converter.Res? = null,
+        ratio: Converter.AspectRatio? = null,
+        quality: Int? = null,
+        enhance: Boolean? = null,
+        stabilize: Boolean? = null
+    ) {
         val cur = Settings.load(this)
         Settings.save(
             this,
             cur.copy(
                 res = res ?: cur.res,
-                jpegQuality = quality ?: cur.jpegQuality
+                aspectRatio = ratio ?: cur.aspectRatio,
+                jpegQuality = quality ?: cur.jpegQuality,
+                enhance = enhance ?: cur.enhance,
+                stabilize = stabilize ?: cur.stabilize
             )
         )
     }

@@ -104,7 +104,14 @@ class ProcessActivity : AppCompatActivity() {
         lifecycleScope.launch {
             val at = (hint?.startMs ?: 0L) + (hint?.keyframeOffsetMs ?: 0L)
             val bmp = withContext(Dispatchers.IO) {
-                Converter.extractFrame(this@ProcessActivity, uri, at, opts, 720, 720)
+                val (sourceW, sourceH) = Converter.videoSize(this@ProcessActivity, uri)
+                val (outputW, outputH) = Converter.calculateDimensions(sourceW, sourceH, opts)
+                val scale = minOf(1f, 720f / maxOf(outputW, outputH).coerceAtLeast(1))
+                val previewW = Converter.evenUp(outputW * scale)
+                val previewH = Converter.evenUp(outputH * scale)
+                Converter.extractFrame(
+                    this@ProcessActivity, uri, at, opts, previewW, previewH
+                )
             }
             if (bmp != null) fitPreview(bmp)
         }

@@ -15,6 +15,11 @@ runtime dependencies are distributed under the Apache License, Version 2.0:
 - AndroidX Media3 Transformer, Effect, Common, ExoPlayer, and UI
   (androidx.media3:media3-*)
 
+Interface glyphs are based on Material Symbols Rounded, licensed under Apache
+License 2.0. TikTok, Instagram, and WhatsApp brand glyph paths are sourced from
+Simple Icons (CC0 1.0); all brand names and logos remain trademarks of their
+respective owners. Generated product illustrations are original project assets.
+
 Full dependency metadata and version pins are in app/build.gradle.kts. The
 Apache License, Version 2.0 for this application and the listed dependencies
 is provided in LICENSE. Android, Kotlin, and Media3 names are trademarks of

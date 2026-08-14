@@ -1,33 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Clean Graphite + Cobalt. Netral, tajam, tanpa dominasi ungu. -->
-    <color name="paper">#FFF6F8FC</color>
+    <!-- Graphite + deep teal: tenang, profesional, dan fokus pada konten. -->
+    <color name="paper">#FFF4F7F6</color>
     <color name="paper_dim">#FFFFFFFF</color>
-    <color name="ink">#FF0F172A</color>
+    <color name="ink">#FF17201F</color>
     <color name="on_ink">#FFFFFFFF</color>
+    <color name="text_hi">#FF17201F</color>
+    <color name="text_mid">#FF4E5D5A</color>
+    <color name="text_dim">#FF71807D</color>
+    <color name="line">#FFDCE5E2</color>
+    <color name="line_strong">#FFBECBC7</color>
+    <color name="accent_primary">#FF0F8F7F</color>
+    <color name="accent_glow">#330F8F7F</color>
+    <color name="accent_soft">#140F8F7F</color>
+    <color name="accent_metal">#FF2DD4BF</color>
+    <color name="icon_tint">#FF33413F</color>
+    <color name="ok">#FF168A62</color>
+    <color name="bad">#FFDC4C4C</color>
+    <color name="hero_start">#FF101B1A</color>
+    <color name="hero_mid">#FF164B46</color>
+    <color name="hero_end">#FF0F766E</color>
+    <color name="hero_sub">#FFD9F7F0</color>
+    <color name="hero_line">#6642D6C2</color>
 
-    <color name="text_hi">#FF101828</color>
-    <color name="text_mid">#FF475467</color>
-    <color name="text_dim">#FF667085</color>
-    <color name="line">#FFE4E7EC</color>
-    <color name="line_strong">#FFD0D5DD</color>
-
-    <color name="accent_primary">#FF2563EB</color>
-    <color name="accent_glow">#332563EB</color>
-    <color name="accent_soft">#142563EB</color>
-    <color name="accent_metal">#FF38BDF8</color>
-    <color name="icon_tint">#FF344054</color>
-
-    <color name="ok">#FF12B76A</color>
-    <color name="bad">#FFF04438</color>
-
-    <color name="hero_start">#FF081221</color>
-    <color name="hero_mid">#FF123B73</color>
-    <color name="hero_end">#FF155E75</color>
-    <color name="hero_sub">#FFDDEAFE</color>
-    <color name="hero_line">#665B8DEF</color>
-
-    <!-- Palet struktural High Contrast. Bukan sekadar pembesaran teks. -->
     <color name="hc_paper">#FFFFFFFF</color>
     <color name="hc_surface">#FFFFFFFF</color>
     <color name="hc_ink">#FF000000</color>
@@ -36,7 +31,7 @@
     <color name="hc_text_mid">#FF111111</color>
     <color name="hc_text_dim">#FF242424</color>
     <color name="hc_line">#FF000000</color>
-    <color name="hc_accent">#FF0047FF</color>
-    <color name="hc_accent_soft">#1F0047FF</color>
+    <color name="hc_accent">#FF00796B</color>
+    <color name="hc_accent_soft">#1F00796B</color>
     <color name="hc_icon">#FF000000</color>
 </resources>

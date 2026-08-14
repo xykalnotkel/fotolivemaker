@@ -28,6 +28,18 @@ Saat rilis, pindahkan ke heading versi + tanggal.
 - Patch version dinaikkan dari tag semver terbaru; pull request tidak membuat release.
 - Isi bagian Unreleased ini otomatis menjadi release notes dan CHANGELOG.md ikut dilampirkan.
 
+### Revisi kualitas dan share
+- Bug batas array pada block matcher stabilizer diperbaiki; sebelumnya radius maksimum dapat mematikan stabilisasi karena out-of-bounds.
+- Hasil encode sekarang diverifikasi ulang dimensi dan durasinya sebelum Motion Photo disimpan.
+- Preview layar export mengikuti rasio crop yang dipilih, bukan lagi dipaksa kotak 720x720.
+- Settings mendapat rasio, Bersih, dan Stabilizer bawaan.
+- Share MP4 langsung ditambahkan untuk TikTok, Instagram Story, WhatsApp/WA Business, dan aplikasi lain.
+- Logo sosial memakai path brand resmi dan package routing otomatis dengan fallback aman.
+- Seluruh ikon antarmuka dimigrasikan ke Material Symbols Rounded yang konsisten.
+- Palet diganti menjadi graphite dan deep teal untuk light/dark mode.
+- Ilustrasi dibuat ulang tanpa wajah, diproses rembg AI, dan disimpan sebagai WebP transparan; seluruh PNG dihapus.
+- Splash memakai kartu editor portrait baru yang selaras dengan timeline.
+
 ## [v1.2.1](https://github.com/xykalnotkel/fotolivemaker/releases/tag/v1.2.1) — 2026-08-14
 
 ### Perbaikan inti

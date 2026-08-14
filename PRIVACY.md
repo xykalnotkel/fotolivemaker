@@ -64,6 +64,8 @@ video yang kamu pilih**, tanpa memindai galeri.
   sepenuhnya menjadi milikmu.
 - **File sementara** dibuat di cache internal selama proses konversi,
   lalu bisa dibersihkan dari Pengaturan.
+- Tombol sosial memberi URI MP4 sementara hanya ke aplikasi tujuan yang kamu
+  pilih (TikTok, Instagram, WhatsApp, atau aplikasi lain).
 - Tidak ada cadangan ke cloud.
 
 ## Layanan pihak ketiga

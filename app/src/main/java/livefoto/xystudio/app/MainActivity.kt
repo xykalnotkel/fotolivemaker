@@ -3,6 +3,7 @@ package livefoto.xystudio.app
 import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.content.res.ColorStateList
 import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Build
@@ -14,6 +15,7 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.core.widget.ImageViewCompat
 import androidx.lifecycle.lifecycleScope
 import livefoto.xystudio.app.databinding.ActivityMainBinding
 import kotlinx.coroutines.Dispatchers
@@ -105,13 +107,24 @@ class MainActivity : AppCompatActivity() {
         val muted = Settings.color(this, R.attr.appTextMid)
         val high = Settings.color(this, R.attr.appTextHigh)
         val isRatioActive = opts.aspectRatio != Converter.AspectRatio.RATIO_9_16
+        val isResActive = opts.res != Converter.Res.P1080
+
+        b.toolRatio.isSelected = isRatioActive
+        b.toolEnhance.isSelected = opts.enhance
+        b.toolStab.isSelected = opts.stabilize
+        b.toolRes.isSelected = isResActive
 
         b.lblRatio.setTextColor(if (isRatioActive) accent else high)
         b.lblRatio.text = opts.aspectRatio.label
         b.lblEnhance.setTextColor(if (opts.enhance) accent else muted)
         b.lblStab.setTextColor(if (opts.stabilize) accent else muted)
         b.lblRes.text = opts.res.label
-        b.lblRes.setTextColor(high)
+        b.lblRes.setTextColor(if (isResActive) accent else high)
+
+        ImageViewCompat.setImageTintList(b.iconRatio, ColorStateList.valueOf(if (isRatioActive) accent else high))
+        ImageViewCompat.setImageTintList(b.iconEnhance, ColorStateList.valueOf(if (opts.enhance) accent else muted))
+        ImageViewCompat.setImageTintList(b.iconStab, ColorStateList.valueOf(if (opts.stabilize) accent else muted))
+        ImageViewCompat.setImageTintList(b.iconRes, ColorStateList.valueOf(if (isResActive) accent else high))
     }
 
     private fun pickRatio() {

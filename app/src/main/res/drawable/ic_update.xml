@@ -1,13 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
-<vector xmlns:android="http://schemas.android.com/apk/res/android"
-    android:width="96dp" android:height="96dp"
-    android:viewportWidth="96" android:viewportHeight="96">
-    <path android:fillColor="?attr/appAccentSoft"
-        android:pathData="M48,6a42,42 0,1 0,0 84a42,42 0,1 0,0 -84" />
-    <path android:fillColor="@android:color/transparent"
-        android:strokeColor="?attr/appAccent" android:strokeWidth="6"
-        android:strokeLineCap="round" android:strokeLineJoin="round"
-        android:pathData="M25,43 A24,24 0,0 1,68 31 M68,31 L68,18 M68,31 L55,31 M71,53 A24,24 0,0 1,28 65 M28,65 L28,78 M28,65 L41,65" />
-    <path android:fillColor="?attr/appAccent"
-        android:pathData="M48,48m-5,0a5,5 0,1 1,10 0a5,5 0,1 1,-10 0" />
+<vector xmlns:android="http://schemas.android.com/apk/res/android" android:width="24dp" android:height="24dp" android:viewportWidth="24" android:viewportHeight="24" android:tint="?attr/appAccent">
+    <path android:fillColor="#FFFFFFFF" android:pathData="M4 20q-.825 0-1.412-.587T2 18V6q0-.825.588-1.412T4 4h4q.425 0 .713.288T9 5t-.288.713T8 6H4v12h16V6h-4q-.425 0-.712-.288T15 5t.288-.712T16 4h4q.825 0 1.413.588T22 6v12q0 .825-.587 1.413T20 20zm7-8.4V5q0-.425.288-.712T12 4t.713.288T13 5v6.6l1.9-1.9q.275-.275.7-.275t.7.275t.275.7t-.275.7l-3.6 3.6q-.3.3-.7.3t-.7-.3l-3.6-3.6q-.275-.275-.275-.7t.275-.7t.7-.275t.7.275z" />
 </vector>

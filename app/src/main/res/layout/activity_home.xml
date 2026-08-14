@@ -276,8 +276,8 @@
 
             <ImageView
                 android:id="@+id/imgUpdate"
-                android:layout_width="104dp"
-                android:layout_height="88dp"
+                android:layout_width="52dp"
+                android:layout_height="52dp"
                 android:src="@drawable/ic_update"
                 android:scaleType="fitCenter"
                 android:contentDescription="@null" />

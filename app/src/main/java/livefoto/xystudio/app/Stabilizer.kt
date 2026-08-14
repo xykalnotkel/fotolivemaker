@@ -222,6 +222,9 @@ object Stabilizer {
         return (maxVal - minVal) >= 12
     }
 
+    fun safeSearchMax(requestedMax: Int, dimension: Int, searchRadius: Int): Int =
+        requestedMax.coerceAtMost(dimension - 1 - searchRadius)
+
     private fun estimateBlockShift(
         a: IntArray, b: IntArray,
         x0: Int, x1: Int, y0: Int, y1: Int
@@ -230,9 +233,11 @@ object Stabilizer {
         var bestDy = 0
         var bestCost = Long.MAX_VALUE
         val xMin = x0.coerceAtLeast(SEARCH)
-        val xMax = x1.coerceAtMost(ANALYZE_W - SEARCH)
+        // Batas terakhir wajib -1; tanpa ini dx/dy maksimum membaca indeks
+        // ANALYZE_W/ANALYZE_H dan stabilizer diam-diam dibatalkan oleh OOB.
+        val xMax = safeSearchMax(x1, ANALYZE_W, SEARCH)
         val yMin = y0.coerceAtLeast(SEARCH)
-        val yMax = y1.coerceAtMost(ANALYZE_H - SEARCH)
+        val yMax = safeSearchMax(y1, ANALYZE_H, SEARCH)
 
         if (xMax <= xMin || yMax <= yMin) return 0 to 0
 
