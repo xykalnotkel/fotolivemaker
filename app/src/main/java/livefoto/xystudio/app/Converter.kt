@@ -880,9 +880,10 @@ object Converter {
         return Result(savedUri, p, check.log, motionPhoto.size)
     }
 
+
     data class VideoResult(val uri: Uri, val plan: Plan, val width: Int, val height: Int, val bytes: Long)
 
-    private fun saveVideoToGallery(context: Context, file: File): Uri {
+    private fun saveVideoToGallery(context: Context, file: java.io.File): Uri {
         val name = "VID_${System.currentTimeMillis()}.mp4"
         val resolver = context.contentResolver
         val values = ContentValues().apply {
@@ -945,12 +946,6 @@ object Converter {
         }
 
         log("Mulai transcode video HD/UHD...")
-        val mp4File = withContext(Dispatchers.IO) {
-            val outDir = File(context.cacheDir, "transcode").apply { mkdirs() }
-            File(outDir, "video_${System.currentTimeMillis()}.mp4")
-        }
-
-        // Reuse transcodeClip logic but save file directly
         val mp4Bytes = try {
             transcodeClip(context, uri, p, opts, outW, outH, stab, log) { enc ->
                 progress(18 + enc.coerceIn(0, 100) * 76 / 100)
@@ -967,10 +962,9 @@ object Converter {
             }
         }
 
-        // Write bytes to temp file then save to gallery
         val tempFile = withContext(Dispatchers.IO) {
-            val outDir = File(context.cacheDir, "transcode").apply { mkdirs() }
-            val f = File(outDir, "export_${System.currentTimeMillis()}.mp4")
+            val outDir = java.io.File(context.cacheDir, "transcode").apply { mkdirs() }
+            val f = java.io.File(outDir, "export_${System.currentTimeMillis()}.mp4")
             f.writeBytes(mp4Bytes)
             f
         }
@@ -985,7 +979,6 @@ object Converter {
         return VideoResult(savedUri, p, info.width, info.height, mp4Bytes.size.toLong())
     }
 
-    private fun saveToGallery(context: Context, data: ByteArray): Uri {
     private fun saveToGallery(context: Context, data: ByteArray): Uri {
         // Motion Photo Format 1.0: nama harus berakhir "MP" sebelum ekstensi.
         val name = "MP_${System.currentTimeMillis()}MP.jpg"

@@ -160,6 +160,8 @@ class MainActivity : AppCompatActivity() {
             when (it) {
                 Converter.Res.P720 -> CustomDialogs.ChoiceItem("720p (Hemat)", "Proses lebih cepat & ukuran berkas lebih ringan")
                 Converter.Res.P1080 -> CustomDialogs.ChoiceItem("1080p (Full HD)", "Kualitas tajam & seimbang (sangat direkomendasikan)")
+                Converter.Res.P1440 -> CustomDialogs.ChoiceItem("2K QHD", "Lebih tajam untuk layar besar")
+                Converter.Res.P2160 -> CustomDialogs.ChoiceItem("4K UHD", "Ultra HD - file besar")
                 Converter.Res.SOURCE -> CustomDialogs.ChoiceItem(
                     "Resolusi Asli" + if (srcH > 0) " (${srcW}x${srcH})" else "",
                     "Mengikuti resolusi maksimal video tanpa downscaling"
