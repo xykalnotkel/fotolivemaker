@@ -604,7 +604,90 @@
                 </LinearLayout>
             </LinearLayout>
 
+
+            <!-- ====== VIDEO EDITOR (CapCut/Alight Motion) ====== -->
+            <TextView
+                style="@style/Label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:text="Video Editor - HD/UHD &amp; Layers" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginTop="10dp"
+                android:background="@drawable/bg_card"
+                android:paddingStart="18dp"
+                android:paddingEnd="18dp">
+
+                <LinearLayout android:id="@+id/rowExportFormat" android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:minHeight="52dp" android:gravity="center_vertical" android:background="?attr/selectableItemBackground">
+                    <ImageView android:layout_width="18dp" android:layout_height="18dp" android:src="@drawable/ic_export" />
+                    <TextView android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:layout_marginStart="10dp"
+                        android:text="Format Export" android:textColor="?attr/appTextHigh" android:textSize="14sp" />
+                    <TextView android:id="@+id/tvExportFormat" android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:textColor="?attr/appAccent" android:textSize="13sp" android:textStyle="bold" android:text="MP4" />
+                </LinearLayout>
+
+                <View android:layout_width="match_parent" android:layout_height="1dp" android:background="?attr/appLine" />
+
+                <LinearLayout android:id="@+id/rowUhdBitrate" android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:minHeight="52dp" android:gravity="center_vertical" android:background="?attr/selectableItemBackground">
+                    <ImageView android:layout_width="18dp" android:layout_height="18dp" android:src="@drawable/ic_tool_res" />
+                    <TextView android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:layout_marginStart="10dp"
+                        android:text="Bitrate UHD" android:textColor="?attr/appTextHigh" android:textSize="14sp" />
+                    <TextView android:id="@+id/tvUhdBitrate" android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:textColor="?attr/appAccent" android:textSize="13sp" android:textStyle="bold" android:text="20 Mbps" />
+                </LinearLayout>
+
+                <View android:layout_width="match_parent" android:layout_height="1dp" android:background="?attr/appLine" />
+
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:minHeight="56dp" android:gravity="center_vertical">
+                    <LinearLayout android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:orientation="vertical">
+                        <TextView android:text="Hardware Acceleration" android:textColor="?attr/appTextHigh" android:textSize="14sp" />
+                        <TextView android:text="Pakai GPU untuk encode HD/UHD" android:textColor="?attr/appTextDim" android:textSize="11sp" />
+                    </LinearLayout>
+                    <com.google.android.material.materialswitch.MaterialSwitch android:id="@+id/swHwAccel" android:layout_width="wrap_content" android:layout_height="wrap_content" />
+                </LinearLayout>
+
+                <View android:layout_width="match_parent" android:layout_height="1dp" android:background="?attr/appLine" />
+
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:minHeight="56dp" android:gravity="center_vertical">
+                    <LinearLayout android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:orientation="vertical">
+                        <TextView android:text="NDK HD (C++ .so)" android:textColor="?attr/appTextHigh" android:textSize="14sp" />
+                        <TextView android:text="Bersih via native libfotolive_hd.so" android:textColor="?attr/appTextDim" android:textSize="11sp" />
+                    </LinearLayout>
+                    <com.google.android.material.materialswitch.MaterialSwitch android:id="@+id/swNdk" android:layout_width="wrap_content" android:layout_height="wrap_content" />
+                </LinearLayout>
+
+                <View android:layout_width="match_parent" android:layout_height="1dp" android:background="?attr/appLine" />
+
+                <LinearLayout android:id="@+id/rowLayerBlend" android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:minHeight="52dp" android:gravity="center_vertical" android:background="?attr/selectableItemBackground">
+                    <ImageView android:layout_width="18dp" android:layout_height="18dp" android:src="@drawable/ic_tool_crop" />
+                    <TextView android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:layout_marginStart="10dp"
+                        android:text="Layer Blend Mode" android:textColor="?attr/appTextHigh" android:textSize="14sp" />
+                    <TextView android:id="@+id/tvLayerBlend" android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:textColor="?attr/appAccent" android:textSize="13sp" android:textStyle="bold" android:text="Normal" />
+                </LinearLayout>
+
+                <View android:layout_width="match_parent" android:layout_height="1dp" android:background="?attr/appLine" />
+
+                <LinearLayout android:id="@+id/rowCacheLimit" android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:minHeight="52dp" android:gravity="center_vertical" android:background="?attr/selectableItemBackground">
+                    <ImageView android:layout_width="18dp" android:layout_height="18dp" android:src="@drawable/ic_cache" />
+                    <TextView android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:layout_marginStart="10dp"
+                        android:text="Batas Cache" android:textColor="?attr/appTextHigh" android:textSize="14sp" />
+                    <TextView android:id="@+id/tvCacheLimit" android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:textColor="?attr/appAccent" android:textSize="13sp" android:textStyle="bold" android:text="500 MB" />
+                </LinearLayout>
+
+            </LinearLayout>
+
             <!-- ====== INFORMASI ====== -->
+
             <TextView
                 style="@style/Label"
                 android:layout_width="wrap_content"

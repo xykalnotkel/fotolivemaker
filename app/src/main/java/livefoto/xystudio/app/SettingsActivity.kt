@@ -110,6 +110,42 @@ class SettingsActivity : AppCompatActivity() {
             recreate()
         }
 
+
+        b.swHwAccel.isChecked = Settings.hwAccel(this)
+        b.swNdk.isChecked = Settings.ndkEnabled(this)
+        b.tvExportFormat.text = Settings.exportFormat(this)
+        b.tvUhdBitrate.text = "${Settings.uhdBitrate(this)} Mbps"
+        b.tvLayerBlend.text = Settings.layerBlend(this)
+        b.tvCacheLimit.text = "${Settings.cacheLimitMB(this)} MB"
+
+        b.rowExportFormat.setOnClickListener {
+            Settings.triggerHaptic(it)
+            pickExportFormat()
+        }
+        b.rowUhdBitrate.setOnClickListener {
+            Settings.triggerHaptic(it)
+            pickUhdBitrate()
+        }
+        b.rowLayerBlend.setOnClickListener {
+            Settings.triggerHaptic(it)
+            pickLayerBlend()
+        }
+        b.rowCacheLimit.setOnClickListener {
+            Settings.triggerHaptic(it)
+            pickCacheLimit()
+        }
+        b.swHwAccel.setOnCheckedChangeListener { v, enabled ->
+            Settings.triggerHaptic(v)
+            Settings.setHwAccel(this, enabled)
+            notify(if (enabled) "Hardware Accel aktif" else "Hardware Accel mati - pakai CPU")
+        }
+        b.swNdk.setOnCheckedChangeListener { v, enabled ->
+            Settings.triggerHaptic(v)
+            Settings.setNdkEnabled(this, enabled)
+            notify(if (enabled) "NDK HD aktif (.so)" else "NDK HD mati - pakai Kotlin")
+        }
+
+
         b.tvVersion.text = "v${BuildConfig.VERSION_NAME}  ·  build ${BuildConfig.VERSION_CODE}"
 
         b.rowLicense.setOnClickListener {
@@ -263,7 +299,53 @@ class SettingsActivity : AppCompatActivity() {
         }
     }
 
+
+    private fun pickExportFormat() {
+        val fmts = arrayOf("MP4", "GIF", "PNG", "JPG")
+        val choices = fmts.map { CustomDialogs.ChoiceItem(it, "Export sebagai $it") }
+        val cur = fmts.indexOf(Settings.exportFormat(this))
+        CustomDialogs.showChoiceDialog(this, "Format Export", "Pilih format default Video Editor", choices, cur) { which ->
+            Settings.setExportFormat(this, fmts[which])
+            b.tvExportFormat.text = fmts[which]
+            notify("Format export: ${fmts[which]}")
+        }
+    }
+
+    private fun pickUhdBitrate() {
+        val vals = intArrayOf(10, 15, 20, 25, 32)
+        val choices = vals.map { CustomDialogs.ChoiceItem("$it Mbps", if (it>=20) "Kualitas UHD tinggi" else "Hemat") }
+        val cur = vals.indexOf(Settings.uhdBitrate(this)).let { if (it<0) 2 else it }
+        CustomDialogs.showChoiceDialog(this, "Bitrate UHD", "Pilih bitrate untuk 4K/UHD", choices, cur) { which ->
+            Settings.setUhdBitrate(this, vals[which])
+            b.tvUhdBitrate.text = "${vals[which]} Mbps"
+            notify("Bitrate UHD: ${vals[which]} Mbps")
+        }
+    }
+
+    private fun pickLayerBlend() {
+        val blends = arrayOf("Normal", "Multiply", "Screen", "Overlay", "Add", "Subtract")
+        val choices = blends.map { CustomDialogs.ChoiceItem(it, "Mode $it") }
+        val cur = blends.indexOf(Settings.layerBlend(this))
+        CustomDialogs.showChoiceDialog(this, "Layer Blend", "Mode blending antar layer", choices, cur) { which ->
+            Settings.setLayerBlend(this, blends[which])
+            b.tvLayerBlend.text = blends[which]
+            notify("Blend: ${blends[which]}")
+        }
+    }
+
+    private fun pickCacheLimit() {
+        val vals = intArrayOf(200, 500, 1000, 2000)
+        val choices = vals.map { CustomDialogs.ChoiceItem("$it MB", "Batas cache transcode") }
+        val cur = vals.indexOf(Settings.cacheLimitMB(this)).let { if (it<0) 1 else it }
+        CustomDialogs.showChoiceDialog(this, "Batas Cache", "Pilih batas cache", choices, cur) { which ->
+            Settings.setCacheLimitMB(this, vals[which])
+            b.tvCacheLimit.text = "${vals[which]} MB"
+            notify("Cache limit: ${vals[which]} MB")
+        }
+    }
+
     private fun deleteAllResults() {
+
         CustomDialogs.showConfirmDialog(
             this,
             title = "Hapus Semua Hasil?",

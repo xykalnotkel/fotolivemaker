@@ -58,7 +58,7 @@ class LaunchActivity : AppCompatActivity() {
         }
 
         // Durasi splash: biarkan GIF loop ~1.2 detik biar kelihatan modern
-        val delay = 5500L // GIF total 5530ms
+        val delay = 1400L // dipendekin banget biar gak kelamaan, GIF tetep loop
         Handler(Looper.getMainLooper()).postDelayed({
             openHome()
         }, delay)

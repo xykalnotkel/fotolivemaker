@@ -4,391 +4,344 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:background="?attr/appPaper">
 
-    <!-- Top Bar Modern -->
+    <!-- Top Bar - CapCut style minimal -->
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="56dp"
         android:orientation="horizontal"
         android:gravity="center_vertical"
-        android:paddingStart="12dp"
-        android:paddingEnd="16dp"
-        android:paddingTop="12dp"
-        android:paddingBottom="12dp">
+        android:paddingStart="8dp"
+        android:paddingEnd="12dp"
+        android:background="@color/paper_dim">
 
         <ImageView
             android:id="@+id/btnBack"
-            android:layout_width="42dp"
-            android:layout_height="42dp"
-            android:padding="10dp"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:padding="8dp"
             android:src="@drawable/ic_back"
-            android:background="?attr/selectableItemBackgroundBorderless"
             app:tint="?attr/appIconTint"
-            android:contentDescription="Kembali" />
+            android:background="?attr/selectableItemBackgroundBorderless" />
 
         <TextView
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:layout_marginStart="6dp"
-            android:text="Video Editor - HD/UHD"
-            android:textColor="?attr/appTextHigh"
-            android:textSize="18sp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:text="Video Editor"
+            android:textColor="?attr/appInk"
+            android:textSize="17sp"
             android:textStyle="bold"
             android:letterSpacing="-0.02" />
+
+        <TextView
+            android:id="@+id/tvResLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:background="@drawable/bg_pill"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp"
+            android:paddingTop="6dp"
+            android:paddingBottom="6dp"
+            android:text="1080p"
+            android:textColor="?attr/appOnInk"
+            android:textSize="11sp"
+            android:textStyle="bold" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnExportVideo"
             style="@style/Btn.Primary"
             android:layout_width="wrap_content"
-            android:layout_height="40dp"
+            android:layout_height="36dp"
             android:minHeight="0dp"
-            android:paddingStart="14dp"
-            android:paddingEnd="14dp"
-            android:text="EXPORT MP4"
+            android:text="EXPORT"
             android:textSize="12sp"
-            android:contentDescription="Export Live Photo"
             app:icon="@drawable/ic_export"
-            app:iconTint="?attr/appOnInk"
-            app:iconGravity="textStart"
-            app:iconPadding="6dp"
-            app:iconSize="17dp" />
+            app:cornerRadius="18dp" />
     </LinearLayout>
 
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="?attr/appLine" />
+    <View android:layout_width="match_parent" android:layout_height="1dp" android:background="?attr/appLine" />
 
-    <ScrollView
+    <!-- Preview Area - Alight Motion style with layer overlay indicators -->
+    <FrameLayout
+        android:id="@+id/previewHost"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:fillViewport="true"
-        android:scrollbars="none">
+        android:background="#FF000000">
+
+        <FrameLayout
+            android:id="@+id/previewBox"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="center">
+
+            <ImageView
+                android:id="@+id/preview"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scaleType="fitCenter"
+                android:contentDescription="Preview" />
+
+            <TextView
+                android:id="@+id/tvLayerCount"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="top|start"
+                android:layout_margin="12dp"
+                android:background="@drawable/bg_pill"
+                android:padding="8dp"
+                android:text="1 LAYER"
+                android:textColor="?attr/appOnInk"
+                android:textSize="10sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tvTime"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="top|end"
+                android:layout_margin="12dp"
+                android:background="@drawable/bg_pill_outline"
+                android:padding="8dp"
+                android:text="00:00 / 00:03"
+                android:textColor="#FFFFFFFF"
+                android:textSize="10sp"
+                android:fontFamily="monospace" />
+        </FrameLayout>
+    </FrameLayout>
+
+    <!-- Timeline Layers - CapCut multi-track -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="180dp"
+        android:orientation="vertical"
+        android:background="@color/paper_dim"
+        android:paddingTop="8dp">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:paddingStart="20dp"
-            android:paddingEnd="20dp"
-            android:paddingTop="16dp"
-            android:paddingBottom="20dp">
-
-            <!-- Frame Preview Container Adaptif -->
-            <FrameLayout
-                android:id="@+id/previewHost"
-                android:layout_width="match_parent"
-                android:layout_height="270dp"
-                android:background="@drawable/bg_preview">
-
-                <FrameLayout
-                    android:id="@+id/previewBox"
-                    android:layout_width="match_parent"
-                    tools:ignore="UselessParent"
-                    android:layout_height="match_parent"
-                    android:layout_gravity="center">
-
-                    <ImageView
-                        android:id="@+id/preview"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:scaleType="centerCrop"
-                        android:contentDescription="Preview frame kunci" />
-
-                    <!-- Badge Live Indikator Modern -->
-                    <LinearLayout
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="top|start"
-                        android:layout_margin="10dp"
-                        android:orientation="horizontal"
-                        android:gravity="center_vertical"
-                        android:background="@drawable/bg_pill"
-                        android:paddingStart="10dp"
-                        android:paddingEnd="10dp"
-                        android:paddingTop="5dp"
-                        android:paddingBottom="5dp">
-
-                        <ImageView
-                            android:layout_width="14dp"
-                            android:layout_height="14dp"
-                            android:src="@drawable/ic_livephoto"
-                            app:tint="?attr/appOnInk"
-                            android:contentDescription="@null" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginStart="5dp"
-                            android:text="COVER LIVE"
-                            android:textColor="?attr/appOnInk"
-                            android:textSize="11sp"
-                            android:textStyle="bold"
-                            android:letterSpacing="0.08" />
-                    </LinearLayout>
-                </FrameLayout>
-            </FrameLayout>
-
-            <!-- Card Timeline Frame Editor Visual -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:layout_marginTop="16dp"
-                android:background="@drawable/bg_card"
-                android:padding="18dp">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical">
-
-                    <TextView
-                        style="@style/Label"
-                        android:layout_width="0dp"
-                        android:layout_weight="1"
-                        android:layout_height="wrap_content"
-                        android:text="Timeline Video (3,0 Detik)" />
-
-                    <TextView
-                        android:id="@+id/tvClipHint"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:paddingStart="10dp"
-                        android:paddingEnd="10dp"
-                        android:paddingTop="3dp"
-                        android:paddingBottom="3dp"
-                        android:background="@drawable/bg_hero_chip"
-                        android:textColor="?attr/appAccent"
-                        android:textSize="11sp"
-                        android:textStyle="bold"
-                        android:fontFamily="monospace" />
-                </LinearLayout>
-
-                <livefoto.xystudio.app.TimelineEditorView
-                    android:id="@+id/timeline"
-                    android:layout_width="match_parent"
-                    android:layout_height="116dp"
-                    android:layout_marginTop="12dp"
-                    android:contentDescription="Timeline video: geser bingkai klip dan garis cover" />
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="KLIP"
-                        android:textColor="?attr/appTextDim"
-                        android:textSize="11sp"
-                        android:textStyle="bold"
-                        android:letterSpacing="0.08" />
-
-                    <TextView
-                        android:id="@+id/tvStartValue"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="6dp"
-                        android:textColor="?attr/appTextHigh"
-                        android:textSize="12sp"
-                        android:textStyle="bold"
-                        android:fontFamily="monospace" />
-
-                    <View
-                        android:layout_width="1dp"
-                        android:layout_height="16dp"
-                        android:layout_marginStart="12dp"
-                        android:layout_marginEnd="12dp"
-                        android:background="?attr/appLineStrong" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="COVER"
-                        android:textColor="?attr/appTextDim"
-                        android:textSize="11sp"
-                        android:textStyle="bold"
-                        android:letterSpacing="0.08" />
-
-                    <TextView
-                        android:id="@+id/tvKeyValue"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="6dp"
-                        android:textColor="?attr/appAccent"
-                        android:textSize="12sp"
-                        android:textStyle="bold"
-                        android:fontFamily="monospace" />
-                </LinearLayout>
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="6dp"
-                    android:text="Geser bingkai biru untuk memilih klip. Geser garis putih untuk memilih cover."
-                    android:textColor="?attr/appTextDim"
-                    android:textSize="11sp" />
-
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="1dp"
-                    android:layout_marginTop="12dp"
-                    android:layout_marginBottom="10dp"
-                    android:background="?attr/appLine" />
-
-                <TextView
-                    android:id="@+id/tvPlan"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:fontFamily="monospace"
-                    android:textSize="11sp"
-                    android:textColor="?attr/appTextMid"
-                    android:lineSpacingExtra="3dp"
-                    android:text="Menganalisis video…" />
-            </LinearLayout>
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:paddingBottom="6dp">
 
             <TextView
-                android:id="@+id/tvTiktokHint"
-                android:layout_width="match_parent"
+                style="@style/Label"
+                android:layout_width="0dp"
+                android:layout_weight="1"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
-                android:text="Tips: Jika ingin memakai filter/efek langsung di TikTok, matikan opsi Bersih &amp; Stabil agar hasil tidak bertumpuk."
-                android:textColor="?attr/appTextDim"
-                android:textSize="12sp"
-                android:lineSpacingExtra="2dp" />
-        </LinearLayout>
-    </ScrollView>
-
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="?attr/appLine" />
-
-    <!-- Bottom Tool Rail custom Roundline -->
-    <LinearLayout
-        android:id="@+id/toolBar"
-        android:layout_width="match_parent"
-        android:layout_height="72dp"
-        android:orientation="horizontal"
-        android:baselineAligned="false"
-        android:background="@android:color/transparent"
-        android:paddingStart="8dp"
-        android:paddingEnd="8dp">
-
-        <LinearLayout
-            android:id="@+id/toolRatio"
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:layout_height="match_parent"
-            android:orientation="vertical"
-            android:gravity="center"
-            android:background="@android:color/transparent">
-
-            <ImageView
-                android:id="@+id/iconRatio"
-                android:layout_width="26dp"
-                android:layout_height="26dp"
-                android:src="@drawable/ic_tool_crop"
-                android:contentDescription="@null" />
+                android:text="TIMELINE - LAYERS" />
 
             <TextView
-                android:id="@+id/lblRatio"
+                android:id="@+id/btnAddLayer"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:text="Rasio"
-                android:textColor="?attr/appTextMid"
-                android:textSize="11sp"
+                android:background="@drawable/bg_pill_outline"
+                android:padding="8dp"
+                android:text="+ LAYER"
+                android:textColor="?attr/appAccent"
+                android:textSize="10sp"
                 android:textStyle="bold" />
         </LinearLayout>
 
-        <LinearLayout
-            android:id="@+id/toolEnhance"
-            android:layout_width="0dp"
+        <livefoto.xystudio.app.TimelineEditorView
+            android:id="@+id/timeline"
+            android:layout_width="match_parent"
+            android:layout_height="72dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="8dp"
+            android:background="@drawable/bg_card"
+            android:contentDescription="Timeline main" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/layersList"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
             android:layout_weight="1"
-            android:layout_height="match_parent"
-            android:orientation="vertical"
-            android:gravity="center"
-            android:background="@android:color/transparent">
-
-            <ImageView
-                android:id="@+id/iconEnhance"
-                android:layout_width="26dp"
-                android:layout_height="26dp"
-                android:src="@drawable/ic_tool_sharp"
-                android:contentDescription="@null" />
-
-            <TextView
-                android:id="@+id/lblEnhance"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:text="Bersih"
-                android:textColor="?attr/appTextMid"
-                android:textSize="11sp"
-                android:textStyle="bold" />
-        </LinearLayout>
+            android:layout_marginTop="8dp"
+            android:orientation="horizontal"
+            android:clipToPadding="false"
+            android:paddingStart="8dp"
+            android:paddingEnd="8dp"
+            tools:listitem="@layout/item_video_layer" />
 
         <LinearLayout
-            android:id="@+id/toolStab"
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:layout_height="match_parent"
-            android:orientation="vertical"
-            android:gravity="center"
-            android:background="@android:color/transparent">
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:paddingTop="4dp"
+            android:paddingBottom="4dp">
 
-            <ImageView
-                android:id="@+id/iconStab"
-                android:layout_width="26dp"
-                android:layout_height="26dp"
-                android:src="@drawable/ic_tool_stab"
-                android:contentDescription="@null" />
-
-            <TextView
-                android:id="@+id/lblStab"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:text="Stabil"
-                android:textColor="?attr/appTextMid"
-                android:textSize="11sp"
-                android:textStyle="bold" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/toolRes"
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:layout_height="match_parent"
-            android:orientation="vertical"
-            android:gravity="center"
-            android:background="@android:color/transparent">
-
-            <ImageView
-                android:id="@+id/iconRes"
-                android:layout_width="26dp"
-                android:layout_height="26dp"
-                android:src="@drawable/ic_tool_res"
-                android:contentDescription="@null" />
-
-            <TextView
-                android:id="@+id/lblRes"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:text="1080p"
-                android:textColor="?attr/appTextHigh"
-                android:textSize="11sp"
-                android:textStyle="bold" />
+            <TextView android:id="@+id/tvStartValue" android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:textColor="?attr/appTextHigh" android:textSize="11sp" android:fontFamily="monospace" android:text="0.0s" />
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:layout_marginStart="12dp" android:text="→" android:textColor="?attr/appTextDim" android:textSize="11sp" />
+            <TextView android:id="@+id/tvKeyValue" android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:layout_marginStart="12dp" android:textColor="?attr/appAccent" android:textSize="11sp" android:fontFamily="monospace" android:text="1.5s" />
+            <TextView android:id="@+id/tvClipHint" android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:layout_marginStart="12dp" android:background="@drawable/bg_hero_chip" android:padding="4dp"
+                android:textColor="?attr/appAccent" android:textSize="10sp" android:fontFamily="monospace" android:text="3.0s" />
         </LinearLayout>
     </LinearLayout>
+
+    <View android:layout_width="match_parent" android:layout_height="1dp" android:background="?attr/appLine" />
+
+    <!-- Bottom Tools - Alight Motion / CapCut style icon only, no card, scrollable -->
+    <HorizontalScrollView
+        android:layout_width="match_parent"
+        android:layout_height="84dp"
+        android:scrollbars="none"
+        android:background="?attr/appPaper"
+        android:paddingTop="8dp"
+        android:paddingBottom="8dp">
+
+        <LinearLayout
+            android:id="@+id/bottomTools"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:paddingStart="8dp"
+            android:paddingEnd="8dp">
+
+            <LinearLayout android:id="@+id/toolVideo" android:layout_width="64dp" android:layout_height="match_parent"
+                android:orientation="vertical" android:gravity="center" android:background="@android:color/transparent">
+                <ImageView android:layout_width="28dp" android:layout_height="28dp" android:src="@drawable/ic_tool_res" app:tint="?attr/appInk" />
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="4dp"
+                    android:text="Video" android:textColor="?attr/appTextMid" android:textSize="10sp" android:textStyle="bold" />
+            </LinearLayout>
+
+            <LinearLayout android:id="@+id/toolAudio" android:layout_width="64dp" android:layout_height="match_parent"
+                android:orientation="vertical" android:gravity="center" android:background="@android:color/transparent">
+                <ImageView android:layout_width="28dp" android:layout_height="28dp" android:src="@drawable/ic_tool_sharp" app:tint="?attr/appTextMid" />
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="4dp"
+                    android:text="Audio" android:textColor="?attr/appTextMid" android:textSize="10sp" android:textStyle="bold" />
+            </LinearLayout>
+
+            <LinearLayout android:id="@+id/toolText" android:layout_width="64dp" android:layout_height="match_parent"
+                android:orientation="vertical" android:gravity="center" android:background="@android:color/transparent">
+                <ImageView android:layout_width="28dp" android:layout_height="28dp" android:src="@drawable/ic_tool_crop" app:tint="?attr/appTextMid" />
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="4dp"
+                    android:text="Teks" android:textColor="?attr/appTextMid" android:textSize="10sp" android:textStyle="bold" />
+            </LinearLayout>
+
+            <LinearLayout android:id="@+id/toolShape" android:layout_width="64dp" android:layout_height="match_parent"
+                android:orientation="vertical" android:gravity="center" android:background="@android:color/transparent">
+                <ImageView android:layout_width="28dp" android:layout_height="28dp" android:src="@drawable/ic_add" app:tint="?attr/appTextMid" />
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="4dp"
+                    android:text="Shape" android:textColor="?attr/appTextMid" android:textSize="10sp" android:textStyle="bold" />
+            </LinearLayout>
+
+            <LinearLayout android:id="@+id/toolEffect" android:layout_width="64dp" android:layout_height="match_parent"
+                android:orientation="vertical" android:gravity="center" android:background="@android:color/transparent">
+                <ImageView android:layout_width="28dp" android:layout_height="28dp" android:src="@drawable/ic_tool_stab" app:tint="?attr/appTextMid" />
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="4dp"
+                    android:text="Efek" android:textColor="?attr/appTextMid" android:textSize="10sp" android:textStyle="bold" />
+            </LinearLayout>
+
+            <LinearLayout android:id="@+id/toolFilter" android:layout_width="64dp" android:layout_height="match_parent"
+                android:orientation="vertical" android:gravity="center" android:background="@android:color/transparent">
+                <ImageView android:layout_width="28dp" android:layout_height="28dp" android:src="@drawable/ic_theme" app:tint="?attr/appTextMid" />
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="4dp"
+                    android:text="Filter" android:textColor="?attr/appTextMid" android:textSize="10sp" android:textStyle="bold" />
+            </LinearLayout>
+
+            <LinearLayout android:id="@+id/toolOverlay" android:layout_width="64dp" android:layout_height="match_parent"
+                android:orientation="vertical" android:gravity="center" android:background="@android:color/transparent">
+                <ImageView android:layout_width="28dp" android:layout_height="28dp" android:src="@drawable/ic_gallery" app:tint="?attr/appTextMid" />
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="4dp"
+                    android:text="Overlay" android:textColor="?attr/appTextMid" android:textSize="10sp" android:textStyle="bold" />
+            </LinearLayout>
+
+            <LinearLayout android:id="@+id/toolKeyframe" android:layout_width="64dp" android:layout_height="match_parent"
+                android:orientation="vertical" android:gravity="center" android:background="@android:color/transparent">
+                <ImageView android:layout_width="28dp" android:layout_height="28dp" android:src="@drawable/ic_tool_crop" app:tint="?attr/appAccent" />
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="4dp"
+                    android:text="Keyfrm" android:textColor="?attr/appAccent" android:textSize="10sp" android:textStyle="bold" />
+            </LinearLayout>
+
+            <LinearLayout android:id="@+id/toolCurve" android:layout_width="64dp" android:layout_height="match_parent"
+                android:orientation="vertical" android:gravity="center" android:background="@android:color/transparent">
+                <ImageView android:layout_width="28dp" android:layout_height="28dp" android:src="@drawable/ic_tool_res" app:tint="?attr/appTextMid" />
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="4dp"
+                    android:text="Kurva" android:textColor="?attr/appTextMid" android:textSize="10sp" android:textStyle="bold" />
+            </LinearLayout>
+
+            <LinearLayout android:id="@+id/toolMask" android:layout_width="64dp" android:layout_height="match_parent"
+                android:orientation="vertical" android:gravity="center" android:background="@android:color/transparent">
+                <ImageView android:layout_width="28dp" android:layout_height="28dp" android:src="@drawable/ic_tool_sharp" app:tint="?attr/appTextMid" />
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="4dp"
+                    android:text="Mask" android:textColor="?attr/appTextMid" android:textSize="10sp" android:textStyle="bold" />
+            </LinearLayout>
+
+            <LinearLayout android:id="@+id/toolGroup" android:layout_width="64dp" android:layout_height="match_parent"
+                android:orientation="vertical" android:gravity="center" android:background="@android:color/transparent">
+                <ImageView android:layout_width="28dp" android:layout_height="28dp" android:src="@drawable/ic_storage" app:tint="?attr/appTextMid" />
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="4dp"
+                    android:text="Grup" android:textColor="?attr/appTextMid" android:textSize="10sp" android:textStyle="bold" />
+            </LinearLayout>
+
+            <LinearLayout android:id="@+id/toolCrop" android:layout_width="64dp" android:layout_height="match_parent"
+                android:orientation="vertical" android:gravity="center" android:background="@android:color/transparent">
+                <ImageView android:layout_width="28dp" android:layout_height="28dp" android:src="@drawable/ic_tool_crop" app:tint="?attr/appTextMid" />
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="4dp"
+                    android:text="Crop" android:textColor="?attr/appTextMid" android:textSize="10sp" android:textStyle="bold" />
+            </LinearLayout>
+
+            <LinearLayout android:id="@+id/toolRotate" android:layout_width="64dp" android:layout_height="match_parent"
+                android:orientation="vertical" android:gravity="center" android:background="@android:color/transparent">
+                <ImageView android:layout_width="28dp" android:layout_height="28dp" android:src="@drawable/ic_tool_stab" app:tint="?attr/appTextMid" />
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="4dp"
+                    android:text="Rotate" android:textColor="?attr/appTextMid" android:textSize="10sp" android:textStyle="bold" />
+            </LinearLayout>
+
+            <LinearLayout android:id="@+id/toolDraw" android:layout_width="64dp" android:layout_height="match_parent"
+                android:orientation="vertical" android:gravity="center" android:background="@android:color/transparent">
+                <ImageView android:layout_width="28dp" android:layout_height="28dp" android:src="@drawable/ic_livephoto" app:tint="?attr/appTextMid" />
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="4dp"
+                    android:text="Draw" android:textColor="?attr/appTextMid" android:textSize="10sp" android:textStyle="bold" />
+            </LinearLayout>
+
+            <LinearLayout android:id="@+id/toolRatio" android:layout_width="64dp" android:layout_height="match_parent"
+                android:orientation="vertical" android:gravity="center" android:background="@android:color/transparent">
+                <ImageView android:id="@+id/iconRatio" android:layout_width="28dp" android:layout_height="28dp" android:src="@drawable/ic_tool_crop" app:tint="?attr/appTextMid" />
+                <TextView android:id="@+id/lblRatio" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="4dp"
+                    android:text="Rasio" android:textColor="?attr/appTextMid" android:textSize="10sp" android:textStyle="bold" />
+            </LinearLayout>
+
+            <LinearLayout android:id="@+id/toolEnhance" android:layout_width="64dp" android:layout_height="match_parent"
+                android:orientation="vertical" android:gravity="center" android:background="@android:color/transparent">
+                <ImageView android:id="@+id/iconEnhance" android:layout_width="28dp" android:layout_height="28dp" android:src="@drawable/ic_tool_sharp" app:tint="?attr/appTextMid" />
+                <TextView android:id="@+id/lblEnhance" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="4dp"
+                    android:text="Bersih" android:textColor="?attr/appTextMid" android:textSize="10sp" android:textStyle="bold" />
+            </LinearLayout>
+
+            <LinearLayout android:id="@+id/toolStab" android:layout_width="64dp" android:layout_height="match_parent"
+                android:orientation="vertical" android:gravity="center" android:background="@android:color/transparent">
+                <ImageView android:id="@+id/iconStab" android:layout_width="28dp" android:layout_height="28dp" android:src="@drawable/ic_tool_stab" app:tint="?attr/appTextMid" />
+                <TextView android:id="@+id/lblStab" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="4dp"
+                    android:text="Stabil" android:textColor="?attr/appTextMid" android:textSize="10sp" android:textStyle="bold" />
+            </LinearLayout>
+
+            <LinearLayout android:id="@+id/toolRes" android:layout_width="64dp" android:layout_height="match_parent"
+                android:orientation="vertical" android:gravity="center" android:background="@android:color/transparent">
+                <ImageView android:id="@+id/iconRes" android:layout_width="28dp" android:layout_height="28dp" android:src="@drawable/ic_tool_res" app:tint="?attr/appAccent" />
+                <TextView android:id="@+id/lblRes" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="4dp"
+                    android:text="HD" android:textColor="?attr/appAccent" android:textSize="10sp" android:textStyle="bold" />
+            </LinearLayout>
+
+        </LinearLayout>
+    </HorizontalScrollView>
+
+    <TextView android:id="@+id/tvPlan" android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:visibility="gone" />
 </LinearLayout>

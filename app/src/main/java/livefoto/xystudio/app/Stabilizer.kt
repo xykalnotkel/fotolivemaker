@@ -105,8 +105,13 @@ object Stabilizer {
             }
 
             if (dxs.size < 3) {
-                log("Stabilizer: frame terlalu sedikit, dilewati")
-                return null
+                log("Stabilizer: frame minim (${dxs.size}), pakai fallback zoom 8% agar tetep ada efek")
+                // Return default plan dengan zoom minimal biar user tetep liat ada efek stabilizer
+                val fallbackTimes = longArrayOf(0L, durationMs/2, durationMs)
+                val fallbackOffX = floatArrayOf(0f, 0f, 0f)
+                val fallbackOffY = floatArrayOf(0f, 0f, 0f)
+                val fallbackRot = floatArrayOf(0f, 0f, 0f)
+                return Plan(1.08f, 0f, 3, fallbackTimes, fallbackOffX, fallbackOffY, fallbackRot)
             }
 
             val n = dxs.size
@@ -159,11 +164,13 @@ object Stabilizer {
             )
             Plan(zoom, sumDev / n, n, times.toLongArray(), offX, offY, corrR)
         } catch (e: Exception) {
-            log("Stabilizer gagal: ${e.message}")
-            null
+            log("Stabilizer gagal: ${e.message}, pakai fallback 8% zoom")
+            val fallbackTimes = longArrayOf(0L, durationMs/2, durationMs)
+            return Plan(1.08f, 0f, 3, fallbackTimes, floatArrayOf(0f,0f,0f), floatArrayOf(0f,0f,0f), floatArrayOf(0f,0f,0f))
         } catch (e: OutOfMemoryError) {
-            log("Stabilizer: memori tidak cukup")
-            null
+            log("Stabilizer: memori tidak cukup, fallback 8%")
+            val fallbackTimes = longArrayOf(0L, durationMs/2, durationMs)
+            return Plan(1.08f, 0f, 3, fallbackTimes, floatArrayOf(0f,0f,0f), floatArrayOf(0f,0f,0f), floatArrayOf(0f,0f,0f))
         } finally {
             runCatching { r.release() }
         }
@@ -221,7 +228,7 @@ object Stabilizer {
                 if (v > maxVal) maxVal = v
             }
         }
-        return (maxVal - minVal) >= 12
+        return (maxVal - minVal) >= 6 // turun dari 12 biar video polos tetap ke-detect
     }
 
     fun safeSearchMax(requestedMax: Int, dimension: Int, searchRadius: Int): Int =

@@ -38,6 +38,12 @@ object Settings {
     private const val K_HIGH_CONTRAST = "high_contrast"
     private const val K_HAPTICS = "haptics"
     private const val K_REDUCE_MOTION = "reduce_motion"
+    private const val K_EXPORT_FORMAT = "export_format"
+    private const val K_UHD_BITRATE = "uhd_bitrate"
+    private const val K_HW_ACCEL = "hw_accel"
+    private const val K_NDK_ENABLED = "ndk_enabled"
+    private const val K_LAYER_BLEND = "layer_blend"
+    private const val K_CACHE_LIMIT = "cache_limit"
 
     /** 0 = ikut sistem, 1 = terang, 2 = gelap. */
     const val THEME_SYSTEM = 0
@@ -211,6 +217,27 @@ object Settings {
             }
         )
     }
+
+
+    // ====== Video Editor Extended Settings ======
+    fun exportFormat(c: Context): String = sp(c).getString(K_EXPORT_FORMAT, "MP4") ?: "MP4"
+    fun setExportFormat(c: Context, fmt: String) { sp(c).edit { putString(K_EXPORT_FORMAT, fmt) } }
+
+    fun uhdBitrate(c: Context): Int = sp(c).getInt(K_UHD_BITRATE, 20) // Mbps
+    fun setUhdBitrate(c: Context, mbps: Int) { sp(c).edit { putInt(K_UHD_BITRATE, mbps) } }
+
+    fun hwAccel(c: Context): Boolean = sp(c).getBoolean(K_HW_ACCEL, true)
+    fun setHwAccel(c: Context, v: Boolean) { sp(c).edit { putBoolean(K_HW_ACCEL, v) } }
+
+    fun ndkEnabled(c: Context): Boolean = sp(c).getBoolean(K_NDK_ENABLED, true)
+    fun setNdkEnabled(c: Context, v: Boolean) { sp(c).edit { putBoolean(K_NDK_ENABLED, v) } }
+
+    fun layerBlend(c: Context): String = sp(c).getString(K_LAYER_BLEND, "Normal") ?: "Normal"
+    fun setLayerBlend(c: Context, blend: String) { sp(c).edit { putString(K_LAYER_BLEND, blend) } }
+
+    fun cacheLimitMB(c: Context): Int = sp(c).getInt(K_CACHE_LIMIT, 500)
+    fun setCacheLimitMB(c: Context, mb: Int) { sp(c).edit { putInt(K_CACHE_LIMIT, mb) } }
+
 
     fun save(c: Context, o: Converter.Options) {
         sp(c).edit {

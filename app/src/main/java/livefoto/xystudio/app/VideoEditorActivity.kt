@@ -103,6 +103,25 @@ class VideoEditorActivity : AppCompatActivity() {
 
         paintTools()
 
+        b.toolVideo.setOnClickListener { toast("Video: pilih media dari galeri") ; pickVideoLauncher.launch("video/*") }
+        b.toolAudio.setOnClickListener { toast("Audio: tambah musik / suara - segera") }
+        b.toolText.setOnClickListener { toast("Teks: tambah teks overlay - segera") }
+        b.toolShape.setOnClickListener { toast("Shape: tambah bentuk - segera") }
+        b.toolEffect.setOnClickListener { toast("Efek: glitch, blur, dll - segera") }
+        b.toolFilter.setOnClickListener { toast("Filter: LUT, grayscale - segera") }
+        b.toolOverlay.setOnClickListener { toast("Overlay: foto/video di atas video - segera") }
+        b.toolKeyframe.setOnClickListener { toast("Keyframe: tambah keyframe posisi/scale/rot") }
+        b.toolCurve.setOnClickListener { toast("Kurva: atur easing Bezier - segera") }
+        b.toolMask.setOnClickListener { toast("Masking: alpha mask - segera") }
+        b.toolGroup.setOnClickListener { toast("Grup: group layers - segera") }
+        b.toolCrop.setOnClickListener { toast("Crop: potong video - pakai Ratio") ; pickRatio() }
+        b.toolRotate.setOnClickListener { toast("Rotate: putar video - segera") }
+        b.toolDraw.setOnClickListener { toast("Drawing Vector: gambar bebas - segera") }
+        b.btnAddLayer.setOnClickListener { toast("Tambah layer baru - pilih Video/Foto/Text") }
+
+        // Layers list dummy adapter
+        setupLayersList()
+
         // Cek intent: kalau dari share video atau picker
         val incoming = intent?.data
         if (incoming != null) {
@@ -175,6 +194,25 @@ class VideoEditorActivity : AppCompatActivity() {
             opts = opts.copy(res = items[which])
             paintTools(); updatePlanText(); refreshPreview()
         }
+    }
+
+    private fun setupLayersList() {
+        // Dummy layers untuk CapCut-like UI - nanti diganti LayerManager beneran
+        val dummyLayers = listOf("Video Utama", "Overlay", "Teks", "Audio")
+        b.layersList.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(this, androidx.recyclerview.widget.LinearLayoutManager.HORIZONTAL, false)
+        b.layersList.adapter = object : androidx.recyclerview.widget.RecyclerView.Adapter<androidx.recyclerview.widget.RecyclerView.ViewHolder>() {
+            override fun getItemCount() = dummyLayers.size
+            override fun onCreateViewHolder(parent: android.view.ViewGroup, viewType: Int): androidx.recyclerview.widget.RecyclerView.ViewHolder {
+                val v = android.view.LayoutInflater.from(parent.context).inflate(R.layout.item_video_layer, parent, false)
+                return object : androidx.recyclerview.widget.RecyclerView.ViewHolder(v) {}
+            }
+            override fun onBindViewHolder(holder: androidx.recyclerview.widget.RecyclerView.ViewHolder, position: Int) {
+                val tv = holder.itemView.findViewById<android.widget.TextView>(R.id.tvLayerName)
+                tv?.text = dummyLayers[position]
+            }
+        }
+        // Update layer count badge
+        b.tvLayerCount.text = "${dummyLayers.size} LAYERS"
     }
 
     private fun loadVideo(uri: Uri) = lifecycleScope.launch {
