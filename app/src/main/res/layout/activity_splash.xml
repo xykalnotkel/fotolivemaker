@@ -2,29 +2,40 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#FF000000">
+    android:background="#FF00033D"
+    android:animateLayoutChanges="true">
 
-    <ImageView
-        android:id="@+id/imgSplash"
-        android:layout_width="320dp"
-        android:layout_height="80dp"
-        android:layout_gravity="center"
-        android:scaleType="fitCenter"
-        android:contentDescription="Splash" />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:paddingStart="48dp"
+        android:paddingEnd="48dp">
 
-    <TextView
-        android:id="@+id/tvAppName"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:layout_marginTop="96dp"
-        android:layout_marginBottom="0dp"
-        android:translationY="40dp"
-        android:text="Foto Live"
-        android:textColor="#FFFFFFFF"
-        android:textSize="16sp"
-        android:textStyle="bold"
-        android:letterSpacing="0.08"
-        android:alpha="0.85" />
+        <ImageView
+            android:id="@+id/imgSplash"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:scaleType="centerInside"
+            android:adjustViewBounds="true"
+            android:paddingTop="60dp"
+            android:paddingBottom="20dp"
+            android:contentDescription="Splash" />
+
+        <TextView
+            android:id="@+id/tvAppName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Foto Live"
+            android:textColor="#FFF2E6EE"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:letterSpacing="0.08"
+            android:alpha="0.85"
+            android:paddingBottom="60dp" />
+
+    </LinearLayout>
 
 </FrameLayout>

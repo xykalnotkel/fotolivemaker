@@ -112,29 +112,40 @@ class VideoEditorActivity : AppCompatActivity() {
 
         paintTools()
 
-        // Tombol fitur yang SUDAH jadi (aktif di semua build)
-        b.toolVideo.setOnClickListener { toast("Video: pilih media dari galeri") ; pickVideoLauncher.launch("video/*") }
-        b.toolCrop.setOnClickListener { toast("Crop: potong video - pakai Ratio") ; pickRatio() }
-
-        // Tombol fitur yang MASIH DEVELOPMENT — di release cukup disable dengan toast informatif
-        val devMsg = if (BuildConfig.DEBUG) {
-            { s: String -> toast("$s - segera") }
-        } else {
-            { s: String -> toast("$s (akan datang di update berikutnya)") }
+        // Tombol yang SUDAH jadi - aktif di semua build
+        b.toolVideo.setOnClickListener { toast("Pilih video dari galeri"); pickVideoLauncher.launch("video/*") }
+        b.toolCrop.setOnClickListener { toast("Atur rasio aspek"); pickRatio() }
+        b.toolKeyframe.setOnClickListener {
+            showDevDialog("Keyframe Animation",
+                "Tambah keyframe posisi, skala, dan rotasi untuk animasi layer. " +
+                "Fitur ini akan hadir di update berikutnya.\n\n" +
+                "Sementara, gunakan rasio, crop, dan stabilizer yang sudah tersedia.")
         }
-        b.toolAudio.setOnClickListener { devMsg("Audio") }
-        b.toolText.setOnClickListener { devMsg("Teks") }
-        b.toolShape.setOnClickListener { devMsg("Shape") }
-        b.toolEffect.setOnClickListener { devMsg("Efek") }
-        b.toolFilter.setOnClickListener { devMsg("Filter") }
-        b.toolOverlay.setOnClickListener { devMsg("Overlay") }
-        b.toolKeyframe.setOnClickListener { devMsg("Keyframe") }
-        b.toolCurve.setOnClickListener { devMsg("Kurva") }
-        b.toolMask.setOnClickListener { devMsg("Masking") }
-        b.toolGroup.setOnClickListener { devMsg("Grup") }
-        b.toolRotate.setOnClickListener { devMsg("Rotate") }
-        b.toolDraw.setOnClickListener { devMsg("Drawing") }
-        b.btnAddLayer.setOnClickListener { devMsg("Tambah layer") }
+        b.toolFilter.setOnClickListener {
+            showDevDialog("Filter & LUT",
+                "Terapkan filter warna, LUT, dan efek sinematik ke video. " +
+                "Saat ini fitur filter masih dalam pengembangan.")
+        }
+        b.toolEffect.setOnClickListener {
+            showDevDialog("Video Effects",
+                "Efek glitch, blur, VHS, dan transisi akan tersedia di rilis mendatang.")
+        }
+
+        // Tombol development - di debug aktif, di release kasih dialog informatif
+        fun devMsg(name: String, desc: String) {
+            if (BuildConfig.DEBUG) toast("$name - dalam pengembangan")
+            else showDevDialog(name, desc)
+        }
+        b.toolAudio.setOnClickListener { devMsg("Audio", "Tambah musik latar, rekam suara, atau extract audio. Coming soon.") }
+        b.toolText.setOnClickListener { devMsg("Teks", "Tambah teks overlay dengan font, ukuran, dan animasi.") }
+        b.toolShape.setOnClickListener { devMsg("Shape", "Tambah bentuk geometris sebagai layer overlay.") }
+        b.toolOverlay.setOnClickListener { devMsg("Overlay", "Tumpuk video/foto di atas video utama dengan blend mode.") }
+        b.toolCurve.setOnClickListener { devMsg("Kurva", "Easing kustom dengan kurva Bezier untuk animasi layer.") }
+        b.toolMask.setOnClickListener { devMsg("Mask", "Alpha mask untuk transparansi selektif.") }
+        b.toolGroup.setOnClickListener { devMsg("Grup", "Group beberapa layer untuk transformasi bersama.") }
+        b.toolRotate.setOnClickListener { devMsg("Rotate", "Putar video 90/180/270 derajat.") }
+        b.toolDraw.setOnClickListener { devMsg("Drawing", "Gambar bebas di atas video dengan brush.") }
+        b.btnAddLayer.setOnClickListener { devMsg("Tambah Layer", "Tambah layer video, foto, atau teks baru.") }
 
         // Layers list dummy adapter
         setupLayersList()
@@ -394,4 +405,12 @@ class VideoEditorActivity : AppCompatActivity() {
     }
 
     private fun toast(msg: String) = Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
+
+    private fun showDevDialog(title: String, message: String) {
+        androidx.appcompat.app.AlertDialog.Builder(this)
+            .setTitle(title)
+            .setMessage(message)
+            .setPositiveButton("Mengerti", null)
+            .show()
+    }
 }

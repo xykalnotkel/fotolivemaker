@@ -27,9 +27,15 @@ import android.widget.PopupMenu
 import android.widget.TextView
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
+import androidx.media3.common.MediaItem
+import androidx.media3.common.Player
+import androidx.media3.common.util.UnstableApi
+import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.ui.PlayerView
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -44,6 +50,7 @@ import java.util.concurrent.ConcurrentHashMap
  * Pemilih video buatan sendiri + fallback Photo Picker sistem
  * (tidak butuh izin luas, jalan di Android 14+ saat akses sebagian).
  */
+@androidx.annotation.OptIn(UnstableApi::class)
 class PickerActivity : AppCompatActivity() {
 
     private lateinit var b: ActivityPickerBinding
@@ -157,11 +164,56 @@ class PickerActivity : AppCompatActivity() {
     }
 
     private fun pick(uri: Uri) {
-        startActivity(
-            Intent(this, MainActivity::class.java).withReadGrant(uri)
-        )
-        finish()
+        showPreviewDialog(uri)
     }
+
+    /** Dialog preview video: lihat dulu, baru decide edit atau batal. */
+    private fun showPreviewDialog(uri: Uri) {
+        val dialog = AlertDialog.Builder(this).create()
+        val root = layoutInflater.inflate(R.layout.dialog_video_preview, null)
+        dialog.setView(root)
+        dialog.setCancelable(true)
+        dialog.setOnDismissListener { player?.release(); player = null }
+
+        val playerView = root.findViewById<PlayerView>(R.id.previewPlayer)
+        val tvName = root.findViewById<TextView>(R.id.tvPreviewName)
+        val btnEdit = root.findViewById<android.widget.Button>(R.id.btnPreviewEdit)
+        val btnCancel = root.findViewById<android.widget.Button>(R.id.btnPreviewCancel)
+
+        // Cari nama file dari URI
+        runCatching {
+            val cursor = contentResolver.query(uri, arrayOf(MediaStore.Video.Media.DISPLAY_NAME), null, null, null)
+            cursor?.use { if (it.moveToFirst()) tvName.text = it.getString(0) }
+        }
+
+        val p = ExoPlayer.Builder(this).build()
+        player = p
+        playerView.player = p
+        p.setMediaItem(MediaItem.fromUri(uri))
+        p.repeatMode = Player.REPEAT_MODE_ALL
+        p.volume = 0f
+        p.prepare()
+        p.playWhenReady = true
+
+        btnEdit.setOnClickListener {
+            p.stop(); p.release(); player = null
+            dialog.dismiss()
+            startActivity(Intent(this, MainActivity::class.java).withReadGrant(uri))
+            finish()
+        }
+        btnCancel.setOnClickListener {
+            p.stop(); p.release(); player = null
+            dialog.dismiss()
+        }
+
+        dialog.show()
+        dialog.window?.setLayout(
+            (resources.displayMetrics.widthPixels * 0.92).toInt(),
+            android.view.ViewGroup.LayoutParams.WRAP_CONTENT
+        )
+    }
+
+    private var player: ExoPlayer? = null
 
     private inner class VideoAdapter(
         val onPick: (Uri) -> Unit
