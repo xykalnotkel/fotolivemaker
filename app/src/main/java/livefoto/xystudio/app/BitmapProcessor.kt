@@ -167,9 +167,9 @@ object BitmapProcessor {
             val sc = 240f / maxOf(rw, rh); val tww = VideoMath.evenUp(rw * sc); val thh = VideoMath.evenUp(rh * sc)
             for (i in 0 until samples) {
                 val at = if (samples <= 1) 0L else ((totalMs.coerceAtLeast(1L) - 1L) * i / (samples - 1))
-                var bmp = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1)
+                var bmp = (if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1)
                     r.getScaledFrameAtTime(at * 1000, MediaMetadataRetriever.OPTION_CLOSEST_SYNC, tww, thh)
-                else r.getFrameAtTime(at * 1000, MediaMetadataRetriever.OPTION_CLOSEST_SYNC) ?: continue
+                else r.getFrameAtTime(at * 1000, MediaMetadataRetriever.OPTION_CLOSEST_SYNC)) ?: continue
                 bmp = orientFrame(r, bmp)
                 if (maxOf(bmp.width, bmp.height) > 320) {
                     val s = 320f / maxOf(bmp.width, bmp.height)

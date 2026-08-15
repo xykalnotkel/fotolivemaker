@@ -23,6 +23,7 @@ import androidx.media3.transformer.VideoEncoderSettings
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
+import java.io.ByteArrayOutputStream
 import java.io.File
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
@@ -38,6 +39,13 @@ object VideoEncoder {
 
     private data class EncodedVideoInfo(val width: Int, val height: Int, val durationMs: Long)
 
+    /** Konversi internal: Converter.Options -> VideoMath.Options */
+    private fun vOpts(o: Converter.Options) = VideoMath.Options(
+        aspectRatio = VideoMath.AspectRatio.valueOf(o.aspectRatio.name),
+        res = VideoMath.Res.valueOf(o.res.name),
+        enhance = o.enhance, stabilize = o.stabilize, jpegQuality = o.jpegQuality
+    )
+
     private fun inspectEncodedVideo(file: File): EncodedVideoInfo {
         val r = android.media.MediaMetadataRetriever()
         return try {
@@ -49,6 +57,12 @@ object VideoEncoder {
             val d = r.extractMetadata(android.media.MediaMetadataRetriever.METADATA_KEY_DURATION)?.toLongOrNull() ?: 0L
             EncodedVideoInfo(w, h, d)
         } finally { runCatching { r.release() } }
+    }
+
+    private fun bmpToJpeg(bmp: android.graphics.Bitmap, quality: Int): ByteArray {
+        val s = ByteArrayOutputStream()
+        bmp.compress(android.graphics.Bitmap.CompressFormat.JPEG, quality.coerceIn(70, 100), s)
+        return s.toByteArray()
     }
 
     private suspend fun transcodeClip(
@@ -138,7 +152,8 @@ object VideoEncoder {
         val raw = planHint ?: VideoMath.plan(total)
         val p = VideoMath.sanitize(total, raw.startMs, raw.durationMs, raw.keyframeOffsetMs)
         log("Potong: ${p.startMs} → ${p.startMs + p.durationMs} ms")
-        val (outW, outH) = VideoMath.calculateDimensions(srcW, srcH, opts)
+        val vo = vOpts(opts)
+        val (outW, outH) = VideoMath.calculateDimensions(srcW, srcH, vo)
         log("Target: ${outW}x${outH} (${opts.aspectRatio.label})")
 
         var stab: Stabilizer.Plan? = null
@@ -166,7 +181,7 @@ object VideoEncoder {
             }
         } else rawBmp
 
-        val jpeg = withContext(Dispatchers.Default) { BitmapProcessor.toJpeg(bmp, opts.jpegQuality) }
+        val jpeg = withContext(Dispatchers.Default) { bmpToJpeg(bmp, opts.jpegQuality) }
         if (!bmp.isRecycled) bmp.recycle()
         log("JPEG: ${jpeg.size / 1024} KB")
 
@@ -175,7 +190,8 @@ object VideoEncoder {
         } catch (e: Exception) {
             if (opts.res == Converter.Res.P1080 && (outW > 1280 || outH > 1280)) {
                 log("1080p gagal (${e.message}), coba fallback 720p...")
-                val (fw, fh) = VideoMath.calculateDimensions(srcW, srcH, opts.copy(res = Converter.Res.P720))
+                val vo2 = vOpts(opts.copy(res = Converter.Res.P720))
+                val (fw, fh) = VideoMath.calculateDimensions(srcW, srcH, vo2)
                 try { transcodeClip(context, uri, p, opts.copy(res = Converter.Res.P720), fw, fh, stab, log) { e -> progress(18 + e.coerceIn(0, 100) * 76 / 100) } }
                 catch (e2: Exception) { throw IllegalStateException("Encoder 1080p & 720p gagal: ${e2.message}", e2) }
             } else throw e
@@ -210,7 +226,8 @@ object VideoEncoder {
         val raw = planHint ?: VideoMath.plan(total)
         val p = VideoMath.sanitize(total, raw.startMs, raw.durationMs, raw.keyframeOffsetMs)
         log("Potong: ${p.startMs} -> ${p.startMs + p.durationMs} ms")
-        val (outW, outH) = VideoMath.calculateDimensions(srcW, srcH, opts)
+        val vo = vOpts(opts)
+        val (outW, outH) = VideoMath.calculateDimensions(srcW, srcH, vo)
         log("Target: ${outW}x${outH} (${opts.aspectRatio.label} ${opts.res.label})")
 
         var stab: Stabilizer.Plan? = null
@@ -226,7 +243,8 @@ object VideoEncoder {
         } catch (e: Exception) {
             if (opts.res in listOf(Converter.Res.P2160, Converter.Res.P1440, Converter.Res.P1080)) {
                 log("Resolusi tinggi gagal (${e.message}), fallback ke 720p...")
-                val (fw, fh) = VideoMath.calculateDimensions(srcW, srcH, opts.copy(res = Converter.Res.P720))
+                val vo2 = vOpts(opts.copy(res = Converter.Res.P720))
+                val (fw, fh) = VideoMath.calculateDimensions(srcW, srcH, vo2)
                 transcodeClip(context, uri, p, opts.copy(res = Converter.Res.P720), fw, fh, stab, log) { e -> progress(18 + e.coerceIn(0, 100) * 76 / 100) }
             } else throw e
         }

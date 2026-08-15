@@ -43,7 +43,7 @@ class LaunchActivity : AppCompatActivity() {
         // Load GIF dari raw/splash_gif.gif pakai ImageDecoder (API 28+) agar animasi jalan
         try {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                val source = android.graphics.ImageDecoder.createSource(resources, R.raw.splash_gif)
+                val source = android.graphics.ImageDecoder.createSource(resources, R.drawable.splash_gif)
                 val drawable = android.graphics.ImageDecoder.decodeDrawable(source)
                 img.setImageDrawable(drawable)
                 if (drawable is AnimatedImageDrawable) {
