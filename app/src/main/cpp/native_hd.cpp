@@ -1,3 +1,8 @@
+// XySpace Personal Use License v1.0
+// Copyright 2026 XySpace — Haekal Saputra (KALL)
+// Personal, educational, non-commercial use only.
+// See LICENSE for full terms.
+
 #include <jni.h>
 #include <android/bitmap.h>
 #include <android/log.h>

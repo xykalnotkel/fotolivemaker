@@ -67,7 +67,7 @@
                 android:layout_height="match_parent"
                 android:background="#FF000000" />
 
-            <livefoto.xystudio.app.BoxProgressView
+            <livefoto.xyspace.app.BoxProgressView
                 android:id="@+id/boxProgress"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent" />

@@ -1,9 +1,9 @@
 # Syarat & Ketentuan Penggunaan (Terms of Service) - Personal Use
 
 **Aplikasi:** Foto Live - Live Photo Maker
-**Lisensi:** XYStudio Personal Use License v1.0 (source gratis, personal non-komersial, dilarang jual/beli ulang)
+**Lisensi:** XySpace Personal Use License v1.0 (source gratis, personal non-komersial, dilarang jual/beli ulang)
 **Berlaku sejak:** 13 Agustus 2026 (update lisensi 15 Agustus 2026)
-**Pengembang:** XyStudio — Haekal Saputra (KALL)
+**Pengembang:** XySpace — Haekal Saputra (KALL)
 
 ---
 
@@ -25,7 +25,7 @@ halaman resmi). Tidak ada cek otomatis di latar belakang.
 ## 2. Tanpa jaminan
 
 Aplikasi ini disediakan **"APA ADANYA" (AS IS)**, tanpa jaminan dalam bentuk
-apa pun, sesuai XYStudio Personal Use License v1.0 yang menyertainya.
+apa pun, sesuai XySpace Personal Use License v1.0 yang menyertainya.
 
 Secara khusus, **tidak ada jaminan bahwa:**
 - File hasil konversi akan dikenali sebagai "Live Photo" oleh TikTok, Instagram,
@@ -83,7 +83,7 @@ karena bisa saja sudah dimodifikasi atau disisipi program berbahaya.
 
 APK resmi dari halaman Releases ditandatangani **kunci rilis** pengembang.
 Itu bukan identitas Google Play. **DILARANG MENGUNGGAH APK ini ke Play Store
-atau toko lain untuk dijual / dimonetisasi** tanpa izin tertulis dari XyStudio,
+atau toko lain untuk dijual / dimonetisasi** tanpa izin tertulis dari XySpace,
 sesuai pasal 3 LICENSE. Personal use saja.
 
 Source code gratis untuk edukasi & pribadi, bukan untuk diperjualbelikan kembali.
@@ -97,7 +97,7 @@ menyetujui syarat yang baru.
 ## 8. Hukum yang berlaku
 
 Syarat ini tunduk pada hukum yang berlaku di Republik Indonesia, tanpa
-mengesampingkan ketentuan XYStudio Personal Use License v1.0.
+mengesampingkan ketentuan XySpace Personal Use License v1.0.
 
 ---
 

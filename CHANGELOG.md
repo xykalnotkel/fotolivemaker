@@ -5,6 +5,27 @@ Saat rilis, pindahkan ke heading versi + tanggal.
 
 ## Unreleased
 
+### Refactor Kode & Arsitektur (patch v1.3.0)
+- Converter.kt di-split jadi 4 file specialist: VideoMath (geometri murni), BitmapProcessor (filter/extract frame), VideoEncoder (transcode Media3), MediaStoreWriter (simpan ke galeri). Converter.kt turun dari 1037 ke 142 baris sebagai facade.
+- NativeHD.kt: logic isMutable di-rewrite agar pixel hasil enhance tidak terbuang sia-sia saat bitmap dalam mode read-only.
+- native_hd.cpp: spatial weights disamakan persis dengan implementasi Kotlin (pake spatialDist switch: 0->4.0, 1->2.5, 2->1.8, else->1.0).
+- fragment_enhance_es2.glsl: sigma diubah ke fixed 0.102 (sama dengan CPU, tidak terbalik), blur unsharp mask pake 4-neighbor (bukan 5-tap weighted), coring gate pake luma (bukan length RGB). Konsisten dengan CPU.
+- VideoEditorActivity.kt: layer list sekarang fungsional (menampilkan video aktif), tombol development disembunyikan di release / dikasih toast informatif.
+- activity_result.xml: hardcoded color #FF111827 diganti ke ?attr/appTextHigh dan #FF6B7280 ke ?attr/appTextDim. Dark mode tidak lagi pecah.
+
+### Rebranding XySpace
+- Seluruh referensi XyStudio / XYStudio diganti menjadi XySpace (package namespace, dokumentasi, lisensi, metadata).
+- Lisensi diperbarui ke XSPACE PERSONAL USE LICENSE v1.0.
+- Setiap file source (.kt, .cpp, .glsl) diberi header lisensi XySpace.
+
+### Build & CI
+- Minification (R8) diaktifkan untuk release build dengan ProGuard rules.
+- versionCode lokal memakai timestamp agar tidak bentrok dengan CI.
+- CI: build-tools 37.0.0 -> 36.0.0 (kompatibel AGP 9.3), NDK 27 -> 28.
+- CI: lisensi di release notes disesuaikan dengan LICENSE.
+- .gitignore: tambah aturan untuk PakeAja*, *.token, secrets.*.
+- Duplikat splash_gif.gif di /raw/ dihapus.
+
 ### UI/UX Rounded Full Gradient 1 + HD Stabilizer NDK (patch v1.2.5)
 - Warna diganti total ke Gradient 1 #F2E6EE (light) -> #977DFF (purple): paper #F2E6EE, accent #977DFF, dark #00033D, line #E9DDFF. Light & dark theme diperbarui.
 - Seluruh UI jadi rounded full: bg_card 24dp, bg_card_hero 28dp, bg_preview 28dp, bg_social 20dp, bg_pill 999dp, button cornerRadius 24dp (pill penuh untuk 50dp height).
@@ -86,8 +107,8 @@ Saat rilis, pindahkan ke heading versi + tanggal.
 
 ### Identitas & Penamaan
 - Rebranding nama aplikasi menjadi **Foto Live**.
-- Migrasi namespace & application ID ke `livefoto.xystudio.app`.
-- Konfigurasi kunci penandatangan resmi XYStudio (RSA 2048-bit) untuk rilis publik dan mitigasi Google Play Protect.
+- Migrasi namespace & application ID ke `livefoto.xyspace.app`.
+- Konfigurasi kunci penandatangan resmi XySpace (RSA 2048-bit) untuk rilis publik dan mitigasi Google Play Protect.
 
 ### Core Engine & Kualitas Gambar
 - **Bilateral Filter Edge-Preserving**: Meredam noise mikro tanpa mengaburkan tepi objek.

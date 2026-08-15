@@ -1,6 +1,6 @@
-XYSTUDIO PERSONAL USE LICENSE v1.0
+XSPACE PERSONAL USE LICENSE v1.0
 Foto Live - Live Photo Maker
-Copyright 2026 XyStudio — Haekal Saputra (KALL)
+Copyright 2026 XySpace — Haekal Saputra (KALL)
 https://github.com/xykalnotkel/fotolivemaker
 
 ================================================================================
@@ -33,7 +33,7 @@ syarat berikut. Jika Anda tidak setuju, jangan gunakan kode ini.
    d) Membuat fork di GitHub untuk pull request ke repositori asli.
    e) Membagikan tautan ke repositori asli, bukan file APK hasil build Anda.
 
-3. YANG DILARANG KERAS (TANPA IZIN TERTULIS DARI XYSTUDIO)
+3. YANG DILARANG KERAS (TANPA IZIN TERTULIS DARI XSPACE)
    a) Menjual, menyewakan, melelang, atau memperjualbelikan Karya, baik utuh
       maupun sebagian, dalam bentuk source maupun binary (APK/AAB).
    b) Mengunggah APK/AAB turunan ke toko aplikasi mana pun (Play Store,
@@ -41,7 +41,7 @@ syarat berikut. Jika Anda tidak setuju, jangan gunakan kode ini.
    c) Menggunakan Karya untuk menghasilkan pendapatan iklan, langganan,
       atau jasa berbayar.
    d) Menghapus atau mengubah copyright notice, watermark, atau atribusi
-      XyStudio / Haekal Saputra.
+      XySpace / Haekal Saputra.
    e) Mengklaim Karya ini sebagai milik Anda atau melakukan rebranding total
       tanpa atribusi.
    f) Mendistribusikan ulang source code di luar GitHub tanpa menyertakan
@@ -49,36 +49,36 @@ syarat berikut. Jika Anda tidak setuju, jangan gunakan kode ini.
 
 4. ATRIBUSI
    Setiap turunan yang dibagikan secara non-komersial WAJIB mencantumkan:
-   "Based on Foto Live by XyStudio (Haekal Saputra) - https://github.com/xykalnotkel/fotolivemaker"
+   "Based on Foto Live by XySpace (Haekal Saputra) - https://github.com/xykalnotkel/fotolivemaker"
    di README dan di dalam aplikasi (About / Settings).
 
 5. KEPEMILIKAN
-   Hak cipta tetap milik XyStudio. Lisensi ini TIDAK mengalihkan kepemilikan,
+   Hak cipta tetap milik XySpace. Lisensi ini TIDAK mengalihkan kepemilikan,
    hanya memberi hak pakai terbatas.
 
 6. GARANSI & TANGGUNG JAWAB
-   Karya disediakan "SEBAGAIMANA ADANYA" tanpa garansi. XyStudio tidak
+   Karya disediakan "SEBAGAIMANA ADANYA" tanpa garansi. XySpace tidak
    bertanggung jawab atas kerusakan, kehilangan data, atau pelanggaran hukum
    akibat penggunaan Karya. Penggunaan risiko Anda sendiri.
 
 7. PELANGGARAN
    Pelanggaran terhadap pasal 3 akan mengakibatkan pencabutan otomatis hak
-   Anda atas lisensi ini dan XyStudio berhak mengajukan DMCA takedown,
+   Anda atas lisensi ini dan XySpace berhak mengajukan DMCA takedown,
    laporan Play Store, dan tuntutan sesuai hukum yang berlaku di Indonesia.
 
 8. IZIN KOMERSIAL
    Jika Anda ingin menggunakan Karya untuk tujuan komersial (mis. menjual,
    memonetisasi, atau mempublikasikan atas nama bisnis), hubungi:
-   Email: xystudio.id (cek GitHub profile) untuk perjanjian lisensi komersial
+   Email: xyspace.id (cek GitHub profile) untuk perjanjian lisensi komersial
    terpisah. Tanpa perjanjian tertulis, penggunaan komersial dianggap pelanggaran.
 
 9. KOMPATIBILITAS LISENSI PIHAK KETIGA
    Library pihak ketiga (AndroidX, Material, Media3, Kotlin, dll) tetap tunduk
    pada lisensi masing-masing (umumnya Apache 2.0). Lisensi ini hanya berlaku
-   untuk kode dan aset asli Foto Live buatan XyStudio.
+   untuk kode dan aset asli Foto Live buatan XySpace.
 
 10. PERUBAHAN LISENSI
-    XyStudio dapat memperbarui lisensi ini kapan saja. Versi terbaru selalu ada
+    XySpace dapat memperbarui lisensi ini kapan saja. Versi terbaru selalu ada
     di file LICENSE pada branch main repositori resmi.
 
 Dengan menggunakan repositori ini, Anda dianggap telah membaca, memahami, dan
@@ -91,5 +91,5 @@ ENGLISH SUMMARY (non-legally binding, Indonesian version prevails):
 Free for personal, educational, non-commercial use only. You may view, clone,
 build for personal device, and modify for personal needs. You may NOT sell,
 resell, publish to app stores, monetize with ads/IAP, or remove attribution.
-Commercial use requires separate written permission from XyStudio.
+Commercial use requires separate written permission from XySpace.
 ================================================================================

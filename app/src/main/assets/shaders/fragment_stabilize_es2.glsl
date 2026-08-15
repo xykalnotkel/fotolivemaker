@@ -1,3 +1,6 @@
+// XySpace License v1.0 — Personal use only
+// Copyright 2026 XySpace — Haekal Saputra
+
 #version 100
 // Koreksi guncangan: rotasi kecil + geser X/Y + zoom penutup tepi.
 

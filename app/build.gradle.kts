@@ -3,7 +3,7 @@ plugins {
 }
 
 android {
-    namespace = "livefoto.xystudio.app"
+    namespace = "livefoto.xyspace.app"
     compileSdk = 37
 
     // Keystore rilis diambil dari GitHub Secrets saat build di CI.
@@ -28,7 +28,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "livefoto.xystudio.app"
+        applicationId = "livefoto.xyspace.app"
         minSdk = 24
         targetSdk = 37
         // NDK untuk HD+ - membersihkan MP4 + JPG via C++

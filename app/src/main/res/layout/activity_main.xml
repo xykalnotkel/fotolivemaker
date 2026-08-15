@@ -169,7 +169,7 @@
                         android:fontFamily="monospace" />
                 </LinearLayout>
 
-                <livefoto.xystudio.app.TimelineEditorView
+                <livefoto.xyspace.app.TimelineEditorView
                     android:id="@+id/timeline"
                     android:layout_width="match_parent"
                     android:layout_height="116dp"

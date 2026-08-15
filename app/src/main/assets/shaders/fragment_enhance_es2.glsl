@@ -1,3 +1,6 @@
+// XySpace License v1.0 — Personal use only
+// Copyright 2026 XySpace — Haekal Saputra
+
 #version 100
 // Filter Bersih: Redam noise bilateral 5x5 + Unsharp Mask dengan Coring Threshold
 // Tepi tetap tajam sempurna tanpa memunculkan bintik noise pasir.

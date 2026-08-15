@@ -156,7 +156,7 @@ jobs:
           - Google Motion Photo dan Samsung SEF.
           - Video diproses lokal di perangkat.
 
-          XYStudio Personal Use License. Lihat TERMS.md dan PRIVACY.md untuk detail.
+          XySpace Personal Use License. Lihat TERMS.md dan PRIVACY.md untuk detail.
           EOF
 
           echo "version=${VER}" >> "$GITHUB_OUTPUT"
