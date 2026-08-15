@@ -130,7 +130,11 @@ object VideoEncoder {
                     }
                     override fun onError(c: Composition, res: ExportResult, e: ExportException) {
                         stop(); outFile.delete()
-                        cont.resumeWithException(IllegalStateException("Encoder gagal: ${e.errorCodeName}. Coba turunkan resolusi atau matikan efek.", e))
+                        val errMsg = "Encoder gagal: ${e.errorCodeName} (${e.message}). " +
+                            "Coba turunkan resolusi atau matikan efek."
+                        log("ERROR: $errMsg")
+                        log("Stack: ${e.stackTraceToString().take(500)}")
+                        cont.resumeWithException(IllegalStateException(errMsg, e))
                     }
                 }).build()
 

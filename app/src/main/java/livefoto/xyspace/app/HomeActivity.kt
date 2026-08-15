@@ -10,6 +10,8 @@ package livefoto.xyspace.app
  */
 
 import android.content.Intent
+import android.graphics.drawable.GradientDrawable
+import android.view.animation.DecelerateInterpolator
 import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Build
@@ -51,6 +53,10 @@ class HomeActivity : AppCompatActivity() {
         setContentView(b.root)
         Settings.applyAccessibility(this, b.root)
 
+        if (!Settings.isReduceMotion(this)) {
+            showGradientWelcome()
+        }
+
         b.tvVersion.text = "v${BuildConfig.VERSION_NAME}"
 
         b.cardAdd.setOnClickListener {
@@ -87,6 +93,63 @@ class HomeActivity : AppCompatActivity() {
     }
 
     /** Banner benar-benar hilang bila tidak ada versi yang lebih baru. */
+    private fun showGradientWelcome() {
+        val gradient = View(this@HomeActivity)
+        val purple = 0xBB977DFF.toInt()
+        val transparent = 0x00977DFF.toInt()
+        val drawable = GradientDrawable(
+            GradientDrawable.Orientation.TOP_BOTTOM,
+            intArrayOf(purple, purple, transparent)
+        )
+        gradient.background = drawable
+        gradient.layoutParams = ViewGroup.LayoutParams(
+            ViewGroup.LayoutParams.MATCH_PARENT, (resources.displayMetrics.heightPixels * 0.45).toInt()
+        )
+        (findViewById<ViewGroup>(android.R.id.content) as? ViewGroup)?.apply {
+            addView(gradient)
+            gradient.post {
+                gradient.animate()
+                    .alpha(0f)
+                    .setDuration(900)
+                    .setStartDelay(500)
+                    .setInterpolator(DecelerateInterpolator())
+                    .withEndAction {
+                        (gradient.parent as? ViewGroup)?.removeView(gradient)
+                    }
+                    .start()
+            }
+        }
+    }
+
+    private fun paintBanner(info: UpdateCheck.Info?) {
+    private fun showGradientWelcome() {
+        val gradient = View(this@HomeActivity)
+        val purple = 0xBB977DFF.toInt()
+        val transparent = 0x00977DFF.toInt()
+        val drawable = GradientDrawable(
+            GradientDrawable.Orientation.TOP_BOTTOM,
+            intArrayOf(purple, purple, transparent)
+        )
+        gradient.background = drawable
+        gradient.layoutParams = ViewGroup.LayoutParams(
+            ViewGroup.LayoutParams.MATCH_PARENT, (resources.displayMetrics.heightPixels * 0.45).toInt()
+        )
+        (findViewById<ViewGroup>(android.R.id.content) as? ViewGroup)?.apply {
+            addView(gradient)
+            gradient.post {
+                gradient.animate()
+                    .alpha(0f)
+                    .setDuration(900)
+                    .setStartDelay(500)
+                    .setInterpolator(DecelerateInterpolator())
+                    .withEndAction {
+                        (gradient.parent as? ViewGroup)?.removeView(gradient)
+                    }
+                    .start()
+            }
+        }
+    }
+
     private fun paintBanner(info: UpdateCheck.Info?) {
         val show = info?.newer == true && !UpdateCheck.isDismissed(this, info.tag)
         b.updateBanner.visibility = if (show) View.VISIBLE else View.GONE
