@@ -96,5 +96,21 @@
             android:exported="false"
             android:parentActivityName=".MainActivity" />
 
-    </application>
+    
+        <activity
+            android:name=".VideoEditorActivity"
+            android:exported="false"
+            android:parentActivityName=".HomeActivity" />
+
+        <activity
+            android:name=".VideoProcessActivity"
+            android:exported="false"
+            android:parentActivityName=".VideoEditorActivity" />
+
+        <activity
+            android:name=".VideoResultActivity"
+            android:exported="false"
+            android:parentActivityName=".VideoEditorActivity" />
+
+</application>
 </manifest>

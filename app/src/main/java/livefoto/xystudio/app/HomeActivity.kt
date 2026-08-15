@@ -47,6 +47,9 @@ class HomeActivity : AppCompatActivity() {
         b.cardAdd.setOnClickListener {
             startActivity(Intent(this, PickerActivity::class.java))
         }
+        b.cardVideoEditor.setOnClickListener {
+            startActivity(Intent(this, VideoEditorActivity::class.java))
+        }
         b.btnSettings.setOnClickListener {
             startActivity(Intent(this, SettingsActivity::class.java))
         }

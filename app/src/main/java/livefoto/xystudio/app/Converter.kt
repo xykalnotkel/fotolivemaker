@@ -54,10 +54,12 @@ object Converter {
         fun isOriginal(): Boolean = this == ORIGINAL
     }
 
-    /** Pilihan resolusi keluaran. SOURCE = ikut resolusi asli video. */
+    /** Pilihan resolusi keluaran. SOURCE = ikut resolusi asli video. UHD untuk editor terpisah. */
     enum class Res(val label: String, val height: Int) {
         P720("720p", 720),
         P1080("1080p", 1080),
+        P1440("2K", 1440),
+        P2160("4K UHD", 2160),
         SOURCE("Asli", 0)
     }
 
@@ -878,6 +880,112 @@ object Converter {
         return Result(savedUri, p, check.log, motionPhoto.size)
     }
 
+    data class VideoResult(val uri: Uri, val plan: Plan, val width: Int, val height: Int, val bytes: Long)
+
+    private fun saveVideoToGallery(context: Context, file: File): Uri {
+        val name = "VID_${System.currentTimeMillis()}.mp4"
+        val resolver = context.contentResolver
+        val values = ContentValues().apply {
+            put(MediaStore.Video.Media.DISPLAY_NAME, name)
+            put(MediaStore.Video.Media.MIME_TYPE, "video/mp4")
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                put(MediaStore.Video.Media.RELATIVE_PATH, Environment.DIRECTORY_DCIM + "/Camera")
+                put(MediaStore.Video.Media.IS_PENDING, 1)
+            }
+        }
+        val uri = resolver.insert(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, values)
+            ?: throw IllegalStateException("Tidak bisa membuat berkas video di galeri")
+        try {
+            resolver.openOutputStream(uri)?.use { out ->
+                file.inputStream().use { it.copyTo(out) }
+            } ?: throw IllegalStateException("Tidak bisa menulis berkas video")
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                ContentValues().apply {
+                    put(MediaStore.Video.Media.IS_PENDING, 0)
+                    resolver.update(uri, this, null, null)
+                }
+            }
+            return uri
+        } catch (e: Exception) {
+            runCatching { resolver.delete(uri, null, null) }
+            throw e
+        }
+    }
+
+    suspend fun convertVideo(
+        context: Context,
+        uri: Uri,
+        opts: Options,
+        log: (String) -> Unit,
+        progress: (Int) -> Unit,
+        planHint: Plan? = null
+    ): VideoResult {
+        log("Membaca info video...")
+        progress(3)
+        val total = withContext(Dispatchers.IO) { videoDurationMs(context, uri) }
+        if (total <= 0) throw IllegalStateException("Durasi video tidak terbaca")
+
+        val (srcW, srcH) = withContext(Dispatchers.IO) { videoSize(context, uri) }
+        log("Sumber: ${srcW}x${srcH}, ${total} ms")
+
+        val raw = planHint ?: plan(total)
+        val p = sanitize(total, raw.startMs, raw.durationMs, raw.keyframeOffsetMs)
+        log("Potong: ${p.startMs} -> ${p.startMs + p.durationMs} ms")
+
+        val (outW, outH) = calculateDimensions(srcW, srcH, opts)
+        log("Target: ${outW}x${outH} (${opts.aspectRatio.label} ${opts.res.label})")
+
+        var stab: Stabilizer.Plan? = null
+        if (opts.stabilize) {
+            stab = withContext(Dispatchers.Default) {
+                Stabilizer.analyze(context, uri, p.startMs, p.durationMs, log) { sample ->
+                    progress(5 + sample * 11 / 100)
+                }
+            }
+        }
+
+        log("Mulai transcode video HD/UHD...")
+        val mp4File = withContext(Dispatchers.IO) {
+            val outDir = File(context.cacheDir, "transcode").apply { mkdirs() }
+            File(outDir, "video_${System.currentTimeMillis()}.mp4")
+        }
+
+        // Reuse transcodeClip logic but save file directly
+        val mp4Bytes = try {
+            transcodeClip(context, uri, p, opts, outW, outH, stab, log) { enc ->
+                progress(18 + enc.coerceIn(0, 100) * 76 / 100)
+            }
+        } catch (e: Exception) {
+            if (opts.res == Res.P2160 || opts.res == Res.P1440 || opts.res == Res.P1080) {
+                log("Resolusi tinggi gagal (${e.message}), fallback ke 720p...")
+                val (fallbackW, fallbackH) = calculateDimensions(srcW, srcH, opts.copy(res = Res.P720))
+                transcodeClip(context, uri, p, opts.copy(res = Res.P720), fallbackW, fallbackH, stab, log) { enc ->
+                    progress(18 + enc.coerceIn(0, 100) * 76 / 100)
+                }
+            } else {
+                throw e
+            }
+        }
+
+        // Write bytes to temp file then save to gallery
+        val tempFile = withContext(Dispatchers.IO) {
+            val outDir = File(context.cacheDir, "transcode").apply { mkdirs() }
+            val f = File(outDir, "export_${System.currentTimeMillis()}.mp4")
+            f.writeBytes(mp4Bytes)
+            f
+        }
+
+        val info = inspectEncodedVideo(tempFile)
+        log("Encode terverifikasi: ${info.width}x${info.height}, ${info.durationMs} ms, ${tempFile.length()/1024} KB")
+
+        val savedUri = withContext(Dispatchers.IO) { saveVideoToGallery(context, tempFile) }
+        tempFile.delete()
+        log("Tersimpan di DCIM/Camera sebagai video")
+
+        return VideoResult(savedUri, p, info.width, info.height, mp4Bytes.size.toLong())
+    }
+
+    private fun saveToGallery(context: Context, data: ByteArray): Uri {
     private fun saveToGallery(context: Context, data: ByteArray): Uri {
         // Motion Photo Format 1.0: nama harus berakhir "MP" sebelum ekstensi.
         val name = "MP_${System.currentTimeMillis()}MP.jpg"
