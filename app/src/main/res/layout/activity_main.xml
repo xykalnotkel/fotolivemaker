@@ -279,7 +279,7 @@
         android:layout_height="72dp"
         android:orientation="horizontal"
         android:baselineAligned="false"
-        android:background="?attr/appPaper"
+        android:background="@android:color/transparent"
         android:paddingStart="8dp"
         android:paddingEnd="8dp">
 
@@ -290,7 +290,7 @@
             android:layout_height="match_parent"
             android:orientation="vertical"
             android:gravity="center"
-            android:background="@drawable/bg_tool_state">
+            android:background="@android:color/transparent">
 
             <ImageView
                 android:id="@+id/iconRatio"
@@ -317,7 +317,7 @@
             android:layout_height="match_parent"
             android:orientation="vertical"
             android:gravity="center"
-            android:background="@drawable/bg_tool_state">
+            android:background="@android:color/transparent">
 
             <ImageView
                 android:id="@+id/iconEnhance"
@@ -344,7 +344,7 @@
             android:layout_height="match_parent"
             android:orientation="vertical"
             android:gravity="center"
-            android:background="@drawable/bg_tool_state">
+            android:background="@android:color/transparent">
 
             <ImageView
                 android:id="@+id/iconStab"
@@ -371,7 +371,7 @@
             android:layout_height="match_parent"
             android:orientation="vertical"
             android:gravity="center"
-            android:background="@drawable/bg_tool_state">
+            android:background="@android:color/transparent">
 
             <ImageView
                 android:id="@+id/iconRes"

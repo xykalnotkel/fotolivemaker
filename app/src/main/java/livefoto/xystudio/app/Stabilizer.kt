@@ -14,10 +14,10 @@ import kotlin.math.atan2
  */
 object Stabilizer {
 
-    private const val ANALYZE_W = 128
-    private const val ANALYZE_H = 72
-    private const val SEARCH = 12
-    private const val MAX_SAMPLES = 45
+    private const val ANALYZE_W = 192
+    private const val ANALYZE_H = 108
+    private const val SEARCH = 14
+    private const val MAX_SAMPLES = 60
 
     data class Plan(
         val zoom: Float,
@@ -291,7 +291,8 @@ object Stabilizer {
 
     private fun gaussianSmooth(v: FloatArray): FloatArray {
         val out = FloatArray(v.size)
-        val weights = floatArrayOf(0.06f, 0.12f, 0.20f, 0.24f, 0.20f, 0.12f, 0.06f)
+        // Wider kernel 11 taps for iPhone-like ultra smooth
+        val weights = floatArrayOf(0.03f, 0.06f, 0.09f, 0.12f, 0.16f, 0.18f, 0.16f, 0.12f, 0.09f, 0.06f, 0.03f)
         val half = weights.size / 2
         for (i in v.indices) {
             var sum = 0f

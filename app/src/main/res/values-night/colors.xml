@@ -5,7 +5,7 @@
     <color name="ink">#FFF2E6EE</color>
     <color name="on_ink">#FF00033D</color>
     <color name="text_hi">#FFF2E6EE</color>
-    <color name="text_mid">#FFD8C5FF</color>
+    <color name="text_mid">#FFE9DDFF</color>
     <color name="text_dim">#FF9A8CC0</color>
     <color name="line">#FF1A0F4D</color>
     <color name="line_strong">#FF2D1E7A</color>
@@ -18,7 +18,7 @@
     <color name="bad">#FFFF6B6B</color>
     <color name="hero_start">#FF00033D</color>
     <color name="hero_mid">#FF0600AB</color>
-    <color name="hero_end">#FF0033FF</color>
+    <color name="hero_end">#FFB8A6FF</color>
     <color name="hero_sub">#FFF2E6EE</color>
     <color name="hero_line">#80977DFF</color>
 

@@ -348,14 +348,36 @@ class ResultActivity : AppCompatActivity() {
         return FileProvider.getUriForFile(this, "$packageName.files", file)
     }
 
-    /** JPG Motion Photo asli - format yang sekarang dibaca Live di Android 2026. */
+    /** JPG Motion Photo asli - format yang sekarang dibaca Live di Android 2026.
+     *  Disalin ke cache/share via FileProvider agar grantUriPermission work di semua app
+     *  (termasuk TikTok/WA) dan tidak gagal karena MediaStore permission.
+     */
     private fun shareJpgUri(): Uri? {
-        val uri = savedUri
-        if (uri == null) {
+        val srcUri = savedUri
+        if (srcUri == null) {
             Toast.makeText(this, "File Motion Photo belum siap", Toast.LENGTH_SHORT).show()
             return null
         }
-        return uri
+        return try {
+            val cacheDir = java.io.File(cacheDir, "share").apply { mkdirs() }
+            // Bersihkan file JPG lama agar tidak menumpuk, tapi jangan hapus MP4 clipFile
+            // (MP4 dipakai player). Kita hapus hanya JPG cache.
+            cacheDir.listFiles()?.filter { it.name.endsWith(".jpg") || it.name.startsWith("LivePhoto_JPG_") }?.forEach { it.delete() }
+            val outFile = java.io.File(cacheDir, "LivePhoto_JPG_${System.currentTimeMillis()}.jpg")
+            contentResolver.openInputStream(srcUri)?.use { input ->
+                outFile.outputStream().use { output ->
+                    input.copyTo(output)
+                }
+            }
+            // Fallback kalau copy gagal, pakai srcUri asli
+            if (!outFile.exists() || outFile.length() == 0L) {
+                return srcUri
+            }
+            androidx.core.content.FileProvider.getUriForFile(this, "$packageName.files", outFile)
+        } catch (e: Exception) {
+            // Fallback ke uri MediaStore asli kalau FileProvider copy gagal
+            srcUri
+        }
     }
 
     private fun installedPackage(candidates: List<String>): String? =

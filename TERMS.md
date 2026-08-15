@@ -1,13 +1,13 @@
-# Syarat & Ketentuan Penggunaan (Terms of Service)
+# Syarat & Ketentuan Penggunaan (Terms of Service) - Personal Use
 
-**Aplikasi:** Live Photo Maker
-**Berlaku sejak:** 13 Agustus 2026
-**Pengembang:** xykalnotkel
-
-Dengan meng-install atau menggunakan aplikasi ini, kamu dianggap menyetujui
-syarat di bawah ini. Kalau tidak setuju, jangan gunakan aplikasinya.
+**Aplikasi:** Foto Live - Live Photo Maker
+**Lisensi:** XYStudio Personal Use License v1.0 (source gratis, personal non-komersial, dilarang jual/beli ulang)
+**Berlaku sejak:** 13 Agustus 2026 (update lisensi 15 Agustus 2026)
+**Pengembang:** XyStudio — Haekal Saputra (KALL)
 
 ---
+
+
 
 ## 1. Tentang aplikasi ini
 
@@ -25,7 +25,7 @@ halaman resmi). Tidak ada cek otomatis di latar belakang.
 ## 2. Tanpa jaminan
 
 Aplikasi ini disediakan **"APA ADANYA" (AS IS)**, tanpa jaminan dalam bentuk
-apa pun, sesuai Lisensi Apache License 2.0 yang menyertainya.
+apa pun, sesuai XYStudio Personal Use License v1.0 yang menyertainya.
 
 Secara khusus, **tidak ada jaminan bahwa:**
 - File hasil konversi akan dikenali sebagai "Live Photo" oleh TikTok, Instagram,
@@ -82,8 +82,11 @@ ini. Pengembang tidak bertanggung jawab atas APK yang diperoleh dari sumber lain
 karena bisa saja sudah dimodifikasi atau disisipi program berbahaya.
 
 APK resmi dari halaman Releases ditandatangani **kunci rilis** pengembang.
-Itu bukan identitas Google Play. **Jangan unggah APK ini ke Play Store**
-tanpa paket, kebijakan, dan keystore milikmu sendiri.
+Itu bukan identitas Google Play. **DILARANG MENGUNGGAH APK ini ke Play Store
+atau toko lain untuk dijual / dimonetisasi** tanpa izin tertulis dari XyStudio,
+sesuai pasal 3 LICENSE. Personal use saja.
+
+Source code gratis untuk edukasi & pribadi, bukan untuk diperjualbelikan kembali.
 
 ## 7. Perubahan syarat
 
@@ -94,7 +97,7 @@ menyetujui syarat yang baru.
 ## 8. Hukum yang berlaku
 
 Syarat ini tunduk pada hukum yang berlaku di Republik Indonesia, tanpa
-mengesampingkan ketentuan Lisensi Apache License 2.0.
+mengesampingkan ketentuan XYStudio Personal Use License v1.0.
 
 ---
 

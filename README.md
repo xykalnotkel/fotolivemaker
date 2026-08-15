@@ -1,7 +1,7 @@
 # Foto Live (Android)
 
 [![Build APK](https://github.com/xykalnotkel/fotolivemaker/actions/workflows/build.yml/badge.svg)](https://github.com/xykalnotkel/fotolivemaker/actions/workflows/build.yml)
-[![License: Apache--2.0](https://img.shields.io/badge/License-Apache--2.0-blue.svg)](LICENSE)
+[![License: XYStudio Personal Use](https://img.shields.io/badge/License-Personal%20Use-purple.svg)](LICENSE)
 [![Release](https://img.shields.io/github/v/release/xykalnotkel/fotolivemaker?label=APK)](https://github.com/xykalnotkel/fotolivemaker/releases/latest)
 [![Android 7–17](https://img.shields.io/badge/Android-7--17-2563EB)](app/build.gradle.kts)
 [![Kotlin](https://img.shields.io/badge/Kotlin-built--in-0F172A)](app/src/main/java)
@@ -139,12 +139,12 @@ ada di artifact **laporan-tes**.
 
 ## Lisensi & ketentuan
 
-- **[LICENSE](LICENSE)** — Apache License 2.0 · Copyright 2026 XyStudio — Haekal Saputra
+- **[LICENSE](LICENSE)** — XYStudio Personal Use License v1.0 · Copyright 2026 XyStudio — Haekal Saputra (source free, personal non-commercial only)
 - **[NOTICE](NOTICE)** — pemberitahuan lisensi library pihak ketiga
 - **[TERMS.md](TERMS.md)** — syarat penggunaan & batasan tanggung jawab
 - **[PRIVACY.md](PRIVACY.md)** — kebijakan privasi
 
-**Ringkasnya:** gratis, open source, disediakan **apa adanya tanpa jaminan**.
+**Ringkasnya:** source gratis untuk **personal use non-komersial** saja, tidak boleh dijualbelikan / publish ulang komersial, disediakan **apa adanya tanpa jaminan**. Lihat LICENSE untuk detail.
 
 Izin `INTERNET` dipakai untuk cek versi GitHub saat beranda aktif (maksimal
 sekali per 24 jam) dan mengunduh APK setelah kamu mengetuk banner. Tidak ada

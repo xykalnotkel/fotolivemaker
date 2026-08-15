@@ -1,26 +1,19 @@
-Foto Live
+Foto Live (FotoLive)
 Copyright 2026 XyStudio — Haekal Saputra
 
-This product includes software developed by third parties. The following direct
-runtime dependencies are distributed under the Apache License, Version 2.0:
+This project is licensed under XYStudio Personal Use License v1.0 (see LICENSE)
+- Source free for personal, educational, non-commercial use only.
+- No resale, no commercial publish, attribution required.
 
-- AndroidX Core KTX and Core SplashScreen (androidx.core:core-*)
-- AndroidX AppCompat (androidx.appcompat:appcompat)
-- Material Components for Android (com.google.android.material:material)
-- AndroidX ConstraintLayout (androidx.constraintlayout:constraintlayout)
-- AndroidX RecyclerView (androidx.recyclerview:recyclerview)
-- AndroidX Activity KTX (androidx.activity:activity-ktx)
-- AndroidX Lifecycle Runtime KTX (androidx.lifecycle:lifecycle-runtime-ktx)
-- Kotlin Coroutines Android (org.jetbrains.kotlinx:kotlinx-coroutines-android)
-- AndroidX Media3 Transformer, Effect, Common, ExoPlayer, and UI
-  (androidx.media3:media3-*)
+Third-party libraries:
+- AndroidX, Material, Media3, Kotlin, Coroutines: Apache License 2.0
+- Material Symbols (icons): Apache License 2.0 - https://github.com/google/material-design-icons
+- Simple Icons (TikTok, Instagram, WhatsApp logos): CC0 / trademark of respective owners
+- rembg / U2Net (for illustration background removal in build): MIT / Apache 2.0 (used only during asset generation, not bundled)
+- NDK C++ code in this repo (fotolive_hd): XYStudio Personal Use License v1.0 (same as main)
 
-Interface glyphs are based on Material Symbols Rounded, licensed under Apache
-License 2.0. TikTok, Instagram, and WhatsApp brand glyph paths are sourced from
-Simple Icons (CC0 1.0); all brand names and logos remain trademarks of their
-respective owners. Generated product illustrations are original project assets.
+Splash GIF animation provided by user (personal use) - black background with white pill.
 
-Full dependency metadata and version pins are in app/build.gradle.kts. The
-Apache License, Version 2.0 for this application and the listed dependencies
-is provided in LICENSE. Android, Kotlin, and Media3 names are trademarks of
-their respective owners.
+All trademarks (TikTok, Instagram, WhatsApp, Live Photo, Motion Photo) belong to respective owners.
+
+For commercial license, contact XyStudio via GitHub.
