@@ -648,9 +648,9 @@ object Converter {
 
         if (opts.enhance) {
             effects += GlEffect { ctx, useHdr ->
-                EnhanceShader(ctx, useHdr, denoise = 0.82f, sharpen = 0.46f)
+                EnhanceShader(ctx, useHdr, denoise = 0.90f, sharpen = 0.62f)
             }
-            log("Efek: HD bersih noise kuat (bilateral HD + coring)")
+            log("Efek: HD iPhone - bersih noise ultra + sharpen coring kuat")
         }
 
         if (stab != null && stab.zoom > 1.001f) {
@@ -668,10 +668,11 @@ object Converter {
             .build()
 
         val pixelCount = outW.toLong() * outH
+        // Bitrate lebih tinggi untuk HD mulus seperti iPhone, tapi tetap aman untuk encoder
         val bitrate = when {
-            pixelCount >= 1920L * 1080L -> (pixelCount * 6).toInt().coerceIn(8_000_000, 25_000_000)
-            pixelCount >= 1280L * 720L -> (pixelCount * 7).toInt().coerceIn(6_000_000, 16_000_000)
-            else -> (pixelCount * 8).toInt().coerceIn(3_000_000, 12_000_000)
+            pixelCount >= 1920L * 1080L -> (pixelCount * 9).toInt().coerceIn(14_000_000, 32_000_000)
+            pixelCount >= 1280L * 720L -> (pixelCount * 8).toInt().coerceIn(10_000_000, 20_000_000)
+            else -> (pixelCount * 9).toInt().coerceIn(5_000_000, 14_000_000)
         }
 
         return suspendCancellableCoroutine { cont ->

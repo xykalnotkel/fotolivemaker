@@ -25,7 +25,7 @@ class LaunchActivity : AppCompatActivity() {
         // Tetap pakai system splash untuk Android 12+ biar tidak putih, tapi kita override kontennya
         val splash = installSplashScreen()
         splash.setKeepOnScreenCondition {
-            showIntro && SystemClock.uptimeMillis() - startedAt < 80L
+            false // cuma pakai GIF splash custom, bukan native
         }
 
         Settings.prepareActivity(this)
@@ -58,7 +58,7 @@ class LaunchActivity : AppCompatActivity() {
         }
 
         // Durasi splash: biarkan GIF loop ~1.2 detik biar kelihatan modern
-        val delay = 1200L
+        val delay = 5500L // GIF total 5530ms
         Handler(Looper.getMainLooper()).postDelayed({
             openHome()
         }, delay)

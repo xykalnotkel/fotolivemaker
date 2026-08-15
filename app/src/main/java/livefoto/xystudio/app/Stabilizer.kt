@@ -16,7 +16,7 @@ object Stabilizer {
 
     private const val ANALYZE_W = 192
     private const val ANALYZE_H = 108
-    private const val SEARCH = 14
+    private const val SEARCH = 16
     private const val MAX_SAMPLES = 60
 
     data class Plan(
@@ -148,8 +148,9 @@ object Stabilizer {
             val offX = FloatArray(n)
             val offY = FloatArray(n)
             for (i in 0 until n) {
-                offX[i] = (corrX[i] / ANALYZE_W).coerceIn(-limit, limit)
-                offY[i] = (corrY[i] / ANALYZE_H).coerceIn(-limit, limit)
+                // Kali 2.2 agar koreksi lebih terasa seperti iPhone EIS
+                offX[i] = ((corrX[i] / ANALYZE_W) * 2.2f).coerceIn(-limit, limit)
+                offY[i] = ((corrY[i] / ANALYZE_H) * 2.2f).coerceIn(-limit, limit)
             }
 
             log(

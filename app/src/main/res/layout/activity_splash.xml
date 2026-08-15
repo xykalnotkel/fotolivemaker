@@ -6,8 +6,8 @@
 
     <ImageView
         android:id="@+id/imgSplash"
-        android:layout_width="120dp"
-        android:layout_height="20dp"
+        android:layout_width="280dp"
+        android:layout_height="280dp"
         android:layout_gravity="center"
         android:scaleType="fitCenter"
         android:contentDescription="Splash" />
