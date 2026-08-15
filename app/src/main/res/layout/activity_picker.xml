@@ -3,129 +3,117 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:background="#FF5ED7A0">
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center_vertical"
-        android:paddingStart="8dp"
-        android:paddingEnd="8dp"
-        android:paddingTop="8dp"
-        android:paddingBottom="8dp">
-
-        <ImageView
-            android:id="@+id/btnBack"
-            android:layout_width="44dp"
-            android:layout_height="44dp"
-            android:padding="11dp"
-            android:src="@drawable/ic_back"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            app:tint="?attr/appInk"
-            android:contentDescription="Kembali" />
-
-        <LinearLayout
-            android:id="@+id/albumBar"
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center"
-            android:background="?attr/selectableItemBackground"
-            android:paddingTop="8dp"
-            android:paddingBottom="8dp">
-
-            <TextView
-                android:id="@+id/albumName"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Semua Video"
-                android:textColor="?attr/appInk"
-                android:textSize="16sp"
-                android:textStyle="bold"
-                android:maxWidth="180dp"
-                android:ellipsize="end"
-                android:maxLines="1" />
-
-            <ImageView
-                android:layout_width="18dp"
-                android:layout_height="18dp"
-                android:layout_marginStart="6dp"
-                android:src="@drawable/ic_chevron_down"
-                app:tint="?attr/appInk"
-                android:contentDescription="Pilih album" />
-        </LinearLayout>
-
-        <TextView
-            android:id="@+id/btnSystemPick"
-            android:layout_width="wrap_content"
-            android:layout_height="44dp"
-            android:gravity="center"
-            android:paddingStart="10dp"
-            android:paddingEnd="10dp"
-            android:text="SISTEM"
-            android:textColor="?attr/appInk"
-            android:textSize="11sp"
-            android:textStyle="bold"
-            android:letterSpacing="0.06"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="Pilih lewat pemilih sistem" />
-    </LinearLayout>
-
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1.5dp"
-        android:background="?attr/appLine" />
-
-    <TextView
-        android:id="@+id/count"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingStart="16dp"
-        android:paddingEnd="16dp"
-        android:paddingTop="8dp"
-        android:textColor="?attr/appTextDim"
-        android:textSize="11sp" />
-
+    <!-- Top Preview Purple Area -->
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1">
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/grid"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:padding="2dp"
-            android:clipToPadding="false"
-            android:scrollbars="none" />
+        android:layout_weight="1"
+        android:background="#FF4B4AA0"
+        android:padding="16dp">
 
         <LinearLayout
-            android:id="@+id/emptyBox"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
             android:orientation="vertical"
-            android:gravity="center"
-            android:visibility="gone"
-            android:padding="24dp">
+            android:gravity="center">
 
             <TextView
-                android:id="@+id/empty"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:gravity="center"
-                android:textColor="?attr/appTextDim"
+                android:text="GaleryPicker"
+                android:textColor="#FFFFFFFF"
+                android:textSize="24sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:text="preview select"
+                android:textColor="#FFFFFFFF"
+                android:textSize="20sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:text="All Aspect Ratio"
+                android:textColor="#FFFFFFFF"
+                android:textSize="20sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:paddingTop="12dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="▶"
+                android:textColor="#FFFFFFFF"
                 android:textSize="14sp" />
 
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnEmptyPick"
-                style="@style/Btn.Ghost"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:text="Pilih lewat sistem" />
+            <View
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="6dp"
+                android:layout_marginStart="8dp"
+                android:background="#FFFFFFFF"
+                android:alpha="0.9" />
         </LinearLayout>
+    </FrameLayout>
+
+    <!-- Grid 4x2 dark squares -->
+    <GridLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:columnCount="4"
+        android:rowCount="2"
+        android:background="#FF5ED7A0"
+        android:padding="4dp">
+
+        <FrameLayout android:layout_width="0dp" android:layout_height="100dp" android:layout_columnWeight="1" android:layout_rowWeight="1"
+            android:layout_margin="4dp" android:background="#FF2D2D4A" />
+        <FrameLayout android:layout_width="0dp" android:layout_height="100dp" android:layout_columnWeight="1" android:layout_rowWeight="1"
+            android:layout_margin="4dp" android:background="#FF2D2D4A" />
+        <FrameLayout android:layout_width="0dp" android:layout_height="100dp" android:layout_columnWeight="1" android:layout_rowWeight="1"
+            android:layout_margin="4dp" android:background="#FF2D2D4A" />
+        <FrameLayout android:layout_width="0dp" android:layout_height="100dp" android:layout_columnWeight="1" android:layout_rowWeight="1"
+            android:layout_margin="4dp" android:background="#FF2D2D4A" />
+
+        <FrameLayout android:layout_width="0dp" android:layout_height="100dp" android:layout_columnWeight="1" android:layout_rowWeight="1"
+            android:layout_margin="4dp" android:background="#FF2D2D4A" />
+        <FrameLayout android:layout_width="0dp" android:layout_height="100dp" android:layout_columnWeight="1" android:layout_rowWeight="1"
+            android:layout_margin="4dp" android:background="#FF2D2D4A" />
+        <FrameLayout android:layout_width="0dp" android:layout_height="100dp" android:layout_columnWeight="1" android:layout_rowWeight="1"
+            android:layout_margin="4dp" android:background="#FF2D2D4A" />
+        <FrameLayout android:layout_width="0dp" android:layout_height="100dp" android:layout_columnWeight="1" android:layout_rowWeight="1"
+            android:layout_margin="4dp" android:background="#FF2D2D4A" />
+    </GridLayout>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/grid"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:visibility="gone" />
+
+    <LinearLayout android:id="@+id/emptyBox" android:layout_width="match_parent" android:layout_height="wrap_content" android:visibility="gone" />
+
+    <TextView android:id="@+id/count" android:layout_width="match_parent" android:layout_height="wrap_content" android:visibility="gone" />
+    <FrameLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:visibility="gone">
+        <ImageView android:id="@+id/btnBack" android:layout_width="44dp" android:layout_height="44dp" />
+        <TextView android:id="@+id/albumName" android:layout_width="wrap_content" android:layout_height="wrap_content" />
+        <TextView android:id="@+id/btnSystemPick" android:layout_width="wrap_content" android:layout_height="wrap_content" />
+        <LinearLayout android:id="@+id/albumBar" android:layout_width="match_parent" android:layout_height="wrap_content" />
     </FrameLayout>
 </LinearLayout>
