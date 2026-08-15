@@ -217,8 +217,8 @@
                     android:contentDescription="Bagikan Foto Live JPG ke TikTok, tahan lama untuk MP4">
                     <ImageView android:layout_width="28dp" android:layout_height="28dp" android:src="@drawable/logo_tiktok" android:contentDescription="@null" />
                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="6dp" android:text="TikTok
-JPG Live" android:gravity="center" android:textColor="#FF111827" android:textSize="11sp" android:textStyle="bold" />
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="tap JPG, hold MP4" android:textColor="#FF6B7280" android:textSize="8sp" />
+JPG Live" android:gravity="center" android:textColor="?attr/appTextHigh" android:textSize="11sp" android:textStyle="bold" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="tap JPG, hold MP4" android:textColor="?attr/appTextDim" android:textSize="8sp" />
                 </LinearLayout>
 
                 <LinearLayout
@@ -236,8 +236,8 @@ JPG Live" android:gravity="center" android:textColor="#FF111827" android:textSiz
                     android:contentDescription="Tambahkan video ke Instagram Story">
                     <ImageView android:layout_width="28dp" android:layout_height="28dp" android:src="@drawable/logo_instagram" android:contentDescription="@null" />
                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="6dp" android:text="IG Story
-MP4" android:gravity="center" android:textColor="#FF111827" android:textSize="11sp" android:textStyle="bold" />
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="video murni" android:textColor="#FF6B7280" android:textSize="8sp" />
+MP4" android:gravity="center" android:textColor="?attr/appTextHigh" android:textSize="11sp" android:textStyle="bold" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="video murni" android:textColor="?attr/appTextDim" android:textSize="8sp" />
                 </LinearLayout>
 
                 <LinearLayout
@@ -254,8 +254,8 @@ MP4" android:gravity="center" android:textColor="#FF111827" android:textSize="11
                     android:contentDescription="Bagikan Foto Live JPG ke WhatsApp, tahan lama untuk MP4">
                     <ImageView android:layout_width="28dp" android:layout_height="28dp" android:src="@drawable/logo_whatsapp" android:contentDescription="@null" />
                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="6dp" android:text="WA
-JPG Live" android:gravity="center" android:textColor="#FF111827" android:textSize="11sp" android:textStyle="bold" />
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="tap JPG, hold MP4" android:textColor="#FF6B7280" android:textSize="8sp" />
+JPG Live" android:gravity="center" android:textColor="?attr/appTextHigh" android:textSize="11sp" android:textStyle="bold" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="tap JPG, hold MP4" android:textColor="?attr/appTextDim" android:textSize="8sp" />
                 </LinearLayout>
             </LinearLayout>
 

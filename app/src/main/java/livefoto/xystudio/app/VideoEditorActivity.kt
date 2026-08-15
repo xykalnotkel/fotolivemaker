@@ -103,21 +103,29 @@ class VideoEditorActivity : AppCompatActivity() {
 
         paintTools()
 
+        // Tombol fitur yang SUDAH jadi (aktif di semua build)
         b.toolVideo.setOnClickListener { toast("Video: pilih media dari galeri") ; pickVideoLauncher.launch("video/*") }
-        b.toolAudio.setOnClickListener { toast("Audio: tambah musik / suara - segera") }
-        b.toolText.setOnClickListener { toast("Teks: tambah teks overlay - segera") }
-        b.toolShape.setOnClickListener { toast("Shape: tambah bentuk - segera") }
-        b.toolEffect.setOnClickListener { toast("Efek: glitch, blur, dll - segera") }
-        b.toolFilter.setOnClickListener { toast("Filter: LUT, grayscale - segera") }
-        b.toolOverlay.setOnClickListener { toast("Overlay: foto/video di atas video - segera") }
-        b.toolKeyframe.setOnClickListener { toast("Keyframe: tambah keyframe posisi/scale/rot") }
-        b.toolCurve.setOnClickListener { toast("Kurva: atur easing Bezier - segera") }
-        b.toolMask.setOnClickListener { toast("Masking: alpha mask - segera") }
-        b.toolGroup.setOnClickListener { toast("Grup: group layers - segera") }
         b.toolCrop.setOnClickListener { toast("Crop: potong video - pakai Ratio") ; pickRatio() }
-        b.toolRotate.setOnClickListener { toast("Rotate: putar video - segera") }
-        b.toolDraw.setOnClickListener { toast("Drawing Vector: gambar bebas - segera") }
-        b.btnAddLayer.setOnClickListener { toast("Tambah layer baru - pilih Video/Foto/Text") }
+
+        // Tombol fitur yang MASIH DEVELOPMENT — di release cukup disable dengan toast informatif
+        val devMsg = if (BuildConfig.DEBUG) {
+            { s: String -> toast("$s - segera") }
+        } else {
+            { s: String -> toast("$s (akan datang di update berikutnya)") }
+        }
+        b.toolAudio.setOnClickListener { devMsg("Audio") }
+        b.toolText.setOnClickListener { devMsg("Teks") }
+        b.toolShape.setOnClickListener { devMsg("Shape") }
+        b.toolEffect.setOnClickListener { devMsg("Efek") }
+        b.toolFilter.setOnClickListener { devMsg("Filter") }
+        b.toolOverlay.setOnClickListener { devMsg("Overlay") }
+        b.toolKeyframe.setOnClickListener { devMsg("Keyframe") }
+        b.toolCurve.setOnClickListener { devMsg("Kurva") }
+        b.toolMask.setOnClickListener { devMsg("Masking") }
+        b.toolGroup.setOnClickListener { devMsg("Grup") }
+        b.toolRotate.setOnClickListener { devMsg("Rotate") }
+        b.toolDraw.setOnClickListener { devMsg("Drawing") }
+        b.btnAddLayer.setOnClickListener { devMsg("Tambah layer") }
 
         // Layers list dummy adapter
         setupLayersList()
@@ -197,23 +205,48 @@ class VideoEditorActivity : AppCompatActivity() {
     }
 
     private fun setupLayersList() {
-        // Dummy layers untuk CapCut-like UI - nanti diganti LayerManager beneran
-        val dummyLayers = listOf("Video Utama", "Overlay", "Teks", "Audio")
-        b.layersList.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(this, androidx.recyclerview.widget.LinearLayoutManager.HORIZONTAL, false)
+        // Layer list dinamis yang nunjukin video yang lagi diedit
+        refreshLayerList()
+        b.tvLayerCount.text = "1 LAYER"
+    }
+
+    private fun refreshLayerList() {
+        val layers = mutableListOf<String>()
+        if (videoUri != null) {
+            layers.add("Video Utama (${srcW}x${srcH})")
+        } else {
+            layers.add("(pilih video)")
+        }
+
+        b.layersList.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(
+            this, androidx.recyclerview.widget.LinearLayoutManager.HORIZONTAL, false
+        )
         b.layersList.adapter = object : androidx.recyclerview.widget.RecyclerView.Adapter<androidx.recyclerview.widget.RecyclerView.ViewHolder>() {
-            override fun getItemCount() = dummyLayers.size
-            override fun onCreateViewHolder(parent: android.view.ViewGroup, viewType: Int): androidx.recyclerview.widget.RecyclerView.ViewHolder {
-                val v = android.view.LayoutInflater.from(parent.context).inflate(R.layout.item_video_layer, parent, false)
-                return object : androidx.recyclerview.widget.RecyclerView.ViewHolder(v) {}
+            override fun getItemCount() = layers.size
+            override fun onCreateViewHolder(
+                parent: android.view.ViewGroup, viewType: Int
+            ): androidx.recyclerview.widget.RecyclerView.ViewHolder {
+                val v = android.view.LayoutInflater.from(parent.context)
+                    .inflate(R.layout.item_video_layer, parent, false)
+                return object : androidx.recyclerview.widget.RecyclerView.ViewHolder(v) {
+                    init {
+                        v.setOnClickListener {
+                            // Tap layer → edit video yang dipilih
+                            toast("Layer: ${layers[adapterPosition]}")
+                        }
+                    }
+                }
             }
-            override fun onBindViewHolder(holder: androidx.recyclerview.widget.RecyclerView.ViewHolder, position: Int) {
+            override fun onBindViewHolder(
+                holder: androidx.recyclerview.widget.RecyclerView.ViewHolder, position: Int
+            ) {
                 val tv = holder.itemView.findViewById<android.widget.TextView>(R.id.tvLayerName)
-                tv?.text = dummyLayers[position]
+                tv?.text = layers[position]
             }
         }
-        // Update layer count badge
-        b.tvLayerCount.text = "${dummyLayers.size} LAYERS"
+        b.tvLayerCount.text = "${layers.size} LAYERS"
     }
+
 
     private fun loadVideo(uri: Uri) = lifecycleScope.launch {
         val duration = withContext(Dispatchers.IO) { Converter.videoDurationMs(this@VideoEditorActivity, uri) }
@@ -229,6 +262,7 @@ class VideoEditorActivity : AppCompatActivity() {
         rebuildPlan(true)
         loadTimelineFrames(uri)
         refreshPreview()
+        refreshLayerList()
     }
 
     private fun rebuildPlan(updateTimeline: Boolean = true) {

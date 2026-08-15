@@ -49,7 +49,7 @@ jobs:
             mv "$RUNNER_TEMP/cmdline-tools/cmdline-tools" "$ANDROID_HOME/cmdline-tools/latest"
           fi
           "$ANDROID_HOME/cmdline-tools/latest/bin/android" --no-metrics sdk install \
-            "platforms;android-37.0" "build-tools;37.0.0" "platform-tools" "ndk;27.0.12077973"
+            "platforms;android-37.0" "build-tools;36.0.0" "platform-tools" "ndk;28.2.13676358"
 
       - name: Siapkan keystore rilis
         env:
@@ -156,7 +156,7 @@ jobs:
           - Google Motion Photo dan Samsung SEF.
           - Video diproses lokal di perangkat.
 
-          Lisensi Apache 2.0. Lihat TERMS.md dan PRIVACY.md untuk detail.
+          XYStudio Personal Use License. Lihat TERMS.md dan PRIVACY.md untuk detail.
           EOF
 
           echo "version=${VER}" >> "$GITHUB_OUTPUT"

@@ -33,25 +33,22 @@ object NativeHD {
     fun enhance(bitmap: Bitmap, denoise: Float = 0.82f, sharpen: Float = 0.46f): Boolean {
         if (!loaded) return false
         return try {
-            // Harus ARGB_8888 mutable
-            val mutable = if (bitmap.config == Bitmap.Config.ARGB_8888 && bitmap.isMutable) {
-                bitmap
+            // JNI modify-in-place hanya jalan di ARGB_8888 mutable
+            // Caller (Converter) selalu kirim ARGB_8888 mutable copy,
+            // jadi branch ini mostly cuma fallback safety.
+            if (bitmap.config == Bitmap.Config.ARGB_8888 && bitmap.isMutable) {
+                enhanceBitmap(bitmap, denoise, sharpen)
             } else {
-                bitmap.copy(Bitmap.Config.ARGB_8888, true)
-            }
-            val ok = enhanceBitmap(mutable, denoise, sharpen)
-            if (ok && mutable !== bitmap) {
-                // copy back if we used copy? Actually we need to copy pixels to original
-                // For simplicity, return true and let caller handle copy
-                // Here we just recycle copy and report
-                // But our JNI modifies in place mutable, so we need to copy pixels to original if different
-                if (bitmap.isMutable) {
+                // Copy dulu, enhance di copy, terus gambar balik ke aslinya
+                val copy = bitmap.copy(Bitmap.Config.ARGB_8888, true)
+                val ok = enhanceBitmap(copy, denoise, sharpen)
+                if (ok) {
                     val canvas = android.graphics.Canvas(bitmap)
-                    canvas.drawBitmap(mutable, 0f, 0f, null)
+                    canvas.drawBitmap(copy, 0f, 0f, null)
                 }
-                if (mutable !== bitmap) mutable.recycle()
+                copy.recycle()
+                ok
             }
-            ok
         } catch (t: Throwable) {
             false
         }

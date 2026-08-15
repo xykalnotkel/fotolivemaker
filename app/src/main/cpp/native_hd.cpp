@@ -85,7 +85,12 @@ Java_livefoto_xystudio_app_NativeHD_enhanceBitmap(JNIEnv *env, jclass clazz,
 
                     int dx = xx - x;
                     int dy = yy - y;
-                    float spatial = (dx == 0 && dy == 0) ? 4.0f : ((dx == 0 || dy == 0) ? 2.5f : 1.4f);
+                    int spatialDist = dx*dx + dy*dy;
+                    float spatial;
+                    if (spatialDist == 0) spatial = 4.0f;
+                    else if (spatialDist == 1) spatial = 2.5f;
+                    else if (spatialDist == 2) spatial = 1.8f;
+                    else spatial = 1.0f;
 
                     float dr = pr - cr;
                     float dg = pg - cg;

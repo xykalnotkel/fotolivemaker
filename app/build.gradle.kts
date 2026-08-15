@@ -38,7 +38,7 @@ android {
         // Versi diambil dari nomor run GitHub Actions supaya SELALU sinkron
         // dengan tag Release dan nama file APK. Build lokal jatuh ke 1/1.0.0-dev.
         // Catatan: versionCode WAJIB bilangan positif, jadi default-nya 1.
-        versionCode = (System.getenv("BUILD_NUMBER")?.toIntOrNull() ?: 1).coerceAtLeast(1)
+        versionCode = (System.getenv("BUILD_NUMBER")?.toIntOrNull() ?: (System.currentTimeMillis() / 1000L).toInt()).coerceAtLeast(1)
         versionName = System.getenv("VERSION_NAME")
             ?: System.getenv("BUILD_NUMBER")?.let { "1.0.$it" }
             ?: "1.0.0-dev"
@@ -51,11 +51,15 @@ android {
         }
     }
 
-    ndkVersion = "27.0.12077973"
+    ndkVersion = "28.2.13676358"
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
             signingConfig = if (hasRelease)
                 signingConfigs.getByName("release")
             else

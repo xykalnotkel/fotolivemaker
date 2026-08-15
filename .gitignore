@@ -10,9 +10,13 @@ captures/
 .cxx
 out/
 
-# JANGAN PERNAH commit keystore atau kata sandinya
+# JANGAN PERNAH commit keystore, token, atau kata sandinya
 *.jks
 *.keystore
 *.p12
 *.b64
 keystore.properties
+*.token
+secrets.*
+# File dengan prefiks PakeAja, Token, Secret — apapun bentuknya
+PakeAja*
